@@ -27,7 +27,6 @@ class SelectUsers(SQLAlchemyObjectType):
             # ),
 
         }
-
         only_fields = [
             User.id.key,
             User.name.key,
