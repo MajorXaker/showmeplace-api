@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+alembic = "*"
+alchql = "*" # alchemy - graphql integration
+black = "*"
+pydantic = "*"
+dynaconf = "*"
+graphql-core = "==3.2.1"
+asyncpg = "*"
+uvicorn = { extras = ["standard"], version = "*" }
+SQLAlchemy = { extras = ["asyncio"], version = ">=1.4,<2" }
+psycopg2-binary = "*"
+fastapi = "*"
+starlette-graphene3 = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

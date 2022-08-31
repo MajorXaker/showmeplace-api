@@ -1,0 +1,13 @@
+version: '2'
+services:
+  postgres:
+    image: postgres:13
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data/pgdata
+    environment:
+      POSTGRES_PASSWORD: master_hrinder
+      POSTGRES_USER: mastermind
+      POSTGRES_DB: hrinder
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"

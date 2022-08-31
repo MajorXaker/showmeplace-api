@@ -1,4 +1,4 @@
-# SMP-API
+# hrinder
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/showmeplace/smp-api.git
+git remote add origin https://gitlab.com/mjx24/hrinder.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.com/showmeplace/smp-api/-/settings/integrations)
+- [ ] [Set up project integrations](https://gitlab.com/mjx24/hrinder/-/settings/integrations)
 
 ## Collaborate with your team
 
