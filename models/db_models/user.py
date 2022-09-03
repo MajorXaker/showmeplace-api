@@ -12,4 +12,5 @@ class User(Model):
     has_onboarded = sa.Column(sa.Boolean)
     level = sa.Column(sa.Integer)
     coins = sa.Column(sa.Integer)
+    description = sa.Column(sa.Text)
 
