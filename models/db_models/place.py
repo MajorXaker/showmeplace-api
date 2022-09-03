@@ -13,10 +13,16 @@ class Place(Model):
     description = sa.Column(sa.Text)
     coordinate_longitude = sa.Column(sa.Float, nullable=False)
     coordinate_latitude = sa.Column(sa.Float, nullable=False)
+    address = sa.Column(sa.String)
     category_id = sa.Column(
         sa.Integer,
         sa.ForeignKey("place_category.id", ondelete="RESTRICT"),
         index=True,
         nullable=False,
     )
-
+    # todo place merge
+    secret_place_extras = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("place_category.id", ondelete="RESTRICT"),
+        nullable=False,
+    )

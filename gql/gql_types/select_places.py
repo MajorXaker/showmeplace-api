@@ -26,10 +26,10 @@ class SelectPlaces(SQLAlchemyObjectType):
             #         ),
             #     ),
             # ),
-            "distance": FilterItem(
-                field_type=graphene.Int,
-                filter_func=size_filter,
-            ),
+            # "distance": FilterItem(
+            #     field_type=graphene.Int,
+            #     filter_func=size_filter,
+            # ),
 
         }
         only_fields = [
@@ -44,19 +44,19 @@ class SelectPlaces(SQLAlchemyObjectType):
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
-    def size_filter(v: Int):
-        max_val = sa.func.greatest(
-            m.Description.measurements_width_cm,
-            m.Description.measurements_height_cm,
-            m.Description.measurements_depth_cm,
-            m.Description.measurements_diameter_cm,
-        )
-
-        result = {
-            SizeFilter.OTHER: max_val.is_(None),
-            SizeFilter.SMALL: max_val < 50,
-            SizeFilter.MEDIUM: sa.and_(max_val > 49, max_val < 100),
-            SizeFilter.BIG: max_val > 99,
-        }[v]
-
-        return result
+    # def size_filter(v: Int):
+    #     max_val = sa.func.greatest(
+    #         m.Description.measurements_width_cm,
+    #         m.Description.measurements_height_cm,
+    #         m.Description.measurements_depth_cm,
+    #         m.Description.measurements_diameter_cm,
+    #     )
+    #
+    #     result = {
+    #         SizeFilter.OTHER: max_val.is_(None),
+    #         SizeFilter.SMALL: max_val < 50,
+    #         SizeFilter.MEDIUM: sa.and_(max_val > 49, max_val < 100),
+    #         SizeFilter.BIG: max_val > 99,
+    #     }[v]
+    #
+    #     return result

@@ -16,6 +16,8 @@ class SelectUsers(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
+            # TODO select followers of userID
+            # TODO select follow leads of userID
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(

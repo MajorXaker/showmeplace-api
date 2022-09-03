@@ -5,9 +5,9 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data/pgdata
     environment:
-      POSTGRES_PASSWORD: master_hrinder
-      POSTGRES_USER: mastermind
-      POSTGRES_DB: hrinder
+      POSTGRES_PASSWORD: local_showmeplace_local
+      POSTGRES_USER: localmind
+      POSTGRES_DB: showmeplace
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
