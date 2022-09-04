@@ -11,14 +11,21 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
         model = Place
         output = PlaceType
         input_fields = get_input_fields(
-            model=User,
+            model=Place,
             only_fields=[
-                User.name.key,
-                User.has_onboarded,
-                User.level,
-                User.coins,
+                Place.name.key,
+                Place.category_id.key,
+                Place.description,
+                Place.coordinate_longitude,
+                Place.coordinate_latitude,
+                Place.address.key,
             ],
-            required_fields=[User.name.key],
+            required_fields=[
+                Place.name.key,
+                Place.category_id.key,
+                Place.coordinate_longitude,
+                Place.coordinate_latitude
+            ],
         )
 
     # @classmethod
