@@ -2,13 +2,13 @@ from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 
 from models.db_models import User
-from ..gql_types.select_users import SelectUsers
+from ..gql_types.user import UserType
 
 
 class MutationAddUser(SQLAlchemyCreateMutation):
     class Meta:
         model = User
-        output = SelectUsers
+        output = UserType
         input_fields = get_input_fields(
             model=User,
             only_fields=[

@@ -2,7 +2,7 @@
 import sqlalchemy as sa
 from alchql import SQLAlchemyUpdateMutation
 
-from gql.gql_types.select_users import SelectUsers
+from gql.gql_types.user import UserType
 from models.db_models import User
 
 
@@ -27,7 +27,7 @@ class MutationEditUser(SQLAlchemyUpdateMutation):
                 User.coins.key
             ],
         )
-        output = SelectUsers
+        output = UserType
         input_type_name = "InputUpdateUser"
 
     # @classmethod

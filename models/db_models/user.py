@@ -9,8 +9,7 @@ class User(Model):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String)
-    has_onboarded = sa.Column(sa.Boolean)
+    has_onboarded = sa.Column(sa.Boolean, default=False, server_default="FALSE")
     level = sa.Column(sa.Integer)
     coins = sa.Column(sa.Integer)
     description = sa.Column(sa.Text)
-

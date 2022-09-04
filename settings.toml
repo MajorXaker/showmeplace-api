@@ -1,8 +1,8 @@
 [default]
     DATABASE_PORT = "5432"
-    DATABASE_USER = "mastermind"
-    DATABASE_PASSWORD = "master_hrinder"
-    DATABASE_DB = "hrinder"
+    DATABASE_USER = "localmind"
+    DATABASE_PASSWORD = "local_showmeplace_local"
+    DATABASE_DB = "showmeplace"
     DATABASE_HOST = "localhost"
     DATABASE_ECHO_MODE = false
 

@@ -10,7 +10,7 @@ from alchql.utils import FilterItem
 from models.db_models import User, Place
 
 
-class SelectPlaces(SQLAlchemyObjectType):
+class PlaceType(SQLAlchemyObjectType):
     class Meta:
         model = Place
         interfaces = (AsyncNode,)

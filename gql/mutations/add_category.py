@@ -2,14 +2,14 @@ from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 
 from models.db_models import User, Place
-from ..gql_types.select_places import SelectPlaces
-from ..gql_types.select_users import SelectUsers
+from ..gql_types.place import PlaceType
+from ..gql_types.user import UserType
 
 
 class MutationAddPlace(SQLAlchemyCreateMutation):
     class Meta:
         model = Place
-        output = SelectPlaces
+        output = PlaceType
         input_fields = get_input_fields(
             model=User,
             only_fields=[

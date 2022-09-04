@@ -7,15 +7,17 @@ import sqlalchemy as sa
 # from gql.utils.gql_id import encode_gql_id
 from alchql.utils import FilterItem
 
-from models.db_models import User
+from models.db_models import User, M2MUserFollowingUser
 
 
-class SelectUsers(SQLAlchemyObjectType):
+class UserType(SQLAlchemyObjectType):
     class Meta:
         model = User
         interfaces = (AsyncNode,)
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
+            M2MUserFollowingUser.lead_id.key: [OP_EQ],
+            M2MUserFollowingUser.follower_id.key: [OP_EQ],
             # TODO select followers of userID
             # TODO select follow leads of userID
             # "name__ilike": FilterItem(
@@ -27,7 +29,6 @@ class SelectUsers(SQLAlchemyObjectType):
             #         ),
             #     ),
             # ),
-
         }
         only_fields = [
             User.id.key,
@@ -36,7 +37,6 @@ class SelectUsers(SQLAlchemyObjectType):
             User.level,
             User.coins,
         ]
-
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)

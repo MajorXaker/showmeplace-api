@@ -8,7 +8,6 @@ from models.db_models.user import User
 class M2MUserPlaceFavourite(Model):
     __tablename__ = "m2m_user_place_favourite"
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     user_id = sa.Column(
         sa.Integer,
         sa.ForeignKey(User.id, onupdate="CASCADE", ondelete="CASCADE"),

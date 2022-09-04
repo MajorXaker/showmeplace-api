@@ -5,13 +5,13 @@ from alchql.get_input_type import get_input_fields
 
 from models.db_models import User
 from models.db_models.m2m_user_user_following import M2MUserFollowingUser
-from ..gql_types.select_users import SelectUsers
+from ..gql_types.user import UserType
 
 
 class MutationAddFollower(SQLAlchemyCreateMutation):
     class Meta:
         model = M2MUserFollowingUser
-        output = SelectUsers
+        output = UserType
         input_fields = get_input_fields(
             model=User,
             only_fields=[
