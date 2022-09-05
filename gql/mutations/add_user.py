@@ -11,11 +11,9 @@ class MutationAddUser(SQLAlchemyCreateMutation):
         output = UserType
         input_fields = get_input_fields(
             model=User,
-            only_fields=[
-                User.name.key,
-                User.has_onboarded,
-                User.level,
-                User.coins,
+            exclude_fields=[
+                User.level.key,
+                User.coins.key,
             ],
             required_fields=[User.name.key],
         )

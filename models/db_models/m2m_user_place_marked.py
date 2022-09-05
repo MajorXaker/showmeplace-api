@@ -1,15 +1,12 @@
 import sqlalchemy as sa
 
-# from ..base import Model
-# from ..description import Description
-# from ..image import Image
 from models.base_engine import Model
 from models.db_models.place import Place
 from models.db_models.user import User
 
 
-class M2MUserPlaceOwnership(Model):
-    __tablename__ = "m2m_user_place_ownership"
+class M2MUserPlaceMarked(Model):
+    __tablename__ = "m2m_user_place_marked"
 
     user_id = sa.Column(
         sa.Integer,

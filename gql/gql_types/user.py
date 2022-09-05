@@ -18,8 +18,6 @@ class UserType(SQLAlchemyObjectType):
             User.id: [OP_EQ, OP_IN],
             M2MUserFollowingUser.lead_id.key: [OP_EQ],
             M2MUserFollowingUser.follower_id.key: [OP_EQ],
-            # TODO select followers of userID
-            # TODO select follow leads of userID
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(

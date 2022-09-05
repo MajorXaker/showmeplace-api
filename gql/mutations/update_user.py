@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # from gql.utils.update_artwork_last_sold_data import update_artwork_last_sold_data
 
 
-class MutationEditUser(SQLAlchemyUpdateMutation):
+class MutationInputUpdateUser(SQLAlchemyUpdateMutation):
     class Meta:
         model = User
         input_fields = get_input_fields(

@@ -27,6 +27,7 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
                 Place.coordinate_latitude
             ],
         )
+    # TODO add flag "is_secret_place" if secret place
 
     # @classmethod
     # async def mutate(cls, root, info, value: dict):
