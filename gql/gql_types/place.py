@@ -17,6 +17,13 @@ class PlaceType(SQLAlchemyObjectType):
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
+
+            # TODO namee ilike
+            # todo places added by user
+            # todo places visited by user
+            # todo secret place opened by user
+            # todo places favourited by user
+
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(

@@ -7,7 +7,7 @@ from gql.gql_types.user import UserType
 from gql.mutations.add_place import MutationAddPlace
 from gql.mutations.add_user import MutationAddUser
 from gql.mutations.change_coin_value import MutationChangeCoinValue
-from gql.mutations.update_user import MutationEditUser
+from gql.mutations.update_user import MutationUpdateUser
 
 
 class Query(graphene.ObjectType):
@@ -18,7 +18,7 @@ class Query(graphene.ObjectType):
 
 class Mutation(graphene.ObjectType):
     add_user = MutationAddUser.Field()
-    edit_user = MutationEditUser.Field()
+    edit_user = MutationUpdateUser.Field()
     add_place = MutationAddPlace.Field()
     change_coin_value = MutationChangeCoinValue.Field()
 

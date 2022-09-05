@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, as_declarative
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -9,6 +9,12 @@ convention = {
     "pk": "pk_%(table_name)s",
 }
 
-Model = declarative_base(metadata=MetaData(naming_convention=convention))
 
-db = create_engine("postgresql+psycopg2://mastermind:master_hrinder@localhost/hrinder")
+@as_declarative(metadata=MetaData(naming_convention=convention))
+class Model:
+    metadata: MetaData
+
+
+# Model = declarative_base(metadata=MetaData(naming_convention=convention))
+
+# db = create_engine("postgresql+psycopg2://mastermind:master_hrinder@localhost/hrinder")

@@ -18,6 +18,14 @@ class UserType(SQLAlchemyObjectType):
             User.id: [OP_EQ, OP_IN],
             M2MUserFollowingUser.lead_id.key: [OP_EQ],
             M2MUserFollowingUser.follower_id.key: [OP_EQ],
+
+            # TODO namee ilike
+            # todo user - marked place
+            # todo users - place visited
+            # todo user - secret place openeer
+            #
+
+
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(

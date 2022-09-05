@@ -21,7 +21,7 @@ class Place(Model):
         index=True,
         nullable=False,
     )
-    is_secret_place = sa.Column(sa.Boolean, serverdefault="FALSE")
+    is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
     # todo place merge
     secret_place_extras = sa.Column(
         sa.Integer,
