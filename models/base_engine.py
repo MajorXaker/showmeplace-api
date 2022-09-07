@@ -9,7 +9,7 @@ convention = {
     "pk": "pk_%(table_name)s",
 }
 
-
+#
 @as_declarative(metadata=MetaData(naming_convention=convention))
 class Model:
     metadata: MetaData

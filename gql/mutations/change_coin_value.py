@@ -5,7 +5,7 @@ from alchql.gql_id import ResolvedGlobalId
 
 import sqlalchemy as sa
 
-from gql.gql_types.user import UserType
+from gql.gql_types.user_type import UserType
 from models.db_models import User
 from models.enums import CoinChange
 

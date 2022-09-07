@@ -2,7 +2,7 @@ from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 
 from models.db_models import User
-from ..gql_types.user import UserType
+from ..gql_types.user_type import UserType
 
 
 class MutationAddUser(SQLAlchemyCreateMutation):

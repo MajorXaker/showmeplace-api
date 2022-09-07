@@ -12,3 +12,4 @@ class SecretPlaceExtras(Model):
     time_suggestion = sa.Column(sa.Text)
     company_suggestion = sa.Column(sa.Text)
     music_suggestion = sa.Column(sa.Text)
+    extra_suggestion = sa.Column(sa.Text)

@@ -1,6 +1,6 @@
 from alchql import SQLAlchemyUpdateMutation
 
-from gql.gql_types.place import PlaceType
+from gql.gql_types.place_type import PlaceType
 from models.db_models import Place
 
 
