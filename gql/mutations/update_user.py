@@ -2,7 +2,7 @@
 import sqlalchemy as sa
 from alchql import SQLAlchemyUpdateMutation
 
-from gql.gql_types.user import UserType
+from gql.gql_types.user_type import UserType
 from models.db_models import User
 
 

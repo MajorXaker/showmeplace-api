@@ -10,5 +10,5 @@ class PlaceCategory(Model):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String, nullable=False)
-    # TODO icon field
     places = relationship("Place")
+    # TODO icon field

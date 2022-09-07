@@ -2,8 +2,8 @@ from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 
 from models.db_models import User, Place
-from ..gql_types.place import PlaceType
-from ..gql_types.user import UserType
+from ..gql_types.place_type import PlaceType
+from ..gql_types.user_type import UserType
 
 
 class MutationAddPlace(SQLAlchemyCreateMutation):

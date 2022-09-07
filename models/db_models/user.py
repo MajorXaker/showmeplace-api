@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from models.base_engine import Model
 
 
+
 class User(Model):
 
     __tablename__ = "user"
@@ -14,6 +15,9 @@ class User(Model):
     level = sa.Column(sa.Integer)
     coins = sa.Column(sa.Integer)
     description = sa.Column(sa.Text)
+
+    # damage = relationship("Damage", secondary="m2m_descriptions_damages")
+
 
     place_marked = relationship(
         "Place",

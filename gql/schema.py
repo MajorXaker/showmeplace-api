@@ -1,9 +1,9 @@
 import graphene
 from alchql.fields import FilterConnectionField
 
-from gql.gql_types.category import CategoryType
-from gql.gql_types.place import PlaceType
-from gql.gql_types.user import UserType
+from gql.gql_types.category_type import CategoryType
+from gql.gql_types.place_type import PlaceType
+from gql.gql_types.user_type import UserType
 from gql.mutations.add_place import MutationAddPlace
 from gql.mutations.add_user import MutationAddUser
 from gql.mutations.change_coin_value import MutationChangeCoinValue
@@ -24,4 +24,4 @@ class Mutation(graphene.ObjectType):
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
-# schema = graphene.Schema(query=Query)
+
