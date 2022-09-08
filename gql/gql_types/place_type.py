@@ -1,6 +1,6 @@
 import graphene
 from alchql import SQLAlchemyObjectType
-from alchql.consts import OP_EQ, OP_IN
+from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
 from alchql.node import AsyncNode
 import sqlalchemy as sa
 
@@ -18,7 +18,7 @@ class PlaceType(SQLAlchemyObjectType):
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
-            M2MUserPlaceMarked.user_id: [OP_EQ, OP_IN],
+            Place.name: [OP_ILIKE]
 
             # TODO namee ilike
             # todo places added by user

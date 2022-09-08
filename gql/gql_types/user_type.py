@@ -1,6 +1,6 @@
 import graphene
 from alchql import SQLAlchemyObjectType
-from alchql.consts import OP_EQ, OP_IN
+from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
 from alchql.node import AsyncNode
 import sqlalchemy as sa
 
@@ -17,7 +17,7 @@ class UserType(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
-            M2MUserPlaceMarked.place_id: [OP_EQ, OP_IN],
+            User.name: [OP_ILIKE]
             # Place.user_marked: [OP_EQ]
             # M2MUserFollowingUser.lead_id.key: [OP_EQ],
             # M2MUserFollowingUser.follower_id.key: [OP_EQ],
