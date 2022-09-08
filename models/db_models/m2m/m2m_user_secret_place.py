@@ -5,30 +5,30 @@ from models.base_engine import Model
 # from models.db_models.user import User
 
 
-M2MUserOpenedSecretPlace = sa.Table(
-    "m2m_user_opened_secret_place",
-    Model.metadata,
-    sa.Column("user_id", sa.Integer, nullable=False, index=True),
-    sa.Column("place_id", sa.Integer, nullable=False, index=True),
-    sa.PrimaryKeyConstraint(
-        "user_id", "place_id", name="m2m_user_opened_secret_place_pkey"
-    ),
-    sa.ForeignKeyConstraint(
-        ("user_id",),
-        ["user.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-    sa.ForeignKeyConstraint(
-        ("place_id",),
-        ["place.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-)
-
-# class M2MUserSecretPlace(Model):
-#     __tablename__ = "m2m_user_secret_place"
+# M2MUserOpenedSecretPlace = sa.Table(
+#     "m2m_user_opened_secret_place",
+#     Model.metadata,
+#     sa.Column("user_id", sa.Integer, nullable=False, index=True),
+#     sa.Column("place_id", sa.Integer, nullable=False, index=True),
+#     sa.PrimaryKeyConstraint(
+#         "user_id", "place_id", name="m2m_user_opened_secret_place_pkey"
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("user_id",),
+#         ["user.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("place_id",),
+#         ["place.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+# )
+#
+# class M2MUserOpenedSecretPlace(Model):
+#     __tablename__ = "m2m_user_opened_secret_place"
 #
 #     user_id = sa.Column(
 #         sa.Integer,

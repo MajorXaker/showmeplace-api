@@ -8,6 +8,7 @@ import sqlalchemy as sa
 from alchql.utils import FilterItem
 
 from models.db_models import User, Place
+from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
 
 
 class PlaceType(SQLAlchemyObjectType):
@@ -17,6 +18,7 @@ class PlaceType(SQLAlchemyObjectType):
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
+            M2MUserPlaceMarked.user_id: [OP_EQ, OP_IN],
 
             # TODO namee ilike
             # todo places added by user

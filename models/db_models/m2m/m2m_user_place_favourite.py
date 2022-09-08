@@ -6,27 +6,27 @@ from models.base_engine import Model
 # from models.db_models.user import User
 
 
-M2MUserPlaceFavourite = sa.Table(
-    "m2m_user_place_favourite",
-    Model.metadata,
-    sa.Column("user_id", sa.Integer, nullable=False, index=True),
-    sa.Column("place_id", sa.Integer, nullable=False, index=True),
-    sa.PrimaryKeyConstraint(
-        "user_id", "place_id", name="m2m_user_place_favourite_pkey"
-    ),
-    sa.ForeignKeyConstraint(
-        ("user_id",),
-        ["user.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-    sa.ForeignKeyConstraint(
-        ("place_id",),
-        ["place.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-)
+# M2MUserPlaceFavourite = sa.Table(
+#     "m2m_user_place_favourite",
+#     Model.metadata,
+#     sa.Column("user_id", sa.Integer, nullable=False, index=True),
+#     sa.Column("place_id", sa.Integer, nullable=False, index=True),
+#     sa.PrimaryKeyConstraint(
+#         "user_id", "place_id", name="m2m_user_place_favourite_pkey"
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("user_id",),
+#         ["user.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("place_id",),
+#         ["place.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+# )
 
 #
 # class M2MUserPlaceFavourite(Model):

@@ -7,7 +7,8 @@ import sqlalchemy as sa
 # from gql.utils.gql_id import encode_gql_id
 from alchql.utils import FilterItem
 
-from models.db_models import User, M2MUserFollowingUser
+from models.db_models import User, Place
+from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
 
 
 class UserType(SQLAlchemyObjectType):
@@ -16,8 +17,21 @@ class UserType(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
-            M2MUserFollowingUser.lead_id.key: [OP_EQ],
-            M2MUserFollowingUser.follower_id.key: [OP_EQ],
+            M2MUserPlaceMarked.place_id: [OP_EQ, OP_IN],
+            # Place.user_marked: [OP_EQ]
+            # M2MUserFollowingUser.lead_id.key: [OP_EQ],
+            # M2MUserFollowingUser.follower_id.key: [OP_EQ],
+        }
+        only_fields = [
+            User.id.key,
+            User.name.key,
+            User.has_onboarded,
+            User.level,
+            User.coins,
+        ]
+        #
+        # async def set_select_from(cls, info, q, query_fields):
+        #     aaa = q
 
             # TODO namee ilike
             # todo user - marked place
@@ -35,14 +49,6 @@ class UserType(SQLAlchemyObjectType):
             #         ),
             #     ),
             # ),
-        }
-        only_fields = [
-            User.id.key,
-            User.name.key,
-            User.has_onboarded,
-            User.level,
-            User.coins,
-        ]
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)

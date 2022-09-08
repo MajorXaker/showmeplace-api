@@ -5,27 +5,27 @@ from models.base_engine import Model
 # from models.db_models.user import User
 
 
-M2MUserPlaceVisited = sa.Table(
-    "m2m_user_place_visited",
-    Model.metadata,
-    sa.Column("user_id", sa.Integer, nullable=False, index=True),
-    sa.Column("place_id", sa.Integer, nullable=False, index=True),
-    sa.PrimaryKeyConstraint(
-        "user_id", "place_id", name="m2m_user_place_visited_pkey"
-    ),
-    sa.ForeignKeyConstraint(
-        ("user_id",),
-        ["user.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-    sa.ForeignKeyConstraint(
-        ("place_id",),
-        ["place.id"],
-        onupdate="CASCADE",
-        ondelete="CASCADE",
-    ),
-)
+# M2MUserPlaceVisited = sa.Table(
+#     "m2m_user_place_visited",
+#     Model.metadata,
+#     sa.Column("user_id", sa.Integer, nullable=False, index=True),
+#     sa.Column("place_id", sa.Integer, nullable=False, index=True),
+#     sa.PrimaryKeyConstraint(
+#         "user_id", "place_id", name="m2m_user_place_visited_pkey"
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("user_id",),
+#         ["user.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+#     sa.ForeignKeyConstraint(
+#         ("place_id",),
+#         ["place.id"],
+#         onupdate="CASCADE",
+#         ondelete="CASCADE",
+#     ),
+# )
 #
 # class M2MUserPlaceVisited(Model):
 #     __tablename__ = "m2m_user_place_visited"
