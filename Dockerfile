@@ -1,6 +1,8 @@
 FROM python:3.10-buster
 
-ENV WORKDIR_PATH /usr/src/app
+
+ENV WORKDIR_PATH /home/ec2-user/project
+
 ENV USER_CONTAINER 1919
 ENV DOCKER 1
 
