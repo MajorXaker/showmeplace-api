@@ -23,7 +23,7 @@ class PlaceType(SQLAlchemyObjectType):
             # todo places added by user
             # todo places visited by user
             # todo secret place opened by user
-            # todo places favourited by user
+            # todo places favouritted by user
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(
