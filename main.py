@@ -9,7 +9,6 @@ from utils.db import async_engine
 app = FastAPI()
 
 
-
 @app.on_event("startup")
 async def connect_database_engine() -> None:
     async with async_engine.connect() as conn:
