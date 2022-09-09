@@ -5,7 +5,7 @@ from alchql.gql_id import ResolvedGlobalId
 
 import sqlalchemy as sa
 
-from gql.gql_types.select_users import SelectUsers
+from gql.gql_types.user_type import UserType
 from models.db_models import User
 from models.enums import CoinChange
 
@@ -13,7 +13,7 @@ from models.enums import CoinChange
 class MutationChangeCoinValue(SQLAlchemyUpdateMutation):
     class Meta:
         model = User
-        output = SelectUsers
+        output = UserType
         input_fields = get_input_fields(model=User, only_fields=[User.id.key,],) | {
             "change_type": graphene.Enum.from_enum(CoinChange)(),
             "amount": graphene.Int(),
@@ -32,7 +32,7 @@ class MutationChangeCoinValue(SQLAlchemyUpdateMutation):
 
         if new_value < 0:
             new_value = 0
-        value['coins'] = new_value
+        value["coins"] = new_value
 
         result = await super().mutate(root, info, id, value)
 
