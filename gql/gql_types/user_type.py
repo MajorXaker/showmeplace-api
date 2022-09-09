@@ -33,22 +33,21 @@ class UserType(SQLAlchemyObjectType):
         # async def set_select_from(cls, info, q, query_fields):
         #     aaa = q
 
-            # TODO namee ilike
-            # todo user - marked place
-            # todo users - place visited
-            # todo user - secret place openeer
-            #
+        # TODO namee ilike
+        # todo user - marked place
+        # todo users - place visited
+        # todo user - secret place openeer
+        #
 
-
-            # "name__ilike": FilterItem(
-            #     field_type=graphene.String,
-            #     filter_func=lambda x: sa.or_(
-            #         User.uid == x,
-            #         sa.func.to_tsvector(unaccent(m.Artist.name)).op("@@")(
-            #             parse_query(unidecode(x))
-            #         ),
-            #     ),
-            # ),
+        # "name__ilike": FilterItem(
+        #     field_type=graphene.String,
+        #     filter_func=lambda x: sa.or_(
+        #         User.uid == x,
+        #         sa.func.to_tsvector(unaccent(m.Artist.name)).op("@@")(
+        #             parse_query(unidecode(x))
+        #         ),
+        #     ),
+        # ),
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)

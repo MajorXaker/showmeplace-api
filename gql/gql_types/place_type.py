@@ -19,13 +19,11 @@ class PlaceType(SQLAlchemyObjectType):
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
             Place.name: [OP_ILIKE]
-
             # TODO namee ilike
             # todo places added by user
             # todo places visited by user
             # todo secret place opened by user
             # todo places favourited by user
-
             # "name__ilike": FilterItem(
             #     field_type=graphene.String,
             #     filter_func=lambda x: sa.or_(
@@ -39,7 +37,6 @@ class PlaceType(SQLAlchemyObjectType):
             #     field_type=graphene.Int,
             #     filter_func=size_filter,
             # ),
-
         }
         only_fields = [
             Place.id.key,
@@ -49,7 +46,6 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_latitude,
             Place.category_id,
         ]
-
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)

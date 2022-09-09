@@ -24,9 +24,10 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
                 Place.name.key,
                 Place.category_id.key,
                 Place.coordinate_longitude,
-                Place.coordinate_latitude
+                Place.coordinate_latitude,
             ],
         )
+
     # TODO add flag "is_secret_place" if secret place
 
     # @classmethod

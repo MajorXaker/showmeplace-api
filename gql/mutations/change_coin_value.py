@@ -32,7 +32,7 @@ class MutationChangeCoinValue(SQLAlchemyUpdateMutation):
 
         if new_value < 0:
             new_value = 0
-        value['coins'] = new_value
+        value["coins"] = new_value
 
         result = await super().mutate(root, info, id, value)
 

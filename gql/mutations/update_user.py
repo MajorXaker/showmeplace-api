@@ -9,6 +9,7 @@ from models.db_models import User
 from alchql.get_input_type import get_input_fields
 from alchql.gql_id import ResolvedGlobalId
 from sqlalchemy.ext.asyncio import AsyncSession
+
 #
 # from auth.retool_user import is_retool_user
 # from gql.exceptions import Forbidden
@@ -22,10 +23,7 @@ class MutationUpdateUser(SQLAlchemyUpdateMutation):
         model = User
         input_fields = get_input_fields(
             model=User,
-            exclude_fields=
-            [
-                User.coins.key
-            ],
+            exclude_fields=[User.coins.key],
         )
         output = UserType
         input_type_name = "InputUpdateUser"
