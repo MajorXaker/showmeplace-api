@@ -1,24 +1,20 @@
 from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 
-from models.db_models import User, Place
-from ..gql_types.place_type import PlaceType
-from ..gql_types.user_type import UserType
+from models.db_models import User, PlaceCategory
+from ..gql_types.category_type import PlaceCategoryType
 
 
-class MutationAddPlace(SQLAlchemyCreateMutation):
+class MutationAddCaegory(SQLAlchemyCreateMutation):
     class Meta:
-        model = Place
-        output = PlaceType
+        model = PlaceCategory
+        output = PlaceCategoryType
         input_fields = get_input_fields(
             model=User,
             only_fields=[
-                User.name.key,
-                User.has_onboarded,
-                User.level,
-                User.coins,
+                PlaceCategory.name.key,
             ],
-            required_fields=[User.name.key],
+            required_fields=[PlaceCategory.name.key],
         )
 
     # @classmethod

@@ -1,14 +1,14 @@
-import graphene
-from alchql import SQLAlchemyObjectType
+from alchql import SQLAlchemyObjectType, gql_types
 from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
+from alchql.fields import ModelField
 from alchql.node import AsyncNode
-import sqlalchemy as sa
+
+from gql.gql_types.category_type import PlaceCategoryType
+from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
+from models.db_models import Place
+
 
 # from gql.utils.gql_id import encode_gql_id
-from alchql.utils import FilterItem
-
-from models.db_models import User, Place
-from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
 
 
 class PlaceType(SQLAlchemyObjectType):
@@ -42,10 +42,27 @@ class PlaceType(SQLAlchemyObjectType):
             Place.id.key,
             Place.name.key,
             Place.description.key,
-            Place.coordinate_longitude,
-            Place.coordinate_latitude,
-            Place.category_id,
+            Place.coordinate_longitude.key,
+            Place.coordinate_latitude.key,
         ]
+
+    is_secret_place_opened = gql_types.Boolean()
+    secret_place_extra = ModelField(
+        SecretPlaceExtraType,
+        model_field=Place.secret_place_extra_id,
+    )
+    place_category = ModelField(
+        PlaceCategoryType,
+        model_field=Place.category_id,
+    )
+
+    async def resolve_is_secret_place_opened(self, info):
+        # TODO LOGIC
+        return True
+
+    async def resolve_secret_place_extra(self, info):
+        # TODO LOGIC
+        pass
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)

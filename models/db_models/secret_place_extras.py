@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from models.base_engine import Model
 
 
-class SecretPlaceExtras(Model):
+class SecretPlaceExtra(Model):
 
     __tablename__ = "secret_extras"
 

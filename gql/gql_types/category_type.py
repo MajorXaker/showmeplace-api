@@ -5,7 +5,7 @@ from alchql.node import AsyncNode
 from models.db_models import PlaceCategory
 
 
-class CategoryType(SQLAlchemyObjectType):
+class PlaceCategoryType(SQLAlchemyObjectType):
     class Meta:
         model = PlaceCategory
         interfaces = (AsyncNode,)

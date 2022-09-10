@@ -24,18 +24,18 @@ class Place(Model):
     # category = relationship("PlaceCategory", back_populates="place")
     is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
     # todo place merge
-    secret_place_extras = sa.Column(
+    secret_place_extra_id = sa.Column(
         sa.Integer,
         sa.ForeignKey("secret_extras.id", ondelete="RESTRICT"),
         nullable=True,
     )
-
-    user_marked = relationship(
-        "User",
-        secondary="m2m_user_place_marked",
-        # viewonly=True,
-        # backref="Place"
-    )
+    #
+    # user_marked = relationship(
+    #     "User",
+    #     secondary="m2m_user_place_marked",
+    #     # viewonly=True,
+    #     # backref="Place"
+    # )
 
     # user_visited = relationship(
     #     "User",

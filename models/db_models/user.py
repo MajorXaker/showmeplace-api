@@ -1,21 +1,14 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-# from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
-# from models.db_models.m2m.m2m_user_place_favourite import M2MUserPlaceFavourite
-from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
-
-# from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
-# from models.db_models.m2m.m2m_user_secret_place import M2MUserOpenedSecretPlace
 from models.base_engine import Model
-
-
-# from models.db_models import M2MUserPlaceMarked, M2MUserPlaceFavourite, M2MUserSecretPlace, M2MUserFollowingUser
-# from models.db_models.m2m_user_place_visited import M2MUserPlaceVisited
+from models.db_models.m2m.m2m_user_place_favourite import M2MUserPlaceFavourite
+from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from models.db_models.m2m.m2m_user_secret_place import M2MUserOpenedSecretPlace
+from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 
 
 class User(Model):
-
     __tablename__ = "user"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
@@ -25,12 +18,12 @@ class User(Model):
     coins = sa.Column(sa.Integer)
     description = sa.Column(sa.Text)
 
-    place_marked = relationship(
-        "Place",
-        secondary="m2m_user_place_marked",
-        backref="user",
-        viewonly=True,
-    )
+    # place_marked = relationship(
+    #     "Place",
+    #     secondary="m2m_user_place_marked",
+    #     backref="user.id",
+    #     viewonly=True,
+    # )
     # place_favourited = relationship(
     #     "Place",
     #     secondary=M2MUserPlaceFavourite,
