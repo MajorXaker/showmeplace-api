@@ -42,8 +42,6 @@ class M2MUserOpenedSecretPlace(Model):
         nullable=False,
     )
     __table_args__ = (
-        sa.PrimaryKeyConstraint(
-            user_id, place_id, name="m2m_user_secret_place_pkey"
-        ),
+        sa.PrimaryKeyConstraint(user_id, place_id, name="m2m_user_secret_place_pkey"),
         # sa.UniqueConstraint(description_id, image_id, name="_unique_ordering"),
     )

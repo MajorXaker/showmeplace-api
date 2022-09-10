@@ -28,6 +28,7 @@ from models.base_engine import Model
 #
 # )
 
+
 class M2MUserFollowingUser(Model):
     __tablename__ = "m2m_user_user_following_user"
 
@@ -42,8 +43,6 @@ class M2MUserFollowingUser(Model):
         nullable=False,
     )
     __table_args__ = (
-        sa.PrimaryKeyConstraint(
-            lead_id, follower_id, name="m2m_user_following_user"
-        ),
+        sa.PrimaryKeyConstraint(lead_id, follower_id, name="m2m_user_following_user"),
         # sa.UniqueConstraint(description_id, image_id, name="_unique_ordering"),
     )

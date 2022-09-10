@@ -42,8 +42,6 @@ class M2MUserPlaceVisited(Model):
         nullable=False,
     )
     __table_args__ = (
-        sa.PrimaryKeyConstraint(
-            user_id, place_id, name="m2m_user_place_visited_pkey"
-        ),
+        sa.PrimaryKeyConstraint(user_id, place_id, name="m2m_user_place_visited_pkey"),
         # sa.UniqueConstraint(description_id, image_id, name="_unique_ordering"),
     )
