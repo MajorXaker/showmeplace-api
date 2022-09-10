@@ -5,7 +5,7 @@ from gql.gql_types.user_type import UserType
 from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 
 
-class MutationAddFollower(SQLAlchemyDeleteMutation):
+class MutationRemoveFollower(SQLAlchemyDeleteMutation):
     class Meta:
         model = M2MUserFollowingUser
         output = UserType

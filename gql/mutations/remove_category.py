@@ -1,11 +1,11 @@
-from alchql import SQLAlchemyCreateMutation
+from alchql import SQLAlchemyDeleteMutation
 from alchql.get_input_type import get_input_fields
 
-from models.db_models import User, PlaceCategory
+from models.db_models import PlaceCategory
 from ..gql_types.category_type import PlaceCategoryType
 
 
-class MutationAddCategory(SQLAlchemyCreateMutation):
+class MutationRemoveCategory(SQLAlchemyDeleteMutation):
     class Meta:
         model = PlaceCategory
         output = PlaceCategoryType

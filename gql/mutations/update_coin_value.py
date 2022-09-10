@@ -10,7 +10,7 @@ from models.db_models import User
 from models.enums import CoinChange
 
 
-class MutationChangeCoinValue(SQLAlchemyUpdateMutation):
+class MutationUpdateCoinValue(SQLAlchemyUpdateMutation):
     class Meta:
         model = User
         output = UserType

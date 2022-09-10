@@ -6,7 +6,7 @@ from models.db_models import User, Place
 from models.db_models.m2m.m2m_user_place_favourite import M2MUserPlaceFavourite
 
 
-class MutationAddFavouritePlace(SQLAlchemyDeleteMutation):
+class MutationRemoveFavouritePlace(SQLAlchemyDeleteMutation):
     class Meta:
         model = M2MUserPlaceFavourite
         output = PlaceType
