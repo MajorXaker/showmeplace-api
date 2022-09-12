@@ -4,8 +4,9 @@ from alchql.fields import ModelField
 from alchql.node import AsyncNode
 
 from gql.gql_types.category_type import PlaceCategoryType
+from gql.gql_types.place_image_type import PlaceImageType
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
-from models.db_models import Place
+from models.db_models import Place, SecretPlaceExtra
 
 
 # from gql.utils.gql_id import encode_gql_id
@@ -49,10 +50,14 @@ class PlaceType(SQLAlchemyObjectType):
     is_secret_place_opened = gql_types.Boolean()
     secret_place_extra = ModelField(
         SecretPlaceExtraType,
-        model_field=Place.secret_place_extra_id,
+        model_field=SecretPlaceExtra.place_id,
     )
     place_category = ModelField(
         PlaceCategoryType,
+        model_field=Place.category_id,
+    )
+    image = ModelField(
+        PlaceImageType,
         model_field=Place.category_id,
     )
 

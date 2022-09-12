@@ -15,7 +15,10 @@ class MutationAddUser(SQLAlchemyCreateMutation):
                 User.level.key,
                 User.coins.key,
             ],
-            required_fields=[User.name.key],
+            required_fields=[
+                User.name.key,
+                User.cognito_user_id.key,
+            ],
         )
 
     # @classmethod

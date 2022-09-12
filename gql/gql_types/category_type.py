@@ -1,14 +1,20 @@
 from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN
+from alchql.fields import ModelField
 from alchql.node import AsyncNode
 
-from models.db_models import PlaceCategory
+from gql.gql_types.category_image_type import CategoryImageType
+from models.db_models import Category
 
 
 class PlaceCategoryType(SQLAlchemyObjectType):
     class Meta:
-        model = PlaceCategory
+        model = Category
         interfaces = (AsyncNode,)
         filter_fields = {
-            PlaceCategory.id: [OP_EQ, OP_IN],
+            Category.id: [OP_EQ, OP_IN],
         }
+        image = ModelField(
+            CategoryImageType,
+            model_field=Category.id,
+        )

@@ -36,6 +36,11 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
                 SecretPlaceExtra.music_suggestion.key,
                 SecretPlaceExtra.extra_suggestion.key,
             ],
+        ) | get_input_fields(
+            model=User,
+            only_fields=[User.id.key],
+            required_fields=[User.id.key]
+
         )
 
     @classmethod

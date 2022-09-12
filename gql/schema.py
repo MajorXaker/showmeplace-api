@@ -19,7 +19,7 @@ from gql.mutations import (
     MutationAddCategory,
     MutationUpdateCategory,
     MutationRemoveCategory,
-    MutationRemovePlace,
+    MutationRemovePlace, MutationAddPlaceImage,
 )
 
 
@@ -51,6 +51,8 @@ class Mutation(graphene.ObjectType):
 
     add_visited_place = MutationAddVisitedPlace.Field()
     remove_visited_place = MutationRemoveVisitedPlace.Field()
+
+    add_place_image = MutationAddPlaceImage.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

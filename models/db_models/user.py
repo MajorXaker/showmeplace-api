@@ -17,6 +17,7 @@ class User(Model):
     level = sa.Column(sa.Integer)
     coins = sa.Column(sa.Integer)
     description = sa.Column(sa.Text)
+    cognito_user_id = sa.Column(sa.String, nullable=False)
 
     # place_marked = relationship(
     #     "Place",
