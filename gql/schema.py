@@ -2,6 +2,7 @@ import graphene
 from alchql.fields import FilterConnectionField
 
 from gql.gql_types.category_type import PlaceCategoryType
+from gql.gql_types.place_image_type import PlaceImageType
 from gql.gql_types.place_type import PlaceType
 from gql.gql_types.user_type import UserType
 from gql.mutations import (
@@ -27,7 +28,7 @@ class Query(graphene.ObjectType):
     select_users = FilterConnectionField(UserType)
     select_places = FilterConnectionField(PlaceType)
     select_category = FilterConnectionField(PlaceCategoryType)
-
+    select_place_images = FilterConnectionField(PlaceImageType)
 
 class Mutation(graphene.ObjectType):
     add_user = MutationAddUser.Field()

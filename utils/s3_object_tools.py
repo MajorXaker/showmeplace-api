@@ -1,9 +1,12 @@
 import base64
+import datetime
 from io import BytesIO
-
+import sqlalchemy as sa
 import boto3
 from botocore.exceptions import ClientError
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from yarl import URL
+from models.db_models import PlaceImage, UserImage, CategoryImage
 from utils.config import settings as s
 
 
@@ -16,7 +19,12 @@ def base_64_img_decoder(b64: str) -> bytes:
     return decoded_image_data
 
 
-def upload_to_s3_bucket(fileobj, folder, filename, extension):
+async def upload_to_s3_bucket(
+    fileobj: str,
+    folder: str,
+    filename: str,
+    extension: str,
+):
     s3 = boto3.resource(
         "s3",
         aws_access_key_id=s.ACCESS_KEY_ID,
@@ -24,19 +32,45 @@ def upload_to_s3_bucket(fileobj, folder, filename, extension):
     )
     fileobj = base_64_img_decoder(fileobj)
     bucket = s3.Bucket(s.S3_IMAGES_BUCKET)
+    s3_filename = f"{folder}/{filename}.{extension}"
     bucket.upload_fileobj(
         BytesIO(fileobj),
-        f"{folder}/{filename}.{extension}",
+        s3_filename,
         ExtraArgs={"ContentType": "image/jpg"},
     )
 
+async def get_presigned_url(
+    session: AsyncSession,
+    image_id: int,
+    image_class: PlaceImage | UserImage | CategoryImage,
+) -> URL:
+    image_data = (
+        await session.execute(
+            sa.select(
+                image_class.s3_path,
+                image_class.s3_filename,
+                image_class.presigned_url,
+                image_class.presigned_url_due,
+            )
+            .select_from(image_class)
+            .where(
+                image_class.id == image_id,
+            )
+        )
+    ).fetchone()
 
-def create_presigned_url(object):
+    if image_data.presigned_url_due > datetime.datetime.now():
+        presigned_url = create_presigned_url(
+            f"{image_data.s3_path}{image_data.s3_filename}"
+        )
+        return presigned_url
+    return image_data.presigned_url
+
+
+def create_presigned_url(fileobject: str) -> URL | None:
     """Generate a presigned URL to share an S3 object
 
-    :param bucket_name: string
-    :param object: string
-    :param expiration: Time in seconds for the presigned URL to remain valid
+    :param fileobject: string
     :return: Presigned URL as string. If error, returns None.
     """
 
@@ -49,7 +83,7 @@ def create_presigned_url(object):
     try:
         response = s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": s.S3_IMAGES_BUCKET, "Key": object},
+            Params={"Bucket": s.S3_IMAGES_BUCKET, "file": fileobject},
             ExpiresIn=s.S3_PRESIGNED_URL_EXPIRATION,
         )
     except ClientError as e:
@@ -57,11 +91,3 @@ def create_presigned_url(object):
         return None
 
     return response
-
-
-# if __name__ == "__main__":
-#     # aaa = create_presigned_url(settings.S3_IMAGES_BUCKET, "place_images/sample.jpg", expiration=3600)
-#     # img = base_64_img_decoder(raw_img)
-#
-#     upload_to_s3_bucket(raw_img, "place_images/sample.jpg")
-#     bbb = 6

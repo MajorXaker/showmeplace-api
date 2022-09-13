@@ -8,8 +8,14 @@
 
     S3_IMAGES_BUCKET = "showmeplace-s3-bucket"
     S3_PRESIGNED_URL_EXPIRATION = 43200 #12 hours
+    S3_PLACE_IMAGE_BUCKET = "place_images/"
+    S3_CATEGORY_IMAGE_BUCKET = "category_images/"
+    S3_USER_IMAGE_BUCKET = "user_images/"
+
     ACCESS_SECRET_KEY = "AvgbvCY+eqQy4byqWsoje0A2KB/XYaQYUvFnKaVc"
     ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
+
+
 
 
 
