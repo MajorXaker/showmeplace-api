@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from models.db_models.images import PlaceImage
 from utils.config import settings as s
 from utils.hex_tools import encode_md5
-from utils.s3_object_tools import AWSS3Tools, upload_to_s3_bucket
+from utils.s3_object_tools import upload_to_s3_bucket, get_presigned_url
 from ..gql_types.place_image_type import PlaceImageType
 
 
@@ -18,11 +18,13 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             "place__id": graphene.ID(graphene.ID, required=True),
             "image__b64s": graphene.List(graphene.String, required=True),
         }
+    images__presigned__urls = graphene.List(of_type=str)
 
     @classmethod
     async def mutate(cls, root, info, place__id: str, image__b64s: list):
         session: AsyncSession = info.context.session
-        extension = ".jpg" # TODO implement a feature to load images of diffrent types
+        extension = ".jpg"  # TODO implement a feature to load images of diffrent types
+        presigned_urls = []
         for img in image__b64s:
             filename = encode_md5(f"UID{place__id}{img[:16]}UID")
 
@@ -33,21 +35,23 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
                 extension=extension,
             )
             full_filename = f"{filename}{extension}"
-            await session.execute(
-                sa.insert(PlaceImage).values(
+
+            image_id = await session.execute(
+                sa.insert(PlaceImage)
+                .values(
                     {
-                        PlaceImage.place_id: place__id, # check whether in needs 64debasing
+                        PlaceImage.place_id: place__id,  # check whether in needs 64debasing
                         PlaceImage.s3_path: s.S3_PLACE_IMAGE_BUCKET,
                         PlaceImage.s3_filename: full_filename,
-
                     }
                 )
+                .returning(PlaceImage.id)
             )
-            # await AWSS3Tools.get_presigned_url()
+            presigned_url = get_presigned_url(
+                session=session, image_id=image_id, image_class=PlaceImage
+            )
+            presigned_urls.append(presigned_url)
 
-
-
-        # create all necessary data - presigned url + its date + put file into s3
-        # then create rows in place_image table with theese data
-
-        # return result
+        # output = cls._meta.output
+        # return output.get_node(info)
+        return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
