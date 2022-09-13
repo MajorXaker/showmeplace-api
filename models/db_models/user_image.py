@@ -1,9 +1,9 @@
 import sqlalchemy as sa
 
-from models.base_engine import Model
+from models.base_engine import Model, RecordTimestampFields
 
 
-class UserImage(Model):
+class UserImage(Model, RecordTimestampFields):
     __tablename__ = "user_image"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)

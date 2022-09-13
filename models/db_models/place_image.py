@@ -1,9 +1,10 @@
 import sqlalchemy as sa
 
-from models.base_engine import Model
+from models.base_engine import Model, RecordTimestampFields
+
 
 # TODO presigned url + its date
-class PlaceImage(Model):
+class PlaceImage(Model, RecordTimestampFields):
     __tablename__ = "place_image"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)

@@ -1,9 +1,9 @@
 import sqlalchemy as sa
 
-from models.base_engine import Model
+from models.base_engine import Model, RecordTimestampFields
 
 
-class SecretPlaceExtra(Model):
+class SecretPlaceExtra(Model, RecordTimestampFields):
 
     __tablename__ = "secret_extras"
 
