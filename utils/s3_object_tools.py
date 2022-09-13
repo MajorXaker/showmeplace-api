@@ -39,6 +39,7 @@ async def upload_to_s3_bucket(
         ExtraArgs={"ContentType": "image/jpg"},
     )
 
+
 async def get_presigned_url(
     session: AsyncSession,
     image_id: int,

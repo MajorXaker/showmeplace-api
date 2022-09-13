@@ -16,11 +16,3 @@ class MutationAddCategory(SQLAlchemyCreateMutation):
             ],
             required_fields=[Category.name.key],
         )
-
-    @classmethod
-    async def mutate(cls, root, info, value: dict):
-
-        result = await super().mutate(root, info, value)
-
-
-        return result

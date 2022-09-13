@@ -12,7 +12,4 @@ class UserImageType(SQLAlchemyObjectType):
         filter_fields = {
             UserImage.id: [OP_EQ, OP_IN],
         }
-        only_fields = [
-            UserImage.id.key,
-            UserImage.s3_filename.key
-        ]
+        only_fields = [UserImage.id.key, UserImage.s3_filename.key]

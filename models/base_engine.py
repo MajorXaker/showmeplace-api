@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import declarative_base, as_declarative
 import sqlalchemy as _sa
+from sqlalchemy import MetaData
+from sqlalchemy.orm import as_declarative
+
 
 class RecordTimestampFields:
     """
@@ -34,6 +35,7 @@ class RecordTimestampFields:
                 self.record_modified,
             )
         )
+
 
 convention = {
     "ix": "ix_%(column_0_label)s",

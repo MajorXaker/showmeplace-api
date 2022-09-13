@@ -18,6 +18,7 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             "place__id": graphene.ID(graphene.ID, required=True),
             "image__b64s": graphene.List(graphene.String, required=True),
         }
+
     images__presigned__urls = graphene.List(of_type=str)
 
     @classmethod
