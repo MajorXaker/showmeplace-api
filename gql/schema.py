@@ -20,7 +20,8 @@ from gql.mutations import (
     MutationAddCategory,
     MutationUpdateCategory,
     MutationRemoveCategory,
-    MutationRemovePlace, MutationAddPlaceImage,
+    MutationRemovePlace,
+    MutationAddPlaceImage,
 )
 
 
@@ -29,6 +30,7 @@ class Query(graphene.ObjectType):
     select_places = FilterConnectionField(PlaceType)
     select_category = FilterConnectionField(PlaceCategoryType)
     select_place_images = FilterConnectionField(PlaceImageType)
+
 
 class Mutation(graphene.ObjectType):
     add_user = MutationAddUser.Field()
