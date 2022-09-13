@@ -1,10 +1,10 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from models.base_engine import Model
+from models.base_engine import Model, RecordTimestampFields
 
 
-class Place(Model):
+class Place(Model, RecordTimestampFields):
 
     __tablename__ = "place"
 
@@ -17,18 +17,14 @@ class Place(Model):
     address = sa.Column(sa.String)
     category_id = sa.Column(
         sa.Integer,
-        sa.ForeignKey("place_category.id", ondelete="RESTRICT"),
+        sa.ForeignKey("category.id", ondelete="RESTRICT"),
         # index=True,
         # nullable=False,
     )
-    # category = relationship("PlaceCategory", back_populates="place")
+    # category = relationship("Category", back_populates="place")
     is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
     # todo place merge
-    secret_place_extra_id = sa.Column(
-        sa.Integer,
-        sa.ForeignKey("secret_extras.id", ondelete="RESTRICT"),
-        nullable=True,
-    )
+
     #
     # user_marked = relationship(
     #     "User",

@@ -16,6 +16,9 @@ SQLAlchemy = { extras = ["asyncio"], version = ">=1.4,<2" }
 psycopg2-binary = "*"
 fastapi = "*"
 starlette-graphene3 = "*"
+boto3 = "*"
+botocore = "*"
+yarl = "*"
 
 [dev-packages]
 

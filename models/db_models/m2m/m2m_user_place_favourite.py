@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 
-from models.base_engine import Model
+from models.base_engine import Model, RecordTimestampFields
+
 
 # from models.db_models.place import Place
 # from models.db_models.user import User
@@ -29,7 +30,7 @@ from models.base_engine import Model
 # )
 
 #
-class M2MUserPlaceFavourite(Model):
+class M2MUserPlaceFavourite(Model, RecordTimestampFields):
     __tablename__ = "m2m_user_place_favourite"
 
     user_id = sa.Column(

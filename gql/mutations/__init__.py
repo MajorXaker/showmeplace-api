@@ -8,3 +8,4 @@ from .add_place import MutationAddPlace
 from .update_place import MutationUpdatePlace
 from .remove_place import MutationRemovePlace
 from .update_coin_value import MutationUpdateCoinValue
+from .add_place_image import MutationAddPlaceImage
