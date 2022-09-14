@@ -64,6 +64,16 @@ async def get_presigned_url(
         presigned_url = create_presigned_url(
             f"{image_data.s3_path}{image_data.s3_filename}"
         )
+        await session.execute(
+            sa.update(image_class)
+            .where(image_class.id == image_id)
+            .values(
+                {
+                    image_class.presigned_url: presigned_url,
+                    image_class.presigned_url_due: datetime.datetime.now(),
+                }
+            )
+        )
         return presigned_url
     return image_data.presigned_url
 

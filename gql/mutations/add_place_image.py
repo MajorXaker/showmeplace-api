@@ -24,7 +24,7 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
     @classmethod
     async def mutate(cls, root, info, place__id: str, image__b64s: list):
         session: AsyncSession = info.context.session
-        extension = ".jpg"  # TODO implement a feature to load images of diffrent types
+        extension = ".jpg"  # TODO implement a feature to load images of different types
         presigned_urls = []
         for img in image__b64s:
             filename = encode_md5(f"UID{place__id}{img[:16]}UID")

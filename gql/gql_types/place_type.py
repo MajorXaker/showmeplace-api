@@ -34,10 +34,6 @@ class PlaceType(SQLAlchemyObjectType):
                     parse_query(unidecode(x))
                 ),
             ),
-            # "distance": FilterItem(
-            #     field_type=graphene.Int,
-            #     filter_func=size_filter,
-            # ),
         }
 
         model = Place
@@ -73,9 +69,6 @@ class PlaceType(SQLAlchemyObjectType):
         # TODO LOGIC
         return True
 
-    async def resolve_secret_place_extra(self, info):
-        # TODO LOGIC
-        pass
 
     @classmethod
     async def set_select_from(cls, info, query_fields, q):
@@ -105,6 +98,7 @@ class PlaceType(SQLAlchemyObjectType):
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
+
     # def size_filter(v: Int):
     #     max_val = sa.func.greatest(
     #         m.Description.measurements_width_cm,
