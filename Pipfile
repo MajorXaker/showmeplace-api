@@ -19,6 +19,7 @@ starlette-graphene3 = "*"
 boto3 = "*"
 botocore = "*"
 yarl = "*"
+unidecode = "*"
 
 [dev-packages]
 
