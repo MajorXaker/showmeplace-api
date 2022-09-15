@@ -20,6 +20,7 @@ boto3 = "*"
 botocore = "*"
 yarl = "*"
 unidecode = "*"
+pillow = "*"
 
 [dev-packages]
 

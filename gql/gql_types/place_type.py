@@ -23,10 +23,9 @@ class PlaceType(SQLAlchemyObjectType):
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
-            # Place.name: [OP_ILIKE],
-            "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
-            "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
-            "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            # "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            # "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            # "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
             # name ilike may be redundant at mvp
             "name__ilike": FilterItem(
                 field_type=graphene.String,
@@ -63,42 +62,51 @@ class PlaceType(SQLAlchemyObjectType):
     # todo places added by user
     # todo places visited by user
     # todo secret place opened by user
-    # todo places favouritted by user
+    # todo places favourited by user
 
     async def resolve_is_secret_place_opened(self, info):
         # TODO LOGIC
         return True
 
-
-    @classmethod
-    async def set_select_from(cls, info, query_fields, q):
-        if "distance_from" in info.variable_values:
-            if "longitude_From" and "latitude_From" not in info.variable_values:
-                raise ValueError("Coordinate must be present")
-            lat = info.variable_values["latitude_From"]
-            long = info.variable_values["longitude_From"]
-            dist = info.variable_values["distance_From"]
-
-            delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
-
-            longitude_1_degree_length = 111.3 + math.cos(lat)
-            delta_longitude = dist / longitude_1_degree_length
-
-            q = q.where(
-                sa.and_(
-                    Place.coordinate_latitude.between(
-                        lat + delta_latitude, lat - delta_latitude
-                    ),
-                    Place.coordinate_longitude.between(
-                        long + delta_longitude, long - delta_longitude
-                    ),
-                )
-            )
-        return q
+    # TODO Doesn't work. Need to find another way
+    # TODO do it through new InputType
+    # TODO Add hemishpere to models
+    # @classmethod
+    # async def set_select_from(cls, info, q, query_fields):
+    #     if "distanceFrom" in info.variable_values:
+    #         if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
+    #             raise ValueError("Invalid request. Coordinates must be present")
+    #         lat = info.variable_values["latitudeFrom"]
+    #         long = info.variable_values["longitudeFrom"]
+    #         dist = info.variable_values["distanceFrom"]
+    #
+    #         delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
+    #
+    #         longitude_1_degree_length = 111.3 + math.cos(lat)
+    #         delta_longitude = dist / longitude_1_degree_length
+    #
+    #         q = q.where(
+    #             sa.and_(
+    #                 # for south hemisphere
+    #                 Place.coordinate_latitude.between(
+    #                     lat + delta_latitude, lat - delta_latitude
+    #                 ),
+    #                 Place.coordinate_longitude.between(
+    #                     long + delta_longitude, long - delta_longitude
+    #                 ),
+    #                 # for north hemisphere
+    #                 Place.coordinate_latitude.between(
+    #                     lat + delta_latitude, lat - delta_latitude
+    #                 ),
+    #                 Place.coordinate_longitude.between(
+    #                     long + delta_longitude, long - delta_longitude
+    #                 )
+    #             )
+    #         )
+    #     return q
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
-
     # def size_filter(v: Int):
     #     max_val = sa.func.greatest(
     #         m.Description.measurements_width_cm,
