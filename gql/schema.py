@@ -24,6 +24,7 @@ from gql.mutations import (
     MutationAddPlaceImage,
 )
 
+
 class Query(graphene.ObjectType):
     select_users = FilterConnectionField(UserType)
     select_places = FilterConnectionField(PlaceType)
