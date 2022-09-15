@@ -12,6 +12,7 @@ class PlaceImageType(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             PlaceImage.id: [OP_EQ, OP_IN],
+            PlaceImage.place_id:[OP_EQ],
             # Do not add any other filters, or it may cripple a presigned url resolver
         }
         only_fields = [

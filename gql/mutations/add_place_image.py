@@ -39,12 +39,12 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             # TODO what if I get md5 of the whole picture and then put it here
             filename = encode_md5(f"UID{place__id}{img[:16]}UID")
 
-            await upload_to_s3_bucket(
-                fileobj=img,
-                folder=s.S3_PLACE_IMAGE_BUCKET,
-                filename=filename,
-                extension=extension,
-            )
+            # await upload_to_s3_bucket(
+            #     fileobj=img,
+            #     folder=s.S3_PLACE_IMAGE_BUCKET,
+            #     filename=filename,
+            #     extension=extension,
+            # )
             full_filename = f"{filename}{extension}"
 
             image_id_cursor = await session.execute(
@@ -68,6 +68,6 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
         # return output.get_node(info)
         # return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
         # TODO somehow return data out of it
-        result = await PlaceImage.get_node(info, main_artwork_id)
+        result = await PlaceImageType.get_node(info, main_artwork_id)
         return result
 
