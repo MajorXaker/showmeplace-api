@@ -21,13 +21,13 @@ from ..gql_types.place_image_type import PlaceImageType
 class MutationAddPlaceImage(SQLAlchemyCreateMutation):
     class Meta:
         model = PlaceImage
-        output = PlaceImageType
+        # output = PlaceImageType
         arguments = {
             "place__id": graphene.ID(graphene.ID, required=True),
             "image__b64s": graphene.List(graphene.String, required=True),
         }
 
-    # images__presigned__urls = graphene.List(of_type=str)
+    images__presigned__urls = graphene.List(of_type=String)
 
     @classmethod
     async def mutate(cls, root, info, place__id: str, image__b64s: list):
@@ -39,19 +39,19 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             # TODO what if I get md5 of the whole picture and then put it here
             filename = encode_md5(f"UID{place__id}{img[:16]}UID")
 
-            # await upload_to_s3_bucket(
-            #     fileobj=img,
-            #     folder=s.S3_PLACE_IMAGE_BUCKET,
-            #     filename=filename,
-            #     extension=extension,
-            # )
+            await upload_to_s3_bucket(
+                fileobj=img,
+                folder=s.S3_PLACE_IMAGE_BUCKET,
+                filename=filename,
+                extension=extension,
+            )
             full_filename = f"{filename}{extension}"
 
             image_id_cursor = await session.execute(
                 sa.insert(PlaceImage)
                 .values(
                     {
-                        PlaceImage.place_id: place__id,  # check whether in needs 64debasing
+                        PlaceImage.place_id: place__id,
                         PlaceImage.s3_path: s.S3_PLACE_IMAGE_BUCKET,
                         PlaceImage.s3_filename: full_filename,
                     }
@@ -63,11 +63,5 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
                 session=session, image_id=image_id, image_class=PlaceImage
             )
             presigned_urls.append(presigned_url)
-
-        # output = cls._meta.output
-        # return output.get_node(info)
-        # return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
-        # TODO somehow return data out of it
-        result = await PlaceImageType.get_node(info, main_artwork_id)
-        return result
+        return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
 
