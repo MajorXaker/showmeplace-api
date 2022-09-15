@@ -1,11 +1,13 @@
 import base64
 import datetime
 from io import BytesIO
-import sqlalchemy as sa
+
 import boto3
+import sqlalchemy as sa
 from botocore.exceptions import ClientError
 from sqlalchemy.ext.asyncio import AsyncSession
 from yarl import URL
+
 from models.db_models import PlaceImage, UserImage, CategoryImage
 from utils.config import settings as s
 
@@ -30,11 +32,12 @@ async def upload_to_s3_bucket(
         aws_access_key_id=s.ACCESS_KEY_ID,
         aws_secret_access_key=s.ACCESS_SECRET_KEY,
     )
-    fileobj = base_64_img_decoder(fileobj)
+    fileobj_b = base_64_img_decoder(fileobj)
+
     bucket = s3.Bucket(s.S3_IMAGES_BUCKET)
-    s3_filename = f"{folder}/{filename}.{extension}"
+    s3_filename = f"{folder}{filename}{extension}"
     bucket.upload_fileobj(
-        BytesIO(fileobj),
+        BytesIO(fileobj_b),
         s3_filename,
         ExtraArgs={"ContentType": "image/jpg"},
     )
@@ -60,9 +63,22 @@ async def get_presigned_url(
         )
     ).fetchone()
 
-    if image_data.presigned_url_due > datetime.datetime.now():
+    if (
+        not image_data.presigned_url_due
+        or image_data.presigned_url_due > datetime.datetime.now()
+    ):
         presigned_url = create_presigned_url(
             f"{image_data.s3_path}{image_data.s3_filename}"
+        )
+        await session.execute(
+            sa.update(image_class)
+            .where(image_class.id == image_id)
+            .values(
+                {
+                    image_class.presigned_url: presigned_url,
+                    image_class.presigned_url_due: datetime.datetime.now(),
+                }
+            )
         )
         return presigned_url
     return image_data.presigned_url
@@ -84,7 +100,7 @@ def create_presigned_url(fileobject: str) -> URL | None:
     try:
         response = s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": s.S3_IMAGES_BUCKET, "file": fileobject},
+            Params={"Bucket": s.S3_IMAGES_BUCKET, "Key": fileobject},
             ExpiresIn=s.S3_PRESIGNED_URL_EXPIRATION,
         )
     except ClientError as e:
