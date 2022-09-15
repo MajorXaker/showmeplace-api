@@ -1,27 +1,20 @@
 import graphene
-from alchql import SQLAlchemyCreateMutation
-from graphene import ObjectType, String, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 import sqlalchemy as sa
+from alchql import SQLAlchemyCreateMutation
+from graphene import String
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from models.db_models.images import PlaceImage
 from utils.config import settings as s
 from utils.hex_tools import encode_md5
 from utils.s3_object_tools import upload_to_s3_bucket, get_presigned_url
 from ..gql_id import decode_gql_id
-from ..gql_types.place_image_type import PlaceImageType
-
-# class ImagesURL(ObjectType):
-#     presigned_url = String()
-#
-# class ImagesURLs(ObjectType):
-#     images = graphene.List(of_type=ImagesURL)
 
 
 # TODO receive b64s as dict, it would allow utilisation of extensions and image ordering
 class MutationAddPlaceImage(SQLAlchemyCreateMutation):
     class Meta:
         model = PlaceImage
-        # output = PlaceImageType
         arguments = {
             "place__id": graphene.ID(graphene.ID, required=True),
             "image__b64s": graphene.List(graphene.String, required=True),
@@ -64,4 +57,3 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             )
             presigned_urls.append(presigned_url)
         return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
-

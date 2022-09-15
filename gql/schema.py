@@ -23,8 +23,6 @@ from gql.mutations import (
     MutationRemovePlace,
     MutationAddPlaceImage,
 )
-from gql.mutations.update_placeImage import MutationUpdatePlaceImage
-
 
 class Query(graphene.ObjectType):
     select_users = FilterConnectionField(UserType)
@@ -58,6 +56,5 @@ class Mutation(graphene.ObjectType):
 
     add_place_image = MutationAddPlaceImage.Field()
 
-    temp_xupdplcimgx = MutationUpdatePlaceImage.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
