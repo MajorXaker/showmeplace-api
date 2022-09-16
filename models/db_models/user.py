@@ -19,7 +19,7 @@ class User(Model, RecordTimestampFields):
     coins = sa.Column(sa.Integer)
     description = sa.Column(sa.Text)
     external_id = sa.Column(sa.String, nullable=False)
-    external_id_type: IdentificationEnum = sa.Column(sa.Text, nullable=False)
+    external_id_type: IdentificationEnum = sa.Column(sa.Text, nullable=False, server_default="COGNITO")
 
     # place_marked = relationship(
     #     "Place",
