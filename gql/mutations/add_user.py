@@ -1,14 +1,15 @@
+import graphene
+import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.db_models import User
-from ..gql_types.user_type import UserType
 
 
 class MutationAddUser(SQLAlchemyCreateMutation):
     class Meta:
         model = User
-        output = UserType
         input_fields = get_input_fields(
             model=User,
             exclude_fields=[
@@ -20,14 +21,36 @@ class MutationAddUser(SQLAlchemyCreateMutation):
             ],
             required_fields=[
                 User.name.key,
-                User.cognito_user_id.key,
+                User.external_id.key,
+                User.external_id_type.key,
             ],
         )
+        input_type_name = "InputAddUser"
 
-    # @classmethod
-    # async def mutate(cls, root, info, value: dict):
-    #
-    #     result = await super().mutate(root, info, value)
-    #
-    #
-    #     return result
+    just_added_to_base = graphene.Boolean()
+    already_registered = graphene.Boolean()
+
+    @classmethod
+    async def mutate(cls, root, info, value: dict):
+        session: AsyncSession = info.context.session
+
+        user_in_base = (
+            await session.execute(
+                sa.select(User.external_id).where(
+                    User.external_id == value["external_id"]
+                )
+            )
+        ).fetchone()
+        if user_in_base:
+            return MutationAddUser(already_registered=True, just_added_to_base=False)
+        await session.execute(
+            sa.insert(User).values(
+                {
+                    User.name: value["name"],
+                    User.external_id: value["external_id"],
+                    User.external_id_type: value["external_id_type"],
+                }
+            )
+        )
+
+        return MutationAddUser(already_registered=False, just_added_to_base=True)

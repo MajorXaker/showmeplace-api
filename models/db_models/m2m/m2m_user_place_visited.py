@@ -10,13 +10,13 @@ from models.base_engine import Model, RecordTimestampFields
 # M2MUserPlaceVisited = sa.Table(
 #     "m2m_user_place_visited",
 #     Model.metadata,
-#     sa.Column("user_id", sa.Integer, nullable=False, index=True),
+#     sa.Column("external_id", sa.Integer, nullable=False, index=True),
 #     sa.Column("place_id", sa.Integer, nullable=False, index=True),
 #     sa.PrimaryKeyConstraint(
-#         "user_id", "place_id", name="m2m_user_place_visited_pkey"
+#         "external_id", "place_id", name="m2m_user_place_visited_pkey"
 #     ),
 #     sa.ForeignKeyConstraint(
-#         ("user_id",),
+#         ("external_id",),
 #         ["user.id"],
 #         onupdate="CASCADE",
 #         ondelete="CASCADE",

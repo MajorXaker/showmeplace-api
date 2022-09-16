@@ -30,6 +30,8 @@ class UserType(SQLAlchemyObjectType):
             User.has_onboarded.key,
             User.level.key,
             User.coins.key,
+            User.external_id.key,
+            User.external_id_type.key,
         ]
 
         image = ModelField(
