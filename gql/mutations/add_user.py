@@ -36,12 +36,19 @@ class MutationAddUser(SQLAlchemyCreateMutation):
 
         user_in_base = (
             await session.execute(
-                sa.select(User.external_id).where(User.external_id.key)
+                sa.select(User.external_id).where(User.external_id == value["external_id"])
             )
         ).fetchone()
         if user_in_base:
             return MutationAddUser(already_registered=True, just_added_to_base=False)
-
-        result = await super().mutate(root, info, value)
+        await session.execute(
+            sa.insert(User).values(
+                {
+                    User.name: value["name"],
+                    User.external_id: value["external_id"],
+                    User.external_id_type: value["external_id_type"],
+                }
+            )
+        )
 
         return MutationAddUser(already_registered=False, just_added_to_base=True)
