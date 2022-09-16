@@ -31,7 +31,7 @@ class UserType(SQLAlchemyObjectType):
             User.level.key,
             User.coins.key,
             User.external_id.key,
-            User.external_id_type.key
+            User.external_id_type.key,
         ]
 
         image = ModelField(

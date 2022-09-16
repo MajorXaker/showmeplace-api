@@ -20,4 +20,3 @@ class IdentificationEnum(StrEnum):
 class CoinValueChangeEnum(StrEnum):
     SPEND = "SPEND"
     EARN = "EARN"
-

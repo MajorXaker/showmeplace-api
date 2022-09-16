@@ -36,7 +36,9 @@ class MutationAddUser(SQLAlchemyCreateMutation):
 
         user_in_base = (
             await session.execute(
-                sa.select(User.external_id).where(User.external_id == value["external_id"])
+                sa.select(User.external_id).where(
+                    User.external_id == value["external_id"]
+                )
             )
         ).fetchone()
         if user_in_base:
