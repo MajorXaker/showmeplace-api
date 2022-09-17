@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-
+from utils.config import settings as s
 from models.base_engine import Model, RecordTimestampFields
 
 
@@ -20,6 +20,7 @@ class PlaceImage(Model, BaseImage):
         sa.Integer,
         sa.ForeignKey("place.id", ondelete="CASCADE"),
     )
+    folder = s.S3_PLACE_IMAGE_FOLDER
 
 
 class CategoryImage(Model, BaseImage):
@@ -29,6 +30,7 @@ class CategoryImage(Model, BaseImage):
         sa.Integer,
         sa.ForeignKey("category.id", ondelete="CASCADE"),
     )
+    folder = s.S3_CATEGORY_IMAGE_FOLDER
 
 
 class UserImage(Model, BaseImage):
@@ -38,3 +40,4 @@ class UserImage(Model, BaseImage):
         sa.Integer,
         sa.ForeignKey("user.id", ondelete="CASCADE"),
     )
+    folder = s.S3_USER_IMAGE_FOLDER

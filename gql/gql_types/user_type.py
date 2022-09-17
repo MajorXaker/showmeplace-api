@@ -8,7 +8,7 @@ import sqlalchemy as sa
 # from gql.utils.gql_id import encode_gql_id
 from alchql.utils import FilterItem
 
-from gql.gql_types.user_image_type import UserImageType
+from gql.gql_types.select_image_type import UserImageType
 from models.db_models import User, Place
 from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
 
@@ -21,7 +21,6 @@ class UserType(SQLAlchemyObjectType):
             User.id: [OP_EQ, OP_IN],
             User.external_id: [OP_EQ],
             User.name: [OP_ILIKE],
-
             # Place.user_marked: [OP_EQ]
             # M2MUserFollowingUser.lead_id.key: [OP_EQ],
             # M2MUserFollowingUser.follower_id.key: [OP_EQ],

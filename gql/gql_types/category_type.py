@@ -3,11 +3,11 @@ from alchql.consts import OP_EQ, OP_IN
 from alchql.fields import ModelField
 from alchql.node import AsyncNode
 
-from gql.gql_types.category_image_type import CategoryImageType
+from gql.gql_types.select_image_type import CategoryImageType
 from models.db_models import Category
 
 
-class PlaceCategoryType(SQLAlchemyObjectType):
+class CategoryType(SQLAlchemyObjectType):
     class Meta:
         model = Category
         interfaces = (AsyncNode,)
