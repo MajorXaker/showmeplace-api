@@ -4,6 +4,7 @@ from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from gql.gql_id import encode_gql_id
 from models.db_models import User
 
 
@@ -29,6 +30,7 @@ class MutationAddUser(SQLAlchemyCreateMutation):
 
     just_added_to_base = graphene.Boolean()
     already_registered = graphene.Boolean()
+    internal_id = graphene.String()
 
     @classmethod
     async def mutate(cls, root, info, value: dict):
@@ -36,13 +38,14 @@ class MutationAddUser(SQLAlchemyCreateMutation):
 
         user_in_base = (
             await session.execute(
-                sa.select(User.external_id).where(
+                sa.select(User.external_id, User.id).where(
                     User.external_id == value["external_id"]
                 )
             )
         ).fetchone()
         if user_in_base:
-            return MutationAddUser(already_registered=True, just_added_to_base=False)
+            internal_id = encode_gql_id("UserType", user_in_base.id)
+            return MutationAddUser(already_registered=True, just_added_to_base=False, internal_id=internal_id)
         await session.execute(
             sa.insert(User).values(
                 {
