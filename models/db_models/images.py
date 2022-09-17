@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-
+from utils.config import settings as s
 from models.base_engine import Model, RecordTimestampFields
 
 

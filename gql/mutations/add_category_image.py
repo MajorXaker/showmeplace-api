@@ -41,4 +41,5 @@ class MutationAddCategoryImage(SQLAlchemyCreateMutation):
             session=session,
             image_class=CategoryImage,  # WARNING might not work!
         )
+        presigned_urls = [img["presigned_url"] for img in uploaded_images]
         return MutationAddCategoryImage(images__presigned__urls=presigned_urls)

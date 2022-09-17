@@ -34,11 +34,12 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
         file_extension = (
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )
-        presigned_urls = await add_imagetype_routine(
+        uploaded_images = await add_imagetype_routine(
             extension=file_extension,
             image__b64s=image__b64s,
             entity_id=place__id,
             session=session,
             image_class=PlaceImage,  # WARNING might not work!
         )
+        presigned_urls = [img["presigned_url"] for img in uploaded_images]
         return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
