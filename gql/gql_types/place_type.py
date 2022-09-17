@@ -1,18 +1,16 @@
-import math
-
 import graphene
+import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
-from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
+from alchql.consts import OP_EQ, OP_IN
 from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
-import sqlalchemy as sa
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id
 from gql.gql_types.category_type import CategoryType
-from gql.gql_types.select_image_type import PlaceImageType
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
+from gql.gql_types.select_image_type import PlaceImageType
 from models.db_models import (
     Place,
     SecretPlaceExtra,

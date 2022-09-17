@@ -26,7 +26,20 @@ class Place(Model, RecordTimestampFields):
     active_due_date = sa.Column(sa.DateTime)
     # todo place merge
 
-    #
+    @staticmethod
+    def to_db(coord_type: str, val: float):
+        if coord_type == "latitude":
+            return val + 90
+        if coord_type == "longitude":
+            return val + 180
+
+    @staticmethod
+    def from_db(coord_type: str, val: float):
+        if coord_type == "latitude":
+            return val - 90
+        if coord_type == "longitude":
+            return val - 180
+
     # user_marked = relationship(
     #     "User",
     #     secondary="m2m_user_place_marked",

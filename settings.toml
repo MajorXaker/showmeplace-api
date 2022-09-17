@@ -16,6 +16,8 @@
     ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
     AWS_UPLOADING = false
 
+    CHECK_IN_DISTANCE = 50 # in meters
+
 
 
 
