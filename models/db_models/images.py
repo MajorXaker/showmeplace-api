@@ -18,7 +18,7 @@ class PlaceImage(Model, BaseImage):
 
     place_id = sa.Column(
         sa.Integer,
-        sa.ForeignKey("place.id", ondelete="RESTRICT"),
+        sa.ForeignKey("place.id", ondelete="CASCADE"),
     )
 
 
@@ -27,7 +27,7 @@ class CategoryImage(Model, BaseImage):
 
     category_id = sa.Column(
         sa.Integer,
-        sa.ForeignKey("place.id", ondelete="RESTRICT"),
+        sa.ForeignKey("category.id", ondelete="CASCADE"),
     )
 
 
@@ -36,5 +36,5 @@ class UserImage(Model, BaseImage):
 
     user_id = sa.Column(
         sa.Integer,
-        sa.ForeignKey("place.id", ondelete="RESTRICT"),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
     )

@@ -14,15 +14,16 @@ class Place(Model, RecordTimestampFields):
     description = sa.Column(sa.Text)
     coordinate_longitude = sa.Column(sa.Float, nullable=False)
     coordinate_latitude = sa.Column(sa.Float, nullable=False)
-    address = sa.Column(sa.String)
+    address = sa.Column(sa.Text)
     category_id = sa.Column(
         sa.Integer,
         sa.ForeignKey("category.id", ondelete="RESTRICT"),
-        # index=True,
-        # nullable=False,
+        index=True,
+        nullable=False,
     )
-    # category = relationship("Category", back_populates="place")
+
     is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
+    active_due_date = sa.Column(sa.DateTime)
     # todo place merge
 
     #

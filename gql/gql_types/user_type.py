@@ -19,7 +19,9 @@ class UserType(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
-            User.name: [OP_ILIKE]
+            User.external_id: [OP_EQ],
+            User.name: [OP_ILIKE],
+
             # Place.user_marked: [OP_EQ]
             # M2MUserFollowingUser.lead_id.key: [OP_EQ],
             # M2MUserFollowingUser.follower_id.key: [OP_EQ],
