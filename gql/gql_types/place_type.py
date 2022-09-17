@@ -9,6 +9,7 @@ from alchql.utils import FilterItem
 import sqlalchemy as sa
 from unidecode import unidecode
 
+from gql.gql_id import decode_gql_id
 from gql.gql_types.category_type import CategoryType
 from gql.gql_types.select_image_type import PlaceImageType
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
@@ -32,9 +33,9 @@ class PlaceType(SQLAlchemyObjectType):
             # "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
-            "user__marked": FilterItem(field_type=graphene.Int, filter_func=None),
-            "user__favourite": FilterItem(field_type=graphene.Int, filter_func=None),
-            "user__visited": FilterItem(field_type=graphene.Int, filter_func=None),
+            "user__marked": FilterItem(field_type=graphene.String, filter_func=None),
+            "user__favourite": FilterItem(field_type=graphene.String, filter_func=None),
+            "user__visited": FilterItem(field_type=graphene.String, filter_func=None),
             "name__ilike": FilterItem(
                 field_type=graphene.String,
                 filter_func=lambda x: sa.func.to_tsvector(Place.name).op("@@")(
@@ -113,47 +114,30 @@ class PlaceType(SQLAlchemyObjectType):
         #     )
 
         if "userMarked" in info.variable_values:
-            q = q.outerjoin(
-                Place, M2MUserPlaceMarked, Place.id == M2MUserPlaceMarked.place_id
-            ).where(M2MUserPlaceMarked.user_id == info.variable_values["userMarked"])
+            user_marked = decode_gql_id(info.variable_values["userMarked"])[1]
+            q = q.outerjoin_from(
+                Place,
+                M2MUserPlaceMarked,
+                onclause=(Place.id == M2MUserPlaceMarked.place_id),
+            ).where(M2MUserPlaceMarked.user_id == user_marked)
 
         if "userFavourite" in info.variable_values:
-            q = q.outerjoin(
-                Place, M2MUserPlaceFavourite, Place.id == M2MUserPlaceFavourite.place_id
-            ).where(
-                M2MUserPlaceFavourite.user_id == info.variable_values["userFavourite"]
-            )
+            user_favourite = decode_gql_id(info.variable_values["userFavourite"])[1]
+            q = q.outerjoin_from(
+                Place,
+                M2MUserPlaceFavourite,
+                onclause=(Place.id == M2MUserPlaceFavourite.place_id),
+            ).where(M2MUserPlaceFavourite.user_id == user_favourite)
 
         if "userVisited" in info.variable_values:
-            q = q.outerjoin(
-                Place, M2MUserPlaceVisited, Place.id == M2MUserPlaceVisited.place_id
-            ).where(M2MUserPlaceVisited.user_id == info.variable_values["userVisited"])
+            user_visited = decode_gql_id(info.variable_values["userVisited"])[1]
+            q = q.outerjoin_from(
+                Place,
+                M2MUserPlaceVisited,
+                onclause=(Place.id == M2MUserPlaceVisited.place_id),
+            ).where(M2MUserPlaceVisited.user_id == user_visited)
 
         return q
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
-
-
-# def user_marked_filter(v: int):
-#
-#
-#
-#     max_val = sa.func.greatest(
-#         m.Description.measurements_width_cm,
-#         m.Description.measurements_height_cm,
-#         m.Description.measurements_depth_cm,
-#         m.Description.measurements_diameter_cm,
-#     )
-#
-#     # result = {
-#     #     SizeFilter.OTHER: max_val.is_(None),
-#     #     SizeFilter.SMALL: max_val < 50,
-#     #     SizeFilter.MEDIUM: sa.and_(max_val >= 50, max_val < 100),
-#     #     SizeFilter.BIG: max_val >= 100,
-#     # }[v]
-#
-#     result =
-#
-#
-#     return result
