@@ -11,3 +11,4 @@ from .update_coin_value import MutationUpdateCoinValue
 from .add_place_image import MutationAddPlaceImage
 from .add_category_image import MutationAddCategoryImage
 from .add_user_image import MutationAddUserImage
+from .mutation_check_in import MutationCheckIn
