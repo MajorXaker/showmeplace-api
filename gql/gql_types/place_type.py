@@ -9,8 +9,8 @@ from alchql.utils import FilterItem
 import sqlalchemy as sa
 from unidecode import unidecode
 
-from gql.gql_types.category_type import PlaceCategoryType
-from gql.gql_types.place_image_type import PlaceImageType
+from gql.gql_types.category_type import CategoryType
+from gql.gql_types.select_image_type import PlaceImageType
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from models.db_models import (
     Place,
@@ -59,7 +59,7 @@ class PlaceType(SQLAlchemyObjectType):
         model_field=SecretPlaceExtra.place_id,
     )
     place_category = ModelField(
-        PlaceCategoryType,
+        CategoryType,
         model_field=Place.category_id,
     )
     image = ModelField(

@@ -1,13 +1,15 @@
+from typing import List, Type
+
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
 from graphene import String
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.db_models.images import PlaceImage
+from models.db_models.images import PlaceImage, UserImage, CategoryImage
 from utils.config import settings as s
 from utils.hex_tools import encode_md5
-from utils.s3_object_tools import upload_to_s3_bucket, get_presigned_url
+from utils.s3_object_tools import upload_to_s3_bucket, get_presigned_url, add_imagetype_routine
 from ..gql_id import decode_gql_id
 
 
@@ -25,35 +27,17 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
     @classmethod
     async def mutate(cls, root, info, place__id: str, image__b64s: list):
         session: AsyncSession = info.context.session
-        extension = ".jpg"  # TODO implement a feature to load images of diffrent types
-        place__id = decode_gql_id(place__id)[1]
-        presigned_urls = []
-        for img in image__b64s:
-            # TODO what if I get md5 of the whole picture and then put it here
-            filename = encode_md5(f"UID{place__id}{img[:16]}UID")
-
-            await upload_to_s3_bucket(
-                fileobj=img,
-                folder=s.S3_PLACE_IMAGE_BUCKET,
-                filename=filename,
-                extension=extension,
-            )
-            full_filename = f"{filename}{extension}"
-
-            image_id_cursor = await session.execute(
-                sa.insert(PlaceImage)
-                .values(
-                    {
-                        PlaceImage.place_id: place__id,
-                        PlaceImage.s3_path: s.S3_PLACE_IMAGE_BUCKET,
-                        PlaceImage.s3_filename: full_filename,
-                    }
-                )
-                .returning(PlaceImage.id)
-            )
-            image_id = image_id_cursor.fetchone().id
-            presigned_url = await get_presigned_url(
-                session=session, image_id=image_id, image_class=PlaceImage
-            )
-            presigned_urls.append(presigned_url)
+        file_extension = (
+            ".jpg"  # TODO implement a feature to load images of diffrent types
+        )
+        presigned_urls = await add_imagetype_routine(
+            extension=file_extension,
+            image__b64s=image__b64s,
+            entity_id=place__id,
+            session=session,
+            image_class=Type[PlaceImage], # WARNING might not work!
+        )
         return MutationAddPlaceImage(images__presigned__urls=presigned_urls)
+
+
+

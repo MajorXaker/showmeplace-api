@@ -8,7 +8,7 @@ import sqlalchemy as sa
 # from gql.utils.gql_id import encode_gql_id
 from alchql.utils import FilterItem
 
-from gql.gql_types.user_image_type import UserImageType
+from gql.gql_types.select_image_type import UserImageType
 from models.db_models import User, Place
 from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
 
