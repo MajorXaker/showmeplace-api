@@ -5,6 +5,7 @@ from alchql.consts import OP_EQ, OP_IN
 from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
+from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id
@@ -16,11 +17,14 @@ from models.db_models import (
     SecretPlaceExtra,
     M2MUserPlaceMarked,
     M2MUserPlaceFavourite,
+    PlaceImage,
+    User,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query
+from utils.s3_object_tools import get_presigned_url
 
 
 class PlaceType(SQLAlchemyObjectType):
@@ -50,21 +54,39 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
+            Place.category_id.key,
         ]
 
+    images = graphene.List(of_type=graphene.String)
+    # TODO Refactor this piece of shit
+    async def resolve_images(self, info):
+        session: AsyncSession = info.context.session
+        images = (
+            await session.execute(
+                sa.select(PlaceImage.id).where(PlaceImage.place_id == self.id)
+            )
+        ).fetchall()
+        result = [
+            await get_presigned_url(
+                session=info.context.session, image_id=image.id, image_class=PlaceImage
+            )
+            for image in images
+        ]
+        return result
+
     is_secret_place_opened = gql_types.Boolean()
-    secret_place_extra = ModelField(
-        SecretPlaceExtraType,
-        model_field=SecretPlaceExtra.place_id,
-    )
-    place_category = ModelField(
-        CategoryType,
-        model_field=Place.category_id,
-    )
-    image = ModelField(
-        PlaceImageType,
-        model_field=Place.category_id,
-    )
+    # secret_place_extra = ModelField(
+    #     SecretPlaceExtraType,
+    #     model_field=SecretPlaceExtra.place_id,
+    # )
+    # place_category = ModelField(
+    #     CategoryType,
+    #     model_field=Place.category_id,
+    # )
+    # image = ModelField(
+    #     PlaceImageType,
+    #     model_field=Place.category_id,
+    # )
 
     # todo places added by user
     # todo places visited by user
