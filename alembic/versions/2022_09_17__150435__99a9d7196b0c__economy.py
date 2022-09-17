@@ -50,68 +50,6 @@ def upgrade() -> None:
     op.drop_index("ix_coins_economy_record_modified", table_name="coins_economy")
     op.drop_table("coins_economy")
 
-    op.bulk_insert(
-        Category,
-        [
-            {"name": "Food"},
-            {"name": "Rest"},
-            {"name": "Nature"},
-            {"name": "Culture"},
-            {"name": "Kids"},
-            {"name": "Beauty"},
-            {"name": "Sport"},
-            {"name": "Creative activities"},
-            {"name": "Nightlife"},
-            {"name": "Pets"},
-            # {"name": "Auto"}, # :'(
-        ],
-    )
-
-    op.bulk_insert(
-        ActionsEconomy,
-        [
-            {"name": "Visit a place", "change_type": "EARN", "change_amount": "10"},
-            {"name": "Create a place", "change_type": "EARN", "change_amount": "25"},
-            {"name": "Share a profile", "change_type": "EARN", "change_amount": "25"},
-            {"name": "Share a place", "change_type": "EARN", "change_amount": "10"},
-            {
-                "name": "Have your place visited",
-                "change_type": "EARN",
-                "change_amount": "5",
-            },
-            {
-                "name": "Have your secret place visited",
-                "change_type": "EARN",
-                "change_amount": "35",
-            },
-            {
-                "name": "Have your secret place opened",
-                "change_type": "EARN",
-                "change_amount": "25",
-            },
-            {
-                "name": "Open a secret place",
-                "change_type": "SPEND",
-                "change_amount": "500",
-            },
-            {
-                "name": "Create first secret place",
-                "change_type": "SPEND",
-                "change_amount": "50",
-            },
-            {
-                "name": "Create a new place of the same category",
-                "change_type": "SPEND",
-                "change_amount": "150",
-            },
-            {
-                "name": "Create new secret place",
-                "change_type": "SPEND",
-                "change_amount": "1000",
-            },
-        ],
-    )
-
     # ### end Alembic commands ###
 
 
