@@ -45,7 +45,11 @@ class MutationAddUser(SQLAlchemyCreateMutation):
         ).fetchone()
         if user_in_base:
             internal_id = encode_gql_id("UserType", user_in_base.id)
-            return MutationAddUser(already_registered=True, just_added_to_base=False, internal_id=internal_id)
+            return MutationAddUser(
+                already_registered=True,
+                just_added_to_base=False,
+                internal_id=internal_id,
+            )
         await session.execute(
             sa.insert(User).values(
                 {
