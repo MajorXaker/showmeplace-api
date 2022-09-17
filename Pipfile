@@ -21,6 +21,7 @@ botocore = "*"
 yarl = "*"
 unidecode = "*"
 pillow = "*"
+graphene-federation3 = "*"
 
 [dev-packages]
 

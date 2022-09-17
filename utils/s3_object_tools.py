@@ -125,13 +125,13 @@ async def add_imagetype_routine(
     for img in image__b64s:
         # TODO what if I get md5 of the whole picture and then put it here
         filename = encode_md5(f"UID{entity_id}{img[:16]}UID")
-
-        await upload_to_s3_bucket(
-            fileobj=img,
-            folder=image_class.folder,
-            filename=filename,
-            extension=extension,
-        )
+        if s.AWS_UPLOADING:
+            await upload_to_s3_bucket(
+                fileobj=img,
+                folder=image_class.folder,
+                filename=filename,
+                extension=extension,
+            )
         full_filename = f"{filename}{extension}"
         vals = {
             image_class.s3_path: image_class.folder,
@@ -154,11 +154,13 @@ async def add_imagetype_routine(
             .fetchone()
             .id
         )
+        presigned_url = await get_presigned_url(
+                session=session, image_id=image_id, image_class=image_class
+            )
+
         image = {
             "id": image_id,
-            "presigned_url": await get_presigned_url(
-                session=session, image_id=image_id, image_class=image_class
-            ),
+            "presigned_url": presigned_url if s.AWS_UPLOADING else "temp_string",
         }
         uploaded_images.append(image)
     return uploaded_images
