@@ -155,8 +155,8 @@ async def add_imagetype_routine(
             .id
         )
         presigned_url = await get_presigned_url(
-                session=session, image_id=image_id, image_class=image_class
-            )
+            session=session, image_id=image_id, image_class=image_class
+        )
 
         image = {
             "id": image_id,
