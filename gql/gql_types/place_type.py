@@ -8,7 +8,7 @@ from alchql.utils import FilterItem
 from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
-from gql.gql_id import decode_gql_id
+from gql.gql_id import decode_gql_id, encode_gql_id
 from gql.gql_types.category_type import CategoryType
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from gql.gql_types.select_image_type import PlaceImageType
@@ -54,8 +54,9 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            Place.category_id.key,
+            # Place.category_id.key,
         ]
+    category_id = graphene.String()
 
     images = graphene.List(of_type=graphene.String)
     # TODO Refactor this piece of shit
@@ -159,5 +160,5 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
-    # def resolve_id(self, info):
-    #     return encode_gql_id(self.__class__.__name__, self.id)
+    def resolve_category_id(self, info):
+        return encode_gql_id(self.__class__.__name__, self.category_id)
