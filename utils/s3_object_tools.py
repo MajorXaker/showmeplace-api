@@ -1,7 +1,7 @@
 import base64
 import datetime
 from io import BytesIO
-from typing import List, Type
+from typing import List, Type, Dict
 
 import boto3
 import sqlalchemy as sa
@@ -49,7 +49,7 @@ async def upload_to_s3_bucket(
 async def get_presigned_url(
     session: AsyncSession,
     image_id: int,
-    image_class: PlaceImage | UserImage | CategoryImage,
+    image_class: Type[PlaceImage | UserImage | CategoryImage],
 ) -> URL:
     image_data = (
         await session.execute(
@@ -112,15 +112,16 @@ def create_presigned_url(fileobject: str) -> URL | None:
 
     return response
 
+
 async def add_imagetype_routine(
     extension: str,
     image__b64s: List[str],
     entity_id: str,
     session: AsyncSession,
-    image_class: PlaceImage | UserImage | CategoryImage,
-) -> List[str]:
+    image_class: Type[PlaceImage | UserImage | CategoryImage],
+) -> list[dict[str, URL | int]]:
     entity_id = decode_gql_id(entity_id)[1]
-    presigned_urls = []
+    uploaded_images = []
     for img in image__b64s:
         # TODO what if I get md5 of the whole picture and then put it here
         filename = encode_md5(f"UID{entity_id}{img[:16]}UID")
@@ -132,21 +133,32 @@ async def add_imagetype_routine(
             extension=extension,
         )
         full_filename = f"{filename}{extension}"
+        vals = {
+            image_class.s3_path: image_class.folder,
+            image_class.s3_filename: full_filename,
+        }
 
-        image_id = (await session.execute(
-            sa.insert(image_class)
-            .values(
-                {
-                    image_class.place_id: entity_id,
-                    image_class.s3_path: image_class.folder,
-                    image_class.s3_filename: full_filename,
-                }
+        if image_class == PlaceImage:
+            vals[image_class.place_id] = entity_id
+        elif image_class == CategoryImage:
+            vals[image_class.category_id] = entity_id
+        elif image_class == UserImage:
+            vals[image_class.user_id] = entity_id
+
+        image_id: int = (
+            (
+                await session.execute(
+                    sa.insert(image_class).values(vals).returning(image_class.id)
+                )
             )
-            .returning(image_class.id)
-        )).fetchone().id
-
-        presigned_url = await get_presigned_url(
-            session=session, image_id=image_id, image_class=Type[image_class]
+            .fetchone()
+            .id
         )
-        presigned_urls.append(presigned_url)
-    return presigned_urls
+        image = {
+            "id": image_id,
+            "presigned_url": await get_presigned_url(
+                session=session, image_id=image_id, image_class=image_class
+            ),
+        }
+        uploaded_images.append(image)
+    return uploaded_images
