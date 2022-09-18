@@ -1,3 +1,5 @@
+import math
+
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
@@ -98,41 +100,27 @@ class PlaceType(SQLAlchemyObjectType):
     #     # TODO LOGIC
     #     return True
 
-    # TODO Doesn't work. Need to find another way
-    # TODO do it through new InputType
-    # TODO Add hemishpere to models
+    
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
-        # if "distanceFrom" in info.variable_values:
-        #     if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
-        #         raise ValueError("Invalid request. Coordinates must be present")
-        #     lat = info.variable_values["latitudeFrom"]
-        #     long = info.variable_values["longitudeFrom"]
-        #     dist = info.variable_values["distanceFrom"]
-        #
-        #     delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
-        #
-        #     longitude_1_degree_length = 111.3 + math.cos(lat)
-        #     delta_longitude = dist / longitude_1_degree_length
-        #
-        #     q = q.where(
-        #         sa.and_(
-        #             # for south hemisphere
-        #             Place.coordinate_latitude.between(
-        #                 lat + delta_latitude, lat - delta_latitude
-        #             ),
-        #             Place.coordinate_longitude.between(
-        #                 long + delta_longitude, long - delta_longitude
-        #             ),
-        #             # for north hemisphere
-        #             Place.coordinate_latitude.between(
-        #                 lat + delta_latitude, lat - delta_latitude
-        #             ),
-        #             Place.coordinate_longitude.between(
-        #                 long + delta_longitude, long - delta_longitude
-        #             )
-        #         )
-        #     )
+        if "distanceFrom" in info.variable_values:
+            if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
+                raise ValueError("Invalid request. Coordinates must be present")
+            lat = info.variable_values["latitudeFrom"]
+            long = info.variable_values["longitudeFrom"]
+            dist = info.variable_values["distanceFrom"]
+
+            delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
+
+            longitude_1_degree_length = 111.3 * math.cos(lat)
+            delta_longitude = dist / longitude_1_degree_length
+            q = q.where(
+                sa.and_(
+                    sa.func.ABS(Place.coordinate_longitude - long)
+                    < delta_longitude,
+                    sa.func.ABS(Place.coordinate_latitude - lat) < delta_latitude,
+                )
+            )
 
         if "userMarked" in info.variable_values:
             user_marked = decode_gql_id(info.variable_values["userMarked"])[1]
