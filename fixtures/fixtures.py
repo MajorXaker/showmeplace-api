@@ -102,4 +102,5 @@ if __name__ == "__main__":
     with Session(engine) as session:
         economy_ids = insert_economy(session)
         category_ids = insert_categories(session)
-        aaa = 5
+        session.commit()
+    aaa = 5
