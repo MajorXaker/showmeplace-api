@@ -36,7 +36,7 @@ class MutationCheckIn(graphene.Mutation):
         dist = 1000 / s.CHECK_IN_DISTANCE
 
         delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
-        longitude_1_degree_length = 111.3 + math.cos(lat)
+        longitude_1_degree_length = 111.3 * math.cos(lat)
         delta_longitude = dist / longitude_1_degree_length
 
         place_id = decode_gql_id(check_in__place__id)[1]
