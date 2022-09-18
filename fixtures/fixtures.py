@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from models.db_models import Category, ActionsEconomy
+from models.db_models import Category, ActionsEconomy, CategoryImage
 from utils.db import db_url
 
 
@@ -20,6 +20,7 @@ def insert_categories(session):
         {"name": "Creative activities"},
         {"name": "Nightlife"},
         {"name": "Pets"},
+        {"name": "Secret place"},
         # {"name": "Auto"}, # :'(
     ]
 
@@ -97,10 +98,79 @@ def insert_economy(session):
     ]
 
 
+def insert_category_images(session):
+    data_cat = [
+        {"name": "Food"},
+        {"name": "Rest"},
+        {"name": "Nature"},
+        {"name": "Culture"},
+        {"name": "Kids"},
+        {"name": "Beauty"},
+        {"name": "Sport"},
+        {"name": "Creative activities"},
+        {"name": "Nightlife"},
+        {"name": "Pets"},
+        {"name": "Secret place"},
+        # {"name": "Auto"}, # :'(
+    ]
+
+    data_pins = [
+        {"name": "Food"},
+        {"name": "Rest"},
+        {"name": "Nature"},
+        {"name": "Culture"},
+        {"name": "Kids"},
+        {"name": "Beauty"},
+        {"name": "Sport"},
+        {"name": "Creative"},
+        {"name": "Nightlife"},
+        {"name": "Pets"},
+        {"name": "Secret_opened"},
+    ]
+    data_icons = data_pins.copy()
+    data_icons.append({"name": "Secret_closed"})
+
+    ids_pins = [
+        session.execute(
+            sa.insert(CategoryImage)
+            .values(
+                {
+                    CategoryImage.s3_filename: val["name"],
+                    CategoryImage.s3_path: 'category_images/pins/',
+                    CategoryImage.description: "pin"
+                }
+            )
+            .returning(ActionsEconomy.id)
+        )
+        .fetchone()
+        .id
+        for val in data_pins
+    ]
+
+    ids_icons = [
+        session.execute(
+            sa.insert(CategoryImage)
+            .values(
+                {
+                    CategoryImage.s3_filename: val["name"],
+                    CategoryImage.s3_path: 'category_images/icons/',
+                    CategoryImage.description: "icon"
+                }
+            )
+            .returning(ActionsEconomy.id)
+        )
+        .fetchone()
+        .id
+        for val in data_pins
+    ]
+
+    return [*ids_pins, *ids_icons]
+
 if __name__ == "__main__":
     engine = create_engine(db_url)
     with Session(engine) as session:
         economy_ids = insert_economy(session)
         category_ids = insert_categories(session)
+        cat_img_ids = insert_category_images(session)
         session.commit()
     aaa = 5
