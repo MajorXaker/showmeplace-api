@@ -6,7 +6,7 @@ from gql.mutations import (
     MutationRemoveFollower,
     MutationAddPlace,
     MutationAddUser,
-    MutationUpdateCoinValue,
+    MutationCheckIn,
     MutationAddFavouritePlace,
     MutationAddFollower,
     MutationAddVisitedPlace,
@@ -65,6 +65,8 @@ class Mutation(graphene.ObjectType):
     add_category_image = MutationAddCategoryImage.Field(
         deprecation_reason="Service method. Do not use on production"
     )
+
+    check_in_place = MutationCheckIn.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
