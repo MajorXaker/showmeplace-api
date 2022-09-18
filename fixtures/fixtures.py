@@ -167,11 +167,3 @@ def insert_category_images(session):
     return [*ids_pins, *ids_icons]
 
 
-if __name__ == "__main__":
-    engine = create_engine(db_url)
-    with Session(engine) as session:
-        economy_ids = insert_economy(session)
-        category_ids = insert_categories(session)
-        cat_img_ids = insert_category_images(session)
-        session.commit()
-    aaa = 5
