@@ -34,9 +34,9 @@ class PlaceType(SQLAlchemyObjectType):
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
-            # "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
-            # "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
-            # "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
             "user__marked": FilterItem(field_type=graphene.String, filter_func=None),
             "user__favourite": FilterItem(field_type=graphene.String, filter_func=None),
             "user__visited": FilterItem(field_type=graphene.String, filter_func=None),
@@ -56,7 +56,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            # Place.category_id.key,
+            Place.category_id.key,
         ]
 
     category_id = graphene.String()

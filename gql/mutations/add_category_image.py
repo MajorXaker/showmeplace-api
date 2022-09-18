@@ -34,6 +34,7 @@ class MutationAddCategoryImage(SQLAlchemyCreateMutation):
         file_extension = (
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )
+        category__id = decode_gql_id(category__id)[1]
         uploaded_images = await add_imagetype_routine(
             extension=file_extension,
             image__b64s=image__b64s,

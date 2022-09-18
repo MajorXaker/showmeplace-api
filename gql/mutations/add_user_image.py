@@ -30,16 +30,27 @@ class MutationAddUserImage(SQLAlchemyCreateMutation):
 
     @classmethod
     async def mutate(cls, root, info, user__id: str, image__b64s: list):
+        if len(image__b64s) > 1:
+            raise ValueError("User images cannot be more than 1")
         session: AsyncSession = info.context.session
         file_extension = (
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )
+        user__id = decode_gql_id(user__id)[1]
         uploaded_images = await add_imagetype_routine(
             extension=file_extension,
             image__b64s=image__b64s,
             entity_id=user__id,
             session=session,
             image_class=UserImage,  # WARNING might not work!
+        )[:1]
+        await session.execute(
+            sa.delete(UserImage).where(
+                sa.and_(
+                    UserImage.user_id == user__id,
+                    UserImage.id != uploaded_images[0]["id"],
+                )
+            )
         )
         presigned_urls = [img["presigned_url"] for img in uploaded_images]
         return MutationAddUserImage(images__presigned__urls=presigned_urls)
