@@ -140,7 +140,7 @@ def insert_category_images(session):
                     CategoryImage.description: "pin",
                 }
             )
-            .returning(ActionsEconomy.id)
+            .returning(CategoryImage.id)
         )
         .fetchone()
         .id
@@ -157,7 +157,7 @@ def insert_category_images(session):
                     CategoryImage.description: "icon",
                 }
             )
-            .returning(ActionsEconomy.id)
+            .returning(CategoryImage.id)
         )
         .fetchone()
         .id
