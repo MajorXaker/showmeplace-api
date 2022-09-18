@@ -124,7 +124,7 @@ async def add_imagetype_routine(
     session: AsyncSession,
     image_class: Type[PlaceImage | UserImage | CategoryImage],
 ) -> list[dict[str, URL | int]]:
-    entity_id = decode_gql_id(entity_id)[1]
+
     uploaded_images = []
     for img in image__b64s:
         # TODO what if I get md5 of the whole picture and then put it here

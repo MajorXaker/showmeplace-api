@@ -1,16 +1,12 @@
 import graphene
+import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
-from alchql.fields import ModelField
 from alchql.node import AsyncNode
-import sqlalchemy as sa
+from sqlalchemy.ext.asyncio import AsyncSession
 
-# from gql.utils.gql_id import encode_gql_id
-from alchql.utils import FilterItem
-
-from gql.gql_types.select_image_type import UserImageType
-from models.db_models import User, Place
-from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
+from models.db_models import User, UserImage
+from utils.s3_object_tools import get_presigned_url
 
 
 class UserType(SQLAlchemyObjectType):
@@ -35,29 +31,29 @@ class UserType(SQLAlchemyObjectType):
             User.external_id_type.key,
         ]
 
-        image = ModelField(
-            UserImageType,
-            model_field=Place.category_id,
-        )
-        #
-        # async def set_select_from(cls, info, q, query_fields):
-        #     aaa = q
+        images = graphene.List(of_type=graphene.String)
+
+        async def resolve_images(self, info):
+            session: AsyncSession = info.context.session
+            images = (
+                await session.execute(
+                    sa.select(UserImage.id).where(UserImage.place_id == self.id)
+                )
+            ).fetchall()
+            result = [
+                await get_presigned_url(
+                    session=info.context.session,
+                    image_id=image.id,
+                    image_class=UserImage,
+                )
+                for image in images
+            ]
+            return result
 
         # TODO namee ilike
         # todo user - marked place
         # todo users - place visited
         # todo user - secret place openeer
-        #
-
-        # "name__ilike": FilterItem(
-        #     field_type=graphene.String,
-        #     filter_func=lambda x: sa.or_(
-        #         User.uid == x,
-        #         sa.func.to_tsvector(unaccent(m.Artist.name)).op("@@")(
-        #             parse_query(unidecode(x))
-        #         ),
-        #     ),
-        # ),
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
