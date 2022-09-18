@@ -1,14 +1,9 @@
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 
 from models.db_models import Category, ActionsEconomy, CategoryImage
-from utils.db import db_url
 
 
 def insert_categories(session):
-
     data = [
         {"name": "Food"},
         {"name": "Rest"},
@@ -37,7 +32,6 @@ def insert_categories(session):
 
 
 def insert_economy(session):
-
     data = [
         {"action_name": "Visit a place", "change_type": "EARN", "change_amount": 10},
         {"action_name": "Create a place", "change_type": "EARN", "change_amount": 25},
@@ -99,22 +93,7 @@ def insert_economy(session):
 
 
 def insert_category_images(session):
-    data_cat = [
-        {"name": "Food"},
-        {"name": "Rest"},
-        {"name": "Nature"},
-        {"name": "Culture"},
-        {"name": "Kids"},
-        {"name": "Beauty"},
-        {"name": "Sport"},
-        {"name": "Creative activities"},
-        {"name": "Nightlife"},
-        {"name": "Pets"},
-        {"name": "Secret place"},
-        # {"name": "Auto"}, # :'(
-    ]
-
-    data_pins = [
+    data = [
         {"name": "Food"},
         {"name": "Rest"},
         {"name": "Nature"},
@@ -126,44 +105,65 @@ def insert_category_images(session):
         {"name": "Nightlife"},
         {"name": "Pets"},
         {"name": "Secret_opened"},
+        {"name": "Secret_closed"},
     ]
-    data_icons = data_pins.copy()
-    data_icons.append({"name": "Secret_closed"})
+    categories = [
+        {"name": "Food"},
+        {"name": "Rest"},
+        {"name": "Nature"},
+        {"name": "Culture"},
+        {"name": "Kids"},
+        {"name": "Beauty"},
+        {"name": "Sport"},
+        {"name": "Creative activities"},
+        {"name": "Nightlife"},
+        {"name": "Pets"},
+        {"name": "Secret place"},
+        {"name": "Secret place"},
+    ]
 
-    ids_pins = [
-        session.execute(
-            sa.insert(CategoryImage)
-            .values(
-                {
-                    CategoryImage.s3_filename: val["name"],
-                    CategoryImage.s3_path: "category_images/pins/",
-                    CategoryImage.description: "pin",
-                }
-            )
-            .returning(CategoryImage.id)
+    ids = []
+    for img, category in zip(data, categories):
+        category_id = (
+            session.execute(sa.select(Category.id).where(Category.name == category["name"]))
+            .fetchone()
+            .id
         )
-        .fetchone()
-        .id
-        for val in data_pins
-    ]
+        assert category_id is not None
 
-    ids_icons = [
-        session.execute(
-            sa.insert(CategoryImage)
-            .values(
-                {
-                    CategoryImage.s3_filename: val["name"],
-                    CategoryImage.s3_path: "category_images/icons/",
-                    CategoryImage.description: "icon",
-                }
+        id_pin = (
+            session.execute(
+                sa.insert(CategoryImage)
+                .values(
+                    {
+                        CategoryImage.s3_filename: f'{img["name"]}.svg',
+                        CategoryImage.s3_path: "category_images/pins/",
+                        CategoryImage.description: "pin",
+                        CategoryImage.category_id: category_id
+                    }
+                )
+                .returning(CategoryImage.id)
             )
-            .returning(CategoryImage.id)
+            .fetchone()
+            .id
         )
-        .fetchone()
-        .id
-        for val in data_pins
-    ]
 
-    return [*ids_pins, *ids_icons]
+        id_icon = (
+            session.execute(
+                sa.insert(CategoryImage)
+                .values(
+                    {
+                        CategoryImage.s3_filename: f'{img["name"]}.svg',
+                        CategoryImage.s3_path: "category_images/icons/",
+                        CategoryImage.description: "icon",
+                        CategoryImage.category_id: category_id
+                    }
+                )
+                .returning(CategoryImage.id)
+            )
+            .fetchone()
+            .id
+        )
+        ids.append((id_pin, id_icon))
 
-
+    return ids

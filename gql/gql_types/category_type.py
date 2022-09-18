@@ -29,15 +29,23 @@ class CategoryType(SQLAlchemyObjectType):
             session: AsyncSession = info.context.session
             images = (
                 await session.execute(
-                    sa.select(CategoryImage.id).where(CategoryImage.place_id == self.id)
+                    sa.select(
+                        CategoryImage.id,
+                        CategoryImage.s3_filename,
+                        CategoryImage.description,
+                    ).where(CategoryImage.place_id == self.id)
                 )
             ).fetchall()
             result = [
-                await get_presigned_url(
-                    session=info.context.session,
-                    image_id=image.id,
-                    image_class=CategoryImage,
-                )
+                {
+                    "presigned_url": await get_presigned_url(
+                        session=info.context.session,
+                        image_id=image.id,
+                        image_class=CategoryImage,
+                    ),
+                    "filename": image.s3_filename,
+                    "description": CategoryImage.description,
+                }
                 for image in images
             ]
             return result
