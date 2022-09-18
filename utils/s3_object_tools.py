@@ -70,7 +70,9 @@ async def get_presigned_url(
         not image_data.presigned_url_due
         or image_data.presigned_url_due < datetime.datetime.now()
     ):
-        presigned_url_due_date = datetime.datetime.now() + datetime.timedelta(seconds=s.S3_PRESIGNED_URL_EXPIRATION)
+        presigned_url_due_date = datetime.datetime.now() + datetime.timedelta(
+            seconds=s.S3_PRESIGNED_URL_EXPIRATION
+        )
         presigned_url = create_presigned_url(
             f"{image_data.s3_path}{image_data.s3_filename}"
         )

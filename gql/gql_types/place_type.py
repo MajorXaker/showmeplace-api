@@ -58,6 +58,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_latitude.key,
             # Place.category_id.key,
         ]
+
     category_id = graphene.String()
 
     images = graphene.List(of_type=graphene.String)
@@ -100,7 +101,6 @@ class PlaceType(SQLAlchemyObjectType):
     #     # TODO LOGIC
     #     return True
 
-    
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
         if "distanceFrom" in info.variable_values:
@@ -116,8 +116,7 @@ class PlaceType(SQLAlchemyObjectType):
             delta_longitude = dist / longitude_1_degree_length
             q = q.where(
                 sa.and_(
-                    sa.func.ABS(Place.coordinate_longitude - long)
-                    < delta_longitude,
+                    sa.func.ABS(Place.coordinate_longitude - long) < delta_longitude,
                     sa.func.ABS(Place.coordinate_latitude - lat) < delta_latitude,
                 )
             )
