@@ -11,4 +11,4 @@ if __name__ == "__main__":
         category_ids = insert_categories(session)
         cat_img_ids = insert_category_images(session)
         session.commit()
-    aaa = 5
+    print("Fixtures has been applied")
