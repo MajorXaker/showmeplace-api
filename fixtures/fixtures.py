@@ -136,8 +136,8 @@ def insert_category_images(session):
             .values(
                 {
                     CategoryImage.s3_filename: val["name"],
-                    CategoryImage.s3_path: 'category_images/pins/',
-                    CategoryImage.description: "pin"
+                    CategoryImage.s3_path: "category_images/pins/",
+                    CategoryImage.description: "pin",
                 }
             )
             .returning(ActionsEconomy.id)
@@ -153,8 +153,8 @@ def insert_category_images(session):
             .values(
                 {
                     CategoryImage.s3_filename: val["name"],
-                    CategoryImage.s3_path: 'category_images/icons/',
-                    CategoryImage.description: "icon"
+                    CategoryImage.s3_path: "category_images/icons/",
+                    CategoryImage.description: "icon",
                 }
             )
             .returning(ActionsEconomy.id)
@@ -165,6 +165,7 @@ def insert_category_images(session):
     ]
 
     return [*ids_pins, *ids_icons]
+
 
 if __name__ == "__main__":
     engine = create_engine(db_url)
