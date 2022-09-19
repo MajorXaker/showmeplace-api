@@ -21,6 +21,7 @@ from models.db_models import (
     M2MUserPlaceFavourite,
     PlaceImage,
     User,
+    Category,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 
@@ -60,8 +61,34 @@ class PlaceType(SQLAlchemyObjectType):
         ]
 
     category_id = graphene.String()
-
+    category_Name = graphene.String()
     images = graphene.List(of_type=graphene.String)
+    secret_place_extra_id = graphene.String()
+    user_marked_id = graphene.String()
+
+    async def resolve_user_marked_id(self, info):
+        session: AsyncSession = info.context.session
+        user_id = (
+            (
+                await session.execute(
+                    sa.select(M2MUserPlaceMarked.user_id).where(
+                        M2MUserPlaceMarked.place_id == self.id
+                    )
+                )
+            )
+            .fetchone()
+            .user_id
+        )
+        return encode_gql_id("UserType", user_id)
+
+    async def resolve_category(self, info):
+        session: AsyncSession = info.context.session
+        return (
+            await session.execute(
+                sa.select(Category.name).where(Category.id == self.category_id)
+            )
+        ).fetchone()
+
     # TODO Refactor this piece of shit
     async def resolve_images(self, info):
         session: AsyncSession = info.context.session
@@ -78,7 +105,12 @@ class PlaceType(SQLAlchemyObjectType):
         ]
         return result
 
-    is_secret_place_opened = gql_types.Boolean()
+    # async def resolve_secret_place_extra_id(self, info):
+    #     session: AsyncSession = info.context.session
+    #
+    #     return encode_gql_id("SecretPlaceExtraType", self.category_id)
+
+    # is_secret_place_opened = gql_types.Boolean()
     # secret_place_extra = ModelField(
     #     SecretPlaceExtraType,
     #     model_field=SecretPlaceExtra.place_id,

@@ -31,24 +31,21 @@ class UserType(SQLAlchemyObjectType):
             User.external_id_type.key,
         ]
 
-        images = graphene.List(of_type=graphene.String)
+    images = graphene.String()
 
-        async def resolve_images(self, info):
-            session: AsyncSession = info.context.session
-            images = (
-                await session.execute(
-                    sa.select(UserImage.id).where(UserImage.place_id == self.id)
-                )
-            ).fetchall()
-            result = [
-                await get_presigned_url(
-                    session=info.context.session,
-                    image_id=image.id,
-                    image_class=UserImage,
-                )
-                for image in images
-            ]
-            return result
+    async def resolve_images(self, info):
+        session: AsyncSession = info.context.session
+        image = (
+            await session.execute(
+                sa.select(UserImage.id).where(UserImage.user_id == self.id)
+            )
+        ).fetchone()
+        result = await get_presigned_url(
+            session=info.context.session,
+            image_id=image.id,
+            image_class=UserImage,
+        )
+        return result
 
         # TODO namee ilike
         # todo user - marked place
