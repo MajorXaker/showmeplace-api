@@ -73,9 +73,15 @@ class PlaceType(SQLAlchemyObjectType):
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
-        raw_cat_id = (await session.execute(
-                sa.select(Place.category_id).where(Place.id == self.id)
-            )).fetchone().category_id
+        raw_cat_id = (
+            (
+                await session.execute(
+                    sa.select(Place.category_id).where(Place.id == self.id)
+                )
+            )
+            .fetchone()
+            .category_id
+        )
         cat_id = encode_gql_id(
             "CategoryType",
             raw_cat_id,
