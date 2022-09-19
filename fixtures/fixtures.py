@@ -125,7 +125,9 @@ def insert_category_images(session):
     ids = []
     for img, category in zip(data, categories):
         category_id = (
-            session.execute(sa.select(Category.id).where(Category.name == category["name"]))
+            session.execute(
+                sa.select(Category.id).where(Category.name == category["name"])
+            )
             .fetchone()
             .id
         )
@@ -139,7 +141,7 @@ def insert_category_images(session):
                         CategoryImage.s3_filename: f'{img["name"]}.png',
                         CategoryImage.s3_path: "category_images/pins/",
                         CategoryImage.description: "pin",
-                        CategoryImage.category_id: category_id
+                        CategoryImage.category_id: category_id,
                     }
                 )
                 .returning(CategoryImage.id)
@@ -156,7 +158,7 @@ def insert_category_images(session):
                         CategoryImage.s3_filename: f'{img["name"]}.png',
                         CategoryImage.s3_path: "category_images/icons/",
                         CategoryImage.description: "icon",
-                        CategoryImage.category_id: category_id
+                        CategoryImage.category_id: category_id,
                     }
                 )
                 .returning(CategoryImage.id)
