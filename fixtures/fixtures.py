@@ -136,7 +136,7 @@ def insert_category_images(session):
                 sa.insert(CategoryImage)
                 .values(
                     {
-                        CategoryImage.s3_filename: f'{img["name"]}.svg',
+                        CategoryImage.s3_filename: f'{img["name"]}.png',
                         CategoryImage.s3_path: "category_images/pins/",
                         CategoryImage.description: "pin",
                         CategoryImage.category_id: category_id
@@ -153,7 +153,7 @@ def insert_category_images(session):
                 sa.insert(CategoryImage)
                 .values(
                     {
-                        CategoryImage.s3_filename: f'{img["name"]}.svg',
+                        CategoryImage.s3_filename: f'{img["name"]}.png',
                         CategoryImage.s3_path: "category_images/icons/",
                         CategoryImage.description: "icon",
                         CategoryImage.category_id: category_id
