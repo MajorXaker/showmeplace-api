@@ -10,7 +10,7 @@ from models.db_models import Category, CategoryImage
 from utils.s3_object_tools import get_presigned_url
 
 
-class Image(ObjectType):
+class CatImage(ObjectType):
     presigned_url = String()
     filename = String()
     description = String()
@@ -25,7 +25,7 @@ class CategoryType(SQLAlchemyObjectType):
         }
         only_fields = [Category.id.key, Category.name.key]
 
-    images = graphene.List(of_type=Image)
+    images = graphene.List(of_type=CatImage)
 
     async def resolve_images(self, info):
         session: AsyncSession = info.context.session

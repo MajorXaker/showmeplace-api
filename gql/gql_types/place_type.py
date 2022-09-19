@@ -7,11 +7,12 @@ from alchql.consts import OP_EQ, OP_IN
 from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
+from graphene import ObjectType, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id, encode_gql_id
-from gql.gql_types.category_type import CategoryType
+from gql.gql_types.category_type import CategoryType, CatImage
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from gql.gql_types.select_image_type import PlaceImageType
 from models.db_models import (
@@ -22,12 +23,20 @@ from models.db_models import (
     PlaceImage,
     User,
     Category,
+    CategoryImage,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
+
+
+class Cat(ObjectType):
+    name = String()
+    # filename = String()
+    # description = String()
+    category_images = graphene.List(of_type=CatImage)
 
 
 class PlaceType(SQLAlchemyObjectType):
@@ -57,14 +66,89 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            Place.category_id.key,
+            # Place.category_id.key,
         ]
 
-    category_id = graphene.String()
-    category_Name = graphene.String()
+    category_data = graphene.Field(type_=Cat)
+
+    async def resolve_category_data(self, info):
+        session: AsyncSession = info.context.session
+        raw_cat_id = (await session.execute(
+                sa.select(Place.category_id).where(Place.id == self.id)
+            )).fetchone().category_id
+        cat_id = encode_gql_id(
+            "CategoryType",
+            raw_cat_id,
+        )
+        category_name = (
+            (
+                await session.execute(
+                    sa.select(Category.name).where(Category.id == raw_cat_id)
+                )
+            )
+            .fetchone()
+            .name
+        )
+
+        images = (
+            await session.execute(
+                sa.select(
+                    CategoryImage.id,
+                    CategoryImage.s3_filename,
+                    CategoryImage.description,
+                ).where(CategoryImage.category_id == raw_cat_id)
+            )
+        ).fetchall()
+        category_images = [
+            {
+                "presigned_url": await get_presigned_url(
+                    session=info.context.session,
+                    image_id=image.id,
+                    image_class=CategoryImage,
+                ),
+                "filename": image.s3_filename,
+                "description": image.description,
+            }
+            for image in images
+        ]
+
+        return {
+            "name": category_name,
+            "ID": cat_id,
+            # "description": "",
+            "category_images": category_images,
+        }
+
+    # category_id = graphene.String()
+    # category_name = graphene.String()
     images = graphene.List(of_type=graphene.String)
-    secret_place_extra_id = graphene.String()
+    # secret_place_extra_id = graphene.String()
     user_marked_id = graphene.String()
+
+    async def resolve_category_images(self, info):
+        session: AsyncSession = info.context.session
+        images = (
+            await session.execute(
+                sa.select(
+                    CategoryImage.id,
+                    CategoryImage.s3_filename,
+                    CategoryImage.description,
+                ).where(CategoryImage.category_id == self.category_id)
+            )
+        ).fetchall()
+        result = [
+            {
+                "presigned_url": await get_presigned_url(
+                    session=info.context.session,
+                    image_id=image.id,
+                    image_class=CategoryImage,
+                ),
+                "filename": image.s3_filename,
+                "description": image.description,
+            }
+            for image in images
+        ]
+        return result
 
     async def resolve_user_marked_id(self, info):
         session: AsyncSession = info.context.session
@@ -81,13 +165,7 @@ class PlaceType(SQLAlchemyObjectType):
         )
         return encode_gql_id("UserType", user_id)
 
-    async def resolve_category(self, info):
-        session: AsyncSession = info.context.session
-        return (
-            await session.execute(
-                sa.select(Category.name).where(Category.id == self.category_id)
-            )
-        ).fetchone()
+    # async def resolve_category(self, info):
 
     # TODO Refactor this piece of shit
     async def resolve_images(self, info):
@@ -179,5 +257,5 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
-    def resolve_category_id(self, info):
-        return encode_gql_id(self.__class__.__name__, self.category_id)
+    # def resolve_category_id(self, info):
+    #     return encode_gql_id(self.__class__.__name__, self.category_id)
