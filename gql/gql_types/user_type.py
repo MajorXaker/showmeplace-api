@@ -40,12 +40,14 @@ class UserType(SQLAlchemyObjectType):
                 sa.select(UserImage.id).where(UserImage.user_id == self.id)
             )
         ).fetchone()
-        result = await get_presigned_url(
-            session=info.context.session,
-            image_id=image.id,
-            image_class=UserImage,
-        )
-        return result
+        if image:
+            result = await get_presigned_url(
+                session=info.context.session,
+                image_id=image.id,
+                image_class=UserImage,
+            )
+            return result
+        return ""
 
         # TODO namee ilike
         # todo user - marked place

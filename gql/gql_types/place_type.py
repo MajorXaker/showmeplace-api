@@ -105,18 +105,20 @@ class PlaceType(SQLAlchemyObjectType):
                 ).where(CategoryImage.category_id == raw_cat_id)
             )
         ).fetchall()
-        category_images = [
-            {
-                "presigned_url": await get_presigned_url(
-                    session=info.context.session,
-                    image_id=image.id,
-                    image_class=CategoryImage,
-                ),
-                "filename": image.s3_filename,
-                "description": image.description,
-            }
-            for image in images
-        ]
+        category_images = []
+        if images:
+            category_images = [
+                {
+                    "presigned_url": await get_presigned_url(
+                        session=info.context.session,
+                        image_id=image.id,
+                        image_class=CategoryImage,
+                    ),
+                    "filename": image.s3_filename,
+                    "description": image.description,
+                }
+                for image in images
+            ]
 
         return {
             "name": category_name,
@@ -131,30 +133,30 @@ class PlaceType(SQLAlchemyObjectType):
     # secret_place_extra_id = graphene.String()
     user_marked_id = graphene.String()
 
-    async def resolve_category_images(self, info):
-        session: AsyncSession = info.context.session
-        images = (
-            await session.execute(
-                sa.select(
-                    CategoryImage.id,
-                    CategoryImage.s3_filename,
-                    CategoryImage.description,
-                ).where(CategoryImage.category_id == self.category_id)
-            )
-        ).fetchall()
-        result = [
-            {
-                "presigned_url": await get_presigned_url(
-                    session=info.context.session,
-                    image_id=image.id,
-                    image_class=CategoryImage,
-                ),
-                "filename": image.s3_filename,
-                "description": image.description,
-            }
-            for image in images
-        ]
-        return result
+    # async def resolve_category_images(self, info):
+    #     session: AsyncSession = info.context.session
+    #     images = (
+    #         await session.execute(
+    #             sa.select(
+    #                 CategoryImage.id,
+    #                 CategoryImage.s3_filename,
+    #                 CategoryImage.description,
+    #             ).where(CategoryImage.category_id == self.category_id)
+    #         )
+    #     ).fetchall()
+    #     result = [
+    #         {
+    #             "presigned_url": await get_presigned_url(
+    #                 session=info.context.session,
+    #                 image_id=image.id,
+    #                 image_class=CategoryImage,
+    #             ),
+    #             "filename": image.s3_filename,
+    #             "description": image.description,
+    #         }
+    #         for image in images
+    #     ]
+    #     return result
 
     async def resolve_user_marked_id(self, info):
         session: AsyncSession = info.context.session
