@@ -37,13 +37,13 @@ class MutationAddUserImage(SQLAlchemyCreateMutation):
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )
         user__id = decode_gql_id(user__id)[1]
-        uploaded_images = await add_imagetype_routine(
+        uploaded_images = (await add_imagetype_routine(
             extension=file_extension,
             image__b64s=image__b64s,
             entity_id=user__id,
             session=session,
             image_class=UserImage,  # WARNING might not work!
-        )[:1]
+        ))[:1]
         await session.execute(
             sa.delete(UserImage).where(
                 sa.and_(
