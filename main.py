@@ -32,7 +32,7 @@ app.add_route(
 if __name__ == "__main__":
     print("starting")
     uvicorn.run(
-        app,
+        "__main__:app",
         host="0.0.0.0",
         port=8000,
         log_level="info",
