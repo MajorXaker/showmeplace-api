@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 import uvicorn
 from alchql.app import SessionQLApp
+from alchql.middlewares import LogMiddleware
 from fastapi import FastAPI
 
 from gql.schema import schema
@@ -8,6 +9,9 @@ from utils.db import async_engine
 
 app = FastAPI()
 
+middleware = [
+    LogMiddleware(),
+]
 
 @app.on_event("startup")
 async def connect_database_engine() -> None:
@@ -19,7 +23,7 @@ app.add_route(
     "/graphql",
     SessionQLApp(
         schema=schema,
-        # middleware=middleware,
+        middleware=middleware,
         # extensions=extensions,
         engine=async_engine,
     ),
@@ -32,6 +36,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         log_level="info",
-        reload=False,
+        reload=True,
         log_config=None,
     )
