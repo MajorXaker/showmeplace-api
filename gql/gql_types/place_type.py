@@ -2,9 +2,8 @@ import math
 
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType, gql_types
+from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN
-from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
 from graphene import ObjectType, String
@@ -12,21 +11,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id, encode_gql_id
-from gql.gql_types.category_type import CategoryType, CatImage
-from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
-from gql.gql_types.select_image_type import PlaceImageType
+from gql.gql_types.category_type import CatImage
 from models.db_models import (
     Place,
-    SecretPlaceExtra,
     M2MUserPlaceMarked,
     M2MUserPlaceFavourite,
     PlaceImage,
-    User,
     Category,
     CategoryImage,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
-from utils.api_auth import check_auth, AuthChecker
+from utils.api_auth import AuthChecker
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query

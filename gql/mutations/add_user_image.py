@@ -32,7 +32,7 @@ class MutationAddUserImage(SQLAlchemyCreateMutation):
     @classmethod
     async def mutate(cls, root, info, user__id: str, image__b64s: list):
         session: AsyncSession = info.context.session
-        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
+        user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
         if len(image__b64s) > 1:
             raise ValueError("User images cannot be more than 1")
         file_extension = (

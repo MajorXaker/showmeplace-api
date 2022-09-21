@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from gql.gql_id import decode_gql_id
 from models.db_models import User, UserImage, M2MUserFollowingUser
-from utils.api_auth import check_auth, AuthChecker
+from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
 
 

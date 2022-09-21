@@ -14,13 +14,9 @@ from gql.mutations import (
     MutationRemoveVisitedPlace,
     MutationUpdatePlace,
     MutationUpdateUser,
-    MutationAddCategory,
-    MutationUpdateCategory,
-    MutationRemoveCategory,
     MutationRemovePlace,
     MutationAddPlaceImage,
     MutationAddUserImage,
-    MutationAddCategoryImage,
 )
 
 

@@ -46,10 +46,12 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
             | {"user__id": graphene.ID()}
         )
 
+
+
     @classmethod
     async def mutate(cls, root, info, value: dict):
         session: AsyncSession = info.context.session
-        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
+        user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
 
         result = await super().mutate(root, info, value)
         await session.execute(

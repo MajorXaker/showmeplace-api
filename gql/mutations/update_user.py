@@ -18,7 +18,7 @@ class MutationUpdateUser(SQLAlchemyUpdateMutation):
 
     @classmethod
     async def mutate(cls, root, info, value: dict):
-        user_id = AuthChecker.check_auth_mutation(
+        user_id = await AuthChecker.check_auth_mutation(
             session=info.context.session, info=info
         )
         result = await super().mutate(root, info, value)

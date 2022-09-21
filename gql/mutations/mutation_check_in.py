@@ -31,7 +31,7 @@ class MutationCheckIn(graphene.Mutation):
         user__longitude: float,
     ):
         session: AsyncSession = info.context.session
-        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
+        user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
 
         lat = info.variable_values["userLatitude"]
         long = info.variable_values["userLongitude"]
