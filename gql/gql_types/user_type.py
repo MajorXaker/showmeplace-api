@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from gql.gql_id import decode_gql_id
 from models.db_models import User, UserImage, M2MUserFollowingUser
-from utils.api_auth import check_auth
+from utils.api_auth import check_auth, AuthChecker
 from utils.s3_object_tools import get_presigned_url
 
 
@@ -66,7 +66,7 @@ class UserType(SQLAlchemyObjectType):
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
-        check_auth(info)
+        asker_id = AuthChecker.check_auth_request(info)
 
         if "userFollowerOf" in info.variable_values:
             user = decode_gql_id(info.variable_values["userVisited"])[1]

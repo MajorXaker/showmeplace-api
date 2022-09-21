@@ -7,6 +7,7 @@ from graphene import String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.db_models.images import PlaceImage, UserImage, CategoryImage
+from utils.api_auth import AuthChecker
 from utils.config import settings as s
 from utils.hex_tools import encode_md5
 from utils.s3_object_tools import (
@@ -31,6 +32,7 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
     @classmethod
     async def mutate(cls, root, info, place__id: str, image__b64s: list):
         session: AsyncSession = info.context.session
+        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
         file_extension = (
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )

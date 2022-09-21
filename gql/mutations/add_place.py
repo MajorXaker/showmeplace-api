@@ -4,6 +4,7 @@ from alchql.get_input_type import get_input_fields
 from sqlalchemy.ext.asyncio import AsyncSession
 import sqlalchemy as sa
 from models.db_models import User, Place, SecretPlaceExtra, M2MUserPlaceMarked
+from utils.api_auth import AuthChecker
 from ..gql_id import decode_gql_id
 from ..gql_types.place_type import PlaceType
 from ..gql_types.user_type import UserType
@@ -42,19 +43,14 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
                     SecretPlaceExtra.extra_suggestion.key,
                 ],
             )
-            | {"user__id": graphene.ID(required=True)}
+            | {"user__id": graphene.ID()}
         )
-        # get_input_fields(
-        #     model=User,
-        #     only_fields=[User.id.key],
-        #     required_fields=[User.id.key]
-        #
-        # )
 
     @classmethod
     async def mutate(cls, root, info, value: dict):
         session: AsyncSession = info.context.session
-        user_id = decode_gql_id(value.pop("user__id"))[1]
+        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
+
         result = await super().mutate(root, info, value)
         await session.execute(
             sa.insert(M2MUserPlaceMarked).values(

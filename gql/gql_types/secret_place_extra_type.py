@@ -1,14 +1,9 @@
-import graphene
 from alchql import SQLAlchemyObjectType
-from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
+from alchql.consts import OP_EQ
 from alchql.node import AsyncNode
-import sqlalchemy as sa
 
-# from gql.utils.gql_id import encode_gql_id
-from alchql.utils import FilterItem
-
-from models.db_models import User, Place, SecretPlaceExtra
-from models.db_models.m2m.m2m_user_place_marked import M2MUserPlaceMarked
+from models.db_models import SecretPlaceExtra
+from utils.api_auth import AuthChecker
 
 
 class SecretPlaceExtraType(SQLAlchemyObjectType):
@@ -27,3 +22,8 @@ class SecretPlaceExtraType(SQLAlchemyObjectType):
             SecretPlaceExtra.music_suggestion.key,
             SecretPlaceExtra.extra_suggestion.key,
         ]
+
+    @classmethod
+    async def set_select_from(cls, info, q, query_fields):
+        asker_id = AuthChecker.check_auth_request(info)
+        return q

@@ -4,6 +4,7 @@ import graphene
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from utils.api_auth import AuthChecker
 from utils.config import settings as s
 from models.db_models import Place
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
@@ -30,6 +31,7 @@ class MutationCheckIn(graphene.Mutation):
         user__longitude: float,
     ):
         session: AsyncSession = info.context.session
+        user_id = AuthChecker.check_auth_mutation(session=session, info=info)
 
         lat = info.variable_values["userLatitude"]
         long = info.variable_values["userLongitude"]

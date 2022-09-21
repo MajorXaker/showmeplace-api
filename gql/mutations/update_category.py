@@ -1,7 +1,8 @@
 from alchql import SQLAlchemyUpdateMutation
 from alchql.get_input_type import get_input_fields
 
-from models.db_models import User, Category
+from models.db_models import Category
+from utils.api_auth import AuthChecker
 from ..gql_types.category_type import CategoryType
 
 
@@ -17,10 +18,11 @@ class MutationUpdateCategory(SQLAlchemyUpdateMutation):
             required_fields=[Category.name.key],
         )
 
-    # @classmethod
-    # async def mutate(cls, root, info, value: dict):
-    #
-    #     result = await super().mutate(root, info, value)
-    #
-    #
-    #     return result
+    @classmethod
+    async def mutate(cls, root, info, value: dict):
+        user_id = AuthChecker.check_auth_mutation(
+            session=info.context.session, info=info
+        )
+        result = await super().mutate(root, info, value)
+
+        return result
