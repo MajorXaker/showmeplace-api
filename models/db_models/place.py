@@ -39,26 +39,3 @@ class Place(Model, RecordTimestampFields):
             return val - 90
         if coord_type == "longitude":
             return val - 180
-
-    # user_marked = relationship(
-    #     "User",
-    #     secondary="m2m_user_place_marked",
-    #     # viewonly=True,
-    #     # backref="Place"
-    # )
-
-    # user_visited = relationship(
-    #     "User",
-    #     secondary="M2MUserPlaceVisited",
-    #     viewonly=True,
-    # )
-    # user_favourited = relationship(
-    #     "User",
-    #     secondary="M2MUserPlaceFavourite",
-    #     viewonly=True,
-    # )
-    # user_secret_place_opened = relationship(
-    #     "User",
-    #     secondary="M2MUserSecretPlace",
-    #     viewonly=True,
-    # )

@@ -22,37 +22,3 @@ class User(Model, RecordTimestampFields):
     external_id_type: IdentificationEnum = sa.Column(
         sa.Text, nullable=False, server_default="COGNITO"
     )
-
-    # place_marked = relationship(
-    #     "Place",
-    #     secondary="m2m_user_place_marked",
-    #     backref="user.id",
-    #     viewonly=True,
-    # )
-    # place_favourited = relationship(
-    #     "Place",
-    #     secondary=M2MUserPlaceFavourite,
-    #     viewonly=True,
-    # )
-    # place_visited = relationship(
-    #     "Place",
-    #     secondary=M2MUserPlaceVisited,
-    #     viewonly=True,
-    # )
-    # secret_place_opened = relationship(
-    #     "Place",
-    #     secondary=M2MUserOpenedSecretPlace,
-    #     viewonly=True,
-    # )
-    # user_leading = relationship(
-    #     "User",
-    #     secondary=M2MUserFollowingUser,
-    #     viewonly=True,
-    #     remote_side="lead_id"
-    # )
-    # user_following = relationship(
-    #     "User",
-    #     secondary=M2MUserFollowingUser,
-    #     viewonly=True,
-    #     remote_side="follower_id"
-    # )

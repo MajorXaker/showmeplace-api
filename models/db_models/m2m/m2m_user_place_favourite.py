@@ -3,33 +3,6 @@ import sqlalchemy as sa
 from models.base_engine import Model, RecordTimestampFields
 
 
-# from models.db_models.place import Place
-# from models.db_models.user import User
-
-
-# M2MUserPlaceFavourite = sa.Table(
-#     "m2m_user_place_favourite",
-#     Model.metadata,
-#     sa.Column("external_id", sa.Integer, nullable=False, index=True),
-#     sa.Column("place_id", sa.Integer, nullable=False, index=True),
-#     sa.PrimaryKeyConstraint(
-#         "external_id", "place_id", name="m2m_user_place_favourite_pkey"
-#     ),
-#     sa.ForeignKeyConstraint(
-#         ("external_id",),
-#         ["user.id"],
-#         onupdate="CASCADE",
-#         ondelete="CASCADE",
-#     ),
-#     sa.ForeignKeyConstraint(
-#         ("place_id",),
-#         ["place.id"],
-#         onupdate="CASCADE",
-#         ondelete="CASCADE",
-#     ),
-# )
-
-#
 class M2MUserPlaceFavourite(Model, RecordTimestampFields):
     __tablename__ = "m2m_user_place_favourite"
 
