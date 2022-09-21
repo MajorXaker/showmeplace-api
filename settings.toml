@@ -20,6 +20,8 @@
 
     SERVER_RELOAD_MODE = true
 
+    AUTH_HEADER_NAME = "user_auth" # not used atm -> bytes(private_key, "UTF-8")
+
 
 
 

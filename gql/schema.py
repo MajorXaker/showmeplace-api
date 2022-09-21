@@ -35,15 +35,15 @@ class Mutation(graphene.ObjectType):
     add_user = MutationAddUser.Field()
     update_user = MutationUpdateUser.Field()
 
-    add_category = MutationAddCategory.Field(
-        deprecation_reason="Service method. Do not use on production"
-    )
-    update_category = MutationUpdateCategory.Field(
-        deprecation_reason="Service method. Do not use on production"
-    )
-    remove_category = MutationRemoveCategory.Field(
-        deprecation_reason="Service method. Do not use on production"
-    )
+    # add_category = MutationAddCategory.Field(
+    #     deprecation_reason="Service method. Do not use on production"
+    # )
+    # update_category = MutationUpdateCategory.Field(
+    #     deprecation_reason="Service method. Do not use on production"
+    # )
+    # remove_category = MutationRemoveCategory.Field(
+    #     deprecation_reason="Service method. Do not use on production"
+    # )
 
     add_place = MutationAddPlace.Field()
     update_place = MutationUpdatePlace.Field()
@@ -62,9 +62,9 @@ class Mutation(graphene.ObjectType):
 
     add_place_image = MutationAddPlaceImage.Field()
     add_user_image = MutationAddUserImage.Field()
-    add_category_image = MutationAddCategoryImage.Field(
-        deprecation_reason="Service method. Do not use on production"
-    )
+    # add_category_image = MutationAddCategoryImage.Field(
+    #     deprecation_reason="Service method. Do not use on production"
+    # )
 
     check_in_place = MutationCheckIn.Field()
 
