@@ -250,8 +250,6 @@ class PlaceType(SQLAlchemyObjectType):
                 )
             )
 
-        q = await cls.user_marked_logic(info, q)
-
         if "userFavourite" in info.variable_values:
             user_favourite = decode_gql_id(info.variable_values["userFavourite"])[1]
             q = q.outerjoin_from(

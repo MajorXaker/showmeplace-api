@@ -39,7 +39,6 @@ class CategoryType(SQLAlchemyObjectType):
                 ).where(CategoryImage.category_id == self.id)
             )
         ).fetchall()
-        # result = []
         result = [
             {
                 "presigned_url": await get_presigned_url(

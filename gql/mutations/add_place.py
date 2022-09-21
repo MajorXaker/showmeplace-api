@@ -1,13 +1,12 @@
-import graphene
+from alchql import SQLAlchemyCreateMutation
+import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 from sqlalchemy.ext.asyncio import AsyncSession
-import sqlalchemy as sa
-from models.db_models import User, Place, SecretPlaceExtra, M2MUserPlaceMarked
+
+from models.db_models import Place, SecretPlaceExtra, M2MUserPlaceMarked
 from utils.api_auth import AuthChecker
-from ..gql_id import decode_gql_id
 from ..gql_types.place_type import PlaceType
-from ..gql_types.user_type import UserType
 
 
 class MutationAddPlace(SQLAlchemyCreateMutation):
