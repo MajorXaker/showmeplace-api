@@ -3,9 +3,11 @@ import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN, OP_ILIKE
 from alchql.node import AsyncNode
+from alchql.utils import FilterItem
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.db_models import User, UserImage
+from gql.gql_id import decode_gql_id
+from models.db_models import User, UserImage, M2MUserFollowingUser
 from utils.s3_object_tools import get_presigned_url
 
 
@@ -17,6 +19,8 @@ class UserType(SQLAlchemyObjectType):
             User.id: [OP_EQ, OP_IN],
             User.external_id: [OP_EQ],
             User.name: [OP_ILIKE],
+            "user_follower_of": FilterItem(field_type=graphene.String, filter_func=None),
+            "user_followers": FilterItem(field_type=graphene.String, filter_func=None),
             # Place.user_marked: [OP_EQ]
             # M2MUserFollowingUser.lead_id.key: [OP_EQ],
             # M2MUserFollowingUser.follower_id.key: [OP_EQ],
@@ -56,3 +60,22 @@ class UserType(SQLAlchemyObjectType):
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
+
+    @classmethod
+    async def set_select_from(cls, info, q, query_fields):
+        if "userFollowerOf" in info.variable_values:
+            user = decode_gql_id(info.variable_values["userVisited"])[1]
+            q = q.outerjoin_from(
+                User,
+                M2MUserFollowingUser,
+                onclause=(User.id == M2MUserFollowingUser.lead_id),
+            ).where(M2MUserFollowingUser.follower_id == user)
+        if "userFollowers" in info.variable_values:
+            user = decode_gql_id(info.variable_values["userVisited"])[1]
+            q = q.outerjoin_from(
+                User,
+                M2MUserFollowingUser,
+                onclause=(User.id == M2MUserFollowingUser.follower_id),
+            ).where(M2MUserFollowingUser.lead_id == user)
+
+        return q

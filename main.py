@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from gql.schema import schema
 from utils.db import async_engine
+from utils.config import settings as s
 
 app = FastAPI()
 
@@ -36,6 +37,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         log_level="info",
-        reload=True,
+        reload=s.SERVER_RELOAD_MODE,
         log_config=None,
     )

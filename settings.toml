@@ -18,6 +18,8 @@
 
     CHECK_IN_DISTANCE = 50 # in meters
 
+    SERVER_RELOAD_MODE = true
+
 
 
 
