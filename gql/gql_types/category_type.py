@@ -7,6 +7,7 @@ from graphene import ObjectType, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.db_models import Category, CategoryImage
+from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
 
 
@@ -38,7 +39,6 @@ class CategoryType(SQLAlchemyObjectType):
                 ).where(CategoryImage.category_id == self.id)
             )
         ).fetchall()
-        # result = []
         result = [
             {
                 "presigned_url": await get_presigned_url(
@@ -52,3 +52,8 @@ class CategoryType(SQLAlchemyObjectType):
             for image in images
         ]
         return result
+
+    @classmethod
+    async def set_select_from(cls, info, q, query_fields):
+        asker_id = AuthChecker.check_auth_request(info)
+        return q

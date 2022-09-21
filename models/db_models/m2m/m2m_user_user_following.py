@@ -3,33 +3,6 @@ import sqlalchemy as sa
 from models.base_engine import Model, RecordTimestampFields
 
 
-# from models.db_models.user import User
-
-
-# M2MUserFollowingUser = sa.Table(
-#     "m2m_user_user_following_user",
-#     Model.metadata,
-#     sa.Column("follower_id", sa.Integer, nullable=False, index=True),
-#     sa.Column("lead_id", sa.Integer, nullable=False, index=True),
-#     sa.PrimaryKeyConstraint(
-#         "follower_id", "lead_id", name="m2m_user_user_following_user"
-#     ),
-#     sa.ForeignKeyConstraint(
-#         ("follower_id",),
-#         ["user.id"],
-#         onupdate="CASCADE",
-#         ondelete="CASCADE",
-#     ),
-#     sa.ForeignKeyConstraint(
-#         ("lead_id",),
-#         ["user.id"],
-#         onupdate="CASCADE",
-#         ondelete="CASCADE",
-#     ),
-#
-# )
-
-
 class M2MUserFollowingUser(Model, RecordTimestampFields):
     __tablename__ = "m2m_user_user_following_user"
 

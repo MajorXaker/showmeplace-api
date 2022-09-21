@@ -3,6 +3,7 @@ from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
 
 from models.db_models import PlaceImage, CategoryImage, UserImage
+from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
 
 
@@ -79,3 +80,8 @@ class UserImageType(SQLAlchemyObjectType):
         return await get_presigned_url(
             session=info.context.session, image_id=self.id, image_class=UserImage
         )
+
+    @classmethod
+    async def set_select_from(cls, info, q, query_fields):
+        asker_id = AuthChecker.check_auth_request(info)
+        return q

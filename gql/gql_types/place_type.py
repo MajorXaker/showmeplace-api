@@ -2,9 +2,8 @@ import math
 
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType, gql_types
+from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN
-from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
 from graphene import ObjectType, String
@@ -12,20 +11,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id, encode_gql_id
-from gql.gql_types.category_type import CategoryType, CatImage
-from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
-from gql.gql_types.select_image_type import PlaceImageType
+from gql.gql_types.category_type import CatImage
 from models.db_models import (
     Place,
-    SecretPlaceExtra,
     M2MUserPlaceMarked,
     M2MUserPlaceFavourite,
     PlaceImage,
-    User,
     Category,
     CategoryImage,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from utils.api_auth import AuthChecker
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query
@@ -47,6 +43,9 @@ class PlaceType(SQLAlchemyObjectType):
             "latitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
             "longitude__from": FilterItem(field_type=graphene.Float, filter_func=None),
             "distance__from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "include__my__places": FilterItem(
+                field_type=graphene.Boolean, filter_func=None
+            ),
             "user__marked": FilterItem(field_type=graphene.String, filter_func=None),
             "user__favourite": FilterItem(field_type=graphene.String, filter_func=None),
             "user__visited": FilterItem(field_type=graphene.String, filter_func=None),
@@ -221,6 +220,18 @@ class PlaceType(SQLAlchemyObjectType):
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
+        asker_id = AuthChecker.check_auth_request(info)
+
+        user_to_filter_place = decode_gql_id(info.variable_values.get("userMarked"))[1]
+        include_my_places = info.variable_values.get("includeMyPlaces", False)
+
+        q = cls.user_marked_logic(
+            query=q,
+            asker_id=asker_id,
+            user_to_filter_place=user_to_filter_place,
+            include_my_places=include_my_places,
+        )
+
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
                 raise ValueError("Invalid request. Coordinates must be present")
@@ -239,14 +250,6 @@ class PlaceType(SQLAlchemyObjectType):
                 )
             )
 
-        if "userMarked" in info.variable_values:
-            user_marked = decode_gql_id(info.variable_values["userMarked"])[1]
-            q = q.outerjoin_from(
-                Place,
-                M2MUserPlaceMarked,
-                onclause=(Place.id == M2MUserPlaceMarked.place_id),
-            ).where(M2MUserPlaceMarked.user_id == user_marked)
-
         if "userFavourite" in info.variable_values:
             user_favourite = decode_gql_id(info.variable_values["userFavourite"])[1]
             q = q.outerjoin_from(
@@ -264,6 +267,25 @@ class PlaceType(SQLAlchemyObjectType):
             ).where(M2MUserPlaceVisited.user_id == user_visited)
 
         return q
+
+    @staticmethod
+    def user_marked_logic(
+        query,
+        asker_id: int,
+        user_to_filter_place: int | None = None,
+        include_my_places: bool = False,
+    ):
+
+        query = query.outerjoin_from(
+            Place,
+            M2MUserPlaceMarked,
+            onclause=(Place.id == M2MUserPlaceMarked.place_id),
+        )
+        if user_to_filter_place:
+            query = query.where(M2MUserPlaceMarked.user_id == user_to_filter_place)
+        if include_my_places:
+            query = query.where(M2MUserPlaceMarked.user_id == asker_id)
+        return query
 
     # def resolve_category_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.category_id)
