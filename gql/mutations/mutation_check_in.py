@@ -25,7 +25,6 @@ class MutationCheckIn(graphene.Mutation):
         cls,
         root,
         info,
-        user__checking_in__id: str,
         check_in__place__id: str,
         user__latitude: float,
         user__longitude: float,
@@ -42,7 +41,7 @@ class MutationCheckIn(graphene.Mutation):
         delta_longitude = dist / longitude_1_degree_length
 
         place_id = decode_gql_id(check_in__place__id)[1]
-        user_id = decode_gql_id(user__checking_in__id)[1]
+        # user_id = decode_gql_id(user__checking_in__id)[1]
         is_been_here = await session.execute(
             sa.select(M2MUserPlaceVisited.user_id).where(
                 sa.and_(
