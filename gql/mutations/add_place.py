@@ -1,12 +1,19 @@
+import graphene
 from alchql import SQLAlchemyCreateMutation
 import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
+from graphene import ObjectType
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.db_models import Place, SecretPlaceExtra, M2MUserPlaceMarked
 from utils.api_auth import AuthChecker
 from ..gql_types.place_type import PlaceType
+from ..service_types.coin_change_object import CoinChange
+
+# class PlaceAddition(ObjectType):
+#     added_place = graphene.Field(type_=PlaceType)
+#     coin_change = graphene.Field(type_=CoinChange)
 
 
 class MutationAddPlace(SQLAlchemyCreateMutation):
@@ -41,11 +48,17 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
             ],
         )
 
+    coin_change = graphene.Field(type_=CoinChange)
+
+
     @classmethod
-    async def mutate(cls, root, info, value: dict):
+    async def mutate(cls, root, info, value: dict, **kwargs):
         session: AsyncSession = info.context.session
         user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
-
+        # value["coin_change"] = {
+        #     "change_amount": f"- 50",
+        #     "coins": 2250,
+        # }
         result = await super().mutate(root, info, value)
         await session.execute(
             sa.insert(M2MUserPlaceMarked).values(

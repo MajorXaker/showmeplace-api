@@ -50,14 +50,23 @@ class MutationAddUser(SQLAlchemyCreateMutation):
                 just_added_to_base=False,
                 internal_id=internal_id,
             )
-        await session.execute(
-            sa.insert(User).values(
-                {
-                    User.name: value["name"],
-                    User.external_id: value["external_id"],
-                    User.external_id_type: value["external_id_type"],
-                }
+        new_user_id = (
+            await session.execute(
+                sa.insert(User)
+                .values(
+                    {
+                        User.name: value["name"],
+                        User.external_id: value["external_id"],
+                        User.external_id_type: value["external_id_type"],
+                        User.coins: 0,
+                        User.level: 0,
+                    }
+                )
+                .returning(User.id)
             )
-        )
+        ).fetchone()
+        internal_id = encode_gql_id("UserType", new_user_id.id)
 
-        return MutationAddUser(already_registered=False, just_added_to_base=True)
+        return MutationAddUser(
+            already_registered=False, just_added_to_base=True, internal_id=internal_id
+        )

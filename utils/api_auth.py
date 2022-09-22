@@ -23,8 +23,8 @@ class AuthChecker:
     async def check_auth_mutation(cls, session: AsyncSession, info):
         user_id = cls.check_auth_request(info)
         is_user_in_db = (
-            await session.execute(sa.select(User.id).where(User.id == id))
+            await session.execute(sa.select(User.id).where(User.id == user_id))
         ).fetchone()
         if not is_user_in_db:
             cls.NotAuthorisedException("Unathorised connection")
-        return user_id.id
+        return user_id
