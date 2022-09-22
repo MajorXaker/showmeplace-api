@@ -18,6 +18,13 @@
 
     CHECK_IN_DISTANCE = 50 # in meters
 
+    SERVER_RELOAD_MODE = true
+
+    AUTH_HEADER_NAME = "user_auth" # not used atm -> bytes(private_key, "UTF-8")
+    APP_URL = "http://127.0.0.1:8000"
+
+    META_APP_SECRET = '9f160b93e0dc51231014532e3f1b68c3'
+
 
 
 
