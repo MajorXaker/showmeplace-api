@@ -24,18 +24,13 @@ class Place(Model, RecordTimestampFields):
 
     is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
     active_due_date = sa.Column(sa.DateTime)
+    owner_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    # TODO SECRET PLACE EXTRA id here
+
     # todo place merge
-
-    @staticmethod
-    def to_db(coord_type: str, val: float):
-        if coord_type == "latitude":
-            return val + 90
-        if coord_type == "longitude":
-            return val + 180
-
-    @staticmethod
-    def from_db(coord_type: str, val: float):
-        if coord_type == "latitude":
-            return val - 90
-        if coord_type == "longitude":
-            return val - 180
+    # merge would be as a new entity - grouped place

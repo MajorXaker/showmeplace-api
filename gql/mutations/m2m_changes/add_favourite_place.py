@@ -20,10 +20,10 @@ class MutationAddFavouritePlace(SQLAlchemyCreateMutation):
             required_fields=[Place.id.key],
         )
 
-    # @classmethod
-    # async def mutate(cls, root, info, value: dict):
-    #
-    #     result = await super().mutate(root, info, value)
-    #
-    #
-    #     return result
+    @classmethod
+    async def mutate(cls, root, info, value: dict):
+
+        result = await super().mutate(root, info, value)
+
+
+        return result
