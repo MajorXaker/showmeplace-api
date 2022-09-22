@@ -22,6 +22,7 @@ yarl = "*"
 unidecode = "*"
 pillow = "*"
 graphene-federation3 = "*"
+facepy = "*"
 
 [dev-packages]
 

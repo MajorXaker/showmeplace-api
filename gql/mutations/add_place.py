@@ -16,6 +16,41 @@ from ..service_types.coin_change_object import CoinChange
 #     coin_change = graphene.Field(type_=CoinChange)
 
 
+# class PlaceDataInput(graphene.InputObjectType):
+#     name = graphene.String(required=True)
+#     category = graphene.String(required=True)
+#     coordinate_longitude = graphene.Float(required=True)
+#     coordinate_latitude = graphene.Float(required=True)
+#
+#     address = graphene.String()
+#     description = graphene.String()
+#
+#
+# class SecretPlaceExtraInput(graphene.InputObjectType):
+#     food_suggestion = graphene.String()
+#     time_suggestion = graphene.String()
+#     company_suggestion = graphene.String()
+#     music_suggestion = graphene.String()
+#     extra_suggestion = graphene.String()
+#
+#
+# class MutationAddPlace(graphene.Mutation):
+#     class Arguments:
+#         place_data = PlaceDataInput()
+#         secret_place_extra = SecretPlaceExtraInput()
+#
+#     # new_place = PlaceType()
+#     coin_change = CoinChange()
+#
+#     @staticmethod
+#     def mutate(args, info, new_place):
+#         coins = {
+#             "change_amount": f"+100",
+#             "coins": 150,
+#         }
+#         return MutationAddPlace(coin_change=coins)
+
+
 class MutationAddPlace(SQLAlchemyCreateMutation):
     class Meta:
         model = Place
@@ -49,7 +84,6 @@ class MutationAddPlace(SQLAlchemyCreateMutation):
         )
 
     coin_change = graphene.Field(type_=CoinChange)
-
 
     @classmethod
     async def mutate(cls, root, info, value: dict, **kwargs):

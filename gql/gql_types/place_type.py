@@ -221,8 +221,9 @@ class PlaceType(SQLAlchemyObjectType):
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
         asker_id = AuthChecker.check_auth_request(info)
-
-        user_to_filter_place = decode_gql_id(info.variable_values.get("userMarked"))[1]
+        user_to_filter_place = info.variable_values.get("userMarked")
+        if user_to_filter_place:
+            user_to_filter_place = decode_gql_id(user_to_filter_place)[1]
         include_my_places = info.variable_values.get("includeMyPlaces", False)
 
         q = cls.user_marked_logic(
