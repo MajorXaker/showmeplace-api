@@ -65,7 +65,8 @@ class ActionsEconomy(Model, RecordTimestampFields):
     async def verify_possibility(
         session: AsyncSession,
         user_id: int,
-        action_names: list | None = None,  # if there is no action names - then check all
+        action_names: list
+        | None = None,  # if there is no action names - then check all
     ):
         actions = (
             await session.execute(
@@ -76,9 +77,11 @@ class ActionsEconomy(Model, RecordTimestampFields):
                 )
             )
         ).fetchall()
-        user_wallet = (await session.execute(
-            sa.select(User.coins).where(User.id == user_id)
-        )).fetchone().coins
+        user_wallet = (
+            (await session.execute(sa.select(User.coins).where(User.id == user_id)))
+            .fetchone()
+            .coins
+        )
         if not action_names:
             action_names = [action.action_name for action in actions]
         always_true = {

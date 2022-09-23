@@ -14,6 +14,7 @@ middleware = [
     LogMiddleware(),
 ]
 
+
 @app.on_event("startup")
 async def connect_database_engine() -> None:
     async with async_engine.connect() as conn:

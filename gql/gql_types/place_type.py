@@ -180,10 +180,14 @@ class PlaceType(SQLAlchemyObjectType):
     async def resolve_is_decaying(self, info):
         session: AsyncSession = info.context.session
         decay = (
-            await session.execute(
-                sa.select(Place.active_due_date).where(Place.id == self.id)
+            (
+                await session.execute(
+                    sa.select(Place.active_due_date).where(Place.id == self.id)
+                )
             )
-        ).fetchone().active_due_date
+            .fetchone()
+            .active_due_date
+        )
         if not decay:
             return False
         return True
@@ -191,13 +195,19 @@ class PlaceType(SQLAlchemyObjectType):
     async def resolve_has_decayed(self, info):
         session: AsyncSession = info.context.session
         decay = (
-            await session.execute(
-                sa.select(Place.active_due_date).where(Place.id == self.id)
+            (
+                await session.execute(
+                    sa.select(Place.active_due_date).where(Place.id == self.id)
+                )
             )
-        ).fetchone().active_due_date
+            .fetchone()
+            .active_due_date
+        )
         if not decay:
             return False
-        return (decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS) ) < datetime.datetime.now()
+        return (
+            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
+        ) < datetime.datetime.now()
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
