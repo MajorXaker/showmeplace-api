@@ -11,6 +11,10 @@ from models.db_models import User
 class MutationAddUser(SQLAlchemyCreateMutation):
     class Meta:
         model = User
+
+        # input_fields = {
+        #     "price_kind": graphene.Enum.from_enum(PriceKind)(),
+        #     "currency": graphene.Enum.from_enum(Currency)(),
         input_fields = get_input_fields(
             model=User,
             exclude_fields=[
