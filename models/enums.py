@@ -1,7 +1,7 @@
 from utils.enums_base import StrEnum
 
 
-class CoinChange(StrEnum):
+class CoinChangeEnum(StrEnum):
     INCREASE = "INCREASE"
     DECREASE = "DECREASE"
 

@@ -11,7 +11,6 @@ from gql.mutations import (
     MutationAddFollower,
     MutationAddVisitedPlace,
     MutationRemoveFavouritePlace,
-    MutationRemoveVisitedPlace,
     MutationUpdatePlace,
     MutationUpdateUser,
     MutationRemovePlace,
@@ -42,7 +41,7 @@ class Mutation(graphene.ObjectType):
     remove_follower = MutationRemoveFollower.Field()
 
     add_visited_place = MutationAddVisitedPlace.Field()
-    remove_visited_place = MutationRemoveVisitedPlace.Field()
+    # remove_visited_place = MutationRemoveVisitedPlace.Field(deprecation_reason="Unusable, might be deleted later")
 
     add_place_image = MutationAddPlaceImage.Field()
     add_user_image = MutationAddUserImage.Field()
