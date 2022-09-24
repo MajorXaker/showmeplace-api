@@ -15,7 +15,10 @@ class MutationUpdatePlace(SQLAlchemyUpdateMutation):
             Place.record_modified.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            Place.category_id.key
+            Place.category_id.key,
+            Place.owner_id.key,
+            Place.address.key,
+            Place.is_secret_place.key
         ]
 
     @classmethod

@@ -2,7 +2,7 @@ import graphene
 from alchql import SQLAlchemyCreateMutation
 from graphene import String
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import sqlalchemy as sa
 from models.db_models.images import PlaceImage
 from utils.api_auth import AuthChecker
 from utils.s3_object_tools import (
@@ -38,4 +38,15 @@ class MutationAddPlaceImage(SQLAlchemyCreateMutation):
             image_class=PlaceImage,  # WARNING might not work!
         )
         presigned_urls = [img["presigned_url"] for img in uploaded_images]
+        new_img_ids = [img["id"] for img in uploaded_images]
+        # all_images = (await session.execute(sa.select(PlaceImage.))).fetchall()
+        # for img_id in (img["id"] for img in uploaded_images):
+        await session.execute(
+            sa.delete(PlaceImage).where(
+                sa.and_(
+                    sa.not_(PlaceImage.id.in_(new_img_ids)),
+                    PlaceImage.place_id == place__id,
+                )
+            )
+        )
         return MutationAddPlaceImage(images__presigned__urls=presigned_urls)

@@ -1,6 +1,6 @@
 import datetime
 import math
-from utils.config import settings as s
+
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
@@ -15,14 +15,15 @@ from gql.gql_id import decode_gql_id, encode_gql_id
 from gql.gql_types.category_type import CatImage
 from models.db_models import (
     Place,
-    M2MUserPlaceMarked,
     M2MUserPlaceFavourite,
     PlaceImage,
     Category,
     CategoryImage,
+    M2MUserOpenedSecretPlace,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from utils.api_auth import AuthChecker
+from utils.config import settings as s
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query
@@ -83,7 +84,9 @@ class PlaceType(SQLAlchemyObjectType):
     has_decayed = graphene.Boolean()
     owner_id = gql_types.String(model_field=Place.owner_id)
 
-
+    has_visited = graphene.Boolean()
+    has_favourited = graphene.Boolean()
+    is_opened_for_user = graphene.Boolean()
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
@@ -276,3 +279,39 @@ class PlaceType(SQLAlchemyObjectType):
     async def resolve_owner_id(self, info):
         owner_id = encode_gql_id("UserType", self.owner_id)
         return owner_id
+
+    async def resolve_has_favourited(self, info):
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceFavourite).where(
+                    M2MUserPlaceFavourite.place_id == self.id,
+                    M2MUserPlaceFavourite.user_id == self.owner_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
+
+    async def resolve_has_visited(self, info):
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceVisited).where(
+                    M2MUserPlaceVisited.place_id == self.id,
+                    M2MUserPlaceVisited.user_id == self.owner_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
+
+    async def resolve_is_opened_for_user(self, info):
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserOpenedSecretPlace).where(
+                    M2MUserOpenedSecretPlace.place_id == self.id,
+                    M2MUserOpenedSecretPlace.user_id == self.owner_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
