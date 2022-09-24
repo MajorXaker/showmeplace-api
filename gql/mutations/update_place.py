@@ -18,11 +18,11 @@ class MutationUpdatePlace(SQLAlchemyUpdateMutation):
             Place.category_id.key,
             Place.owner_id.key,
             Place.address.key,
-            Place.is_secret_place.key
+            Place.is_secret_place.key,
         ]
 
     @classmethod
-    async def mutate(cls, root, info,  value: dict, id):
+    async def mutate(cls, root, info, value: dict, id):
         user_id = await AuthChecker.check_auth_mutation(
             session=info.context.session, info=info
         )
