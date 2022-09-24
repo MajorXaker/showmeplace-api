@@ -1,30 +1,15 @@
 import graphene
 from alchql.fields import FilterConnectionField
 
-from gql.gql_types import CategoryType, PlaceImageType, PlaceType, UserType
-from gql.mutations import (
-    MutationRemoveFollower,
-    MutationAddPlace,
-    MutationAddUser,
-    MutationCheckIn,
-    MutationAddFavouritePlace,
-    MutationAddFollower,
-    MutationAddVisitedPlace,
-    MutationRemoveFavouritePlace,
-    MutationUpdatePlace,
-    MutationUpdateUser,
-    MutationRemovePlace,
-    MutationAddPlaceImage,
-    MutationAddUserImage,
-)
-
+from gql.gql_types import *
+from gql.mutations import *
 
 class Query(graphene.ObjectType):
     select_users = FilterConnectionField(UserType)
     select_places = FilterConnectionField(PlaceType)
     select_category = FilterConnectionField(CategoryType)
-    select_place_images = FilterConnectionField(PlaceImageType)
-
+    select_place_images = FilterConnectionField(PlaceImageType, deprecation_reason="Won't be accessed directly")
+    select_actions = FilterConnectionField(ActionType)
 
 class Mutation(graphene.ObjectType):
     add_user = MutationAddUser.Field()
@@ -40,13 +25,15 @@ class Mutation(graphene.ObjectType):
     add_follower = MutationAddFollower.Field()
     remove_follower = MutationRemoveFollower.Field()
 
-    add_visited_place = MutationAddVisitedPlace.Field()
-    # remove_visited_place = MutationRemoveVisitedPlace.Field(deprecation_reason="Unusable, might be deleted later")
+    remove_visited_place = MutationRemoveVisitedPlace.Field(deprecation_reason="Service, will be deleted later")
 
     add_place_image = MutationAddPlaceImage.Field()
     add_user_image = MutationAddUserImage.Field()
 
     check_in_place = MutationCheckIn.Field()
+
+    open_secret_place = MutationOpenSecretPlace.Field()
+    close_secret_place = MutationCloseSecretPlace.Field(deprecation_reason="Service, will be deleted later")
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

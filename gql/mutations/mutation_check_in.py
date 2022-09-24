@@ -6,19 +6,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from models.db_models import Place
+from models.db_models import Place, ActionsEconomy, Category
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from ..gql_id import decode_gql_id
+from ..service_types.coin_change_object import CoinChange
 
 
 class MutationCheckIn(graphene.Mutation):
     class Arguments:
-        user__checking_in__id = graphene.String(required=True)
         check_in__place__id = graphene.String(required=True)
         user__latitude = graphene.Float(required=True)
         user__longitude = graphene.Float(required=True)
 
     is_success = graphene.Boolean()
+    coin_change = graphene.Field(type_=CoinChange)
 
     @classmethod
     async def mutate(
@@ -41,21 +42,26 @@ class MutationCheckIn(graphene.Mutation):
         delta_longitude = dist / longitude_1_degree_length
 
         place_id = decode_gql_id(check_in__place__id)[1]
-        # user_id = decode_gql_id(user__checking_in__id)[1]
-        is_been_here = await session.execute(
-            sa.select(M2MUserPlaceVisited.user_id).where(
-                sa.and_(
-                    M2MUserPlaceVisited.user_id == user_id,
-                    M2MUserPlaceVisited.place_id == place_id,
+        is_been_here = (
+            await session.execute(
+                sa.select(M2MUserPlaceVisited.user_id).where(
+                    sa.and_(
+                        M2MUserPlaceVisited.user_id == user_id,
+                        M2MUserPlaceVisited.place_id == place_id,
+                    )
                 )
             )
-        )
+        ).fetchone()
         if is_been_here:
             raise ValueError("User has already been here")
         # TODO go to try-except logic
         place = (
             await session.execute(
-                sa.select(Place.id).where(
+                sa.select(
+                    Place.id, Place.owner_id, Category.name.label("category_name")
+                )
+                .join(Category, Place.category_id == Category.id)
+                .where(
                     sa.and_(
                         Place.id == place_id,
                         sa.func.ABS(Place.coordinate_longitude - long)
@@ -76,6 +82,22 @@ class MutationCheckIn(graphene.Mutation):
                     ]
                 )
             )
-            return MutationCheckIn(is_success=True)
+            visited_place_action = (
+                "Have your secret place visited"
+                if place.category_name == s.SECRET_PLACE_NAME
+                else "Have your place visited"
+            )
+            # toss a coin to place owner
+            await ActionsEconomy.execute(
+                session=session,
+                action_name=visited_place_action,
+                coin_receiver_user_id=place.owner_id,
+            )
+            coin_change_actor = await ActionsEconomy.execute(
+                session=session,
+                action_name="Visit a place",
+                coin_receiver_user_id=user_id,
+            )
+            return MutationCheckIn(is_success=True, coin_change=coin_change_actor)
         else:
-            return MutationCheckIn(is_success=False)
+            return MutationCheckIn(is_success=False, coin_change=None)

@@ -16,8 +16,9 @@ class ActionsEconomy(Model, RecordTimestampFields):
     change_type: CoinValueChangeEnum = sa.Column(sa.String, nullable=False)
     change_amount = sa.Column(sa.Integer, nullable=False, server_default="0")
 
-    @staticmethod
+    @classmethod
     async def execute(
+        cls,
         session: AsyncSession,
         action_name: str,
         coin_receiver_user_id: int,
@@ -49,6 +50,8 @@ class ActionsEconomy(Model, RecordTimestampFields):
         else:
             new_coin_value = user_coins - action.change_amount
             sign = "-"
+            if new_coin_value < 0:
+                raise cls.InsufficientCoins("Not enough coins")
 
         await session.execute(
             sa.update(User)
@@ -105,3 +108,6 @@ class ActionsEconomy(Model, RecordTimestampFields):
             )
         }
         return {**always_true, **possibilities}
+
+    class InsufficientCoins(Exception):
+        pass
