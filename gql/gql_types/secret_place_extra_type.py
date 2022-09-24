@@ -9,6 +9,7 @@ from utils.api_auth import AuthChecker
 class SecretPlaceExtraType(SQLAlchemyObjectType):
     class Meta:
         model = SecretPlaceExtra
+        sort = None
         interfaces = (AsyncNode,)
         filter_fields = {
             SecretPlaceExtra.id: [OP_EQ],

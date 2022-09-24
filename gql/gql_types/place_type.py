@@ -4,7 +4,9 @@ import math
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
+from alchql.batching import get_batch_resolver
 from alchql.consts import OP_EQ, OP_IN
+from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
 from graphene import ObjectType, String
@@ -12,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id, encode_gql_id
+from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from gql.gql_types.category_type import CatImage
 from models.db_models import (
     Place,
@@ -19,12 +22,10 @@ from models.db_models import (
     PlaceImage,
     Category,
     CategoryImage,
-    M2MUserOpenedSecretPlace,
-)
+    M2MUserOpenedSecretPlace, SecretPlaceExtra, )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-
 # from gql.utils.gql_id import encode_gql_id
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
@@ -36,10 +37,21 @@ class Cat(ObjectType):
     id = String()
     category_images = graphene.List(of_type=CatImage)
 
+
+class SecretPlaceExtraObject(ObjectType):
+    food_suggestion = String()
+    time_suggestion = String()
+    company_suggestion = String()
+    music_suggestion = String()
+    extra_suggestion = String()
+
+
 # TODO ENUM (SECRET PLACES) = HIDE \ SHOW \ ONLY
 # TODO BURNED OUT PLACES
 class PlaceType(SQLAlchemyObjectType):
     class Meta:
+        model = Place
+        interfaces = (AsyncNode,)
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
@@ -66,18 +78,26 @@ class PlaceType(SQLAlchemyObjectType):
             ),  # hidden usually
         }
 
-        model = Place
-        interfaces = (AsyncNode,)
+
         only_fields = [
             Place.id.key,
             Place.name.key,
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
+
             # Place.owner_id.key,
             # "owner_id",
         ]
 
+    # secret_extra = ModelField(
+    #     SecretPlaceExtraType,
+    #     model_field=SecretPlaceExtra,
+    #     resolver=get_batch_resolver(SecretPlaceExtra.place_id.property, single=True),
+    #     use_label=False
+    # )
+
+    secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
     category_data = graphene.Field(type_=Cat)
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
@@ -87,6 +107,19 @@ class PlaceType(SQLAlchemyObjectType):
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
     is_opened_for_user = graphene.Boolean()
+
+    async def resolve_secret_extra_field(self, info):
+        session: AsyncSession = info.context.session
+        extra = (await session.execute(
+            sa.select(
+                SecretPlaceExtra.food_suggestion,
+                SecretPlaceExtra.extra_suggestion,
+                SecretPlaceExtra.music_suggestion,
+                SecretPlaceExtra.time_suggestion,
+                SecretPlaceExtra.company_suggestion,
+            ).where(SecretPlaceExtra.place_id == self.id)
+        )).fetchone()
+        return dict(extra) if extra else None
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
@@ -288,11 +321,9 @@ class PlaceType(SQLAlchemyObjectType):
             await session.execute(
                 sa.select(M2MUserOpenedSecretPlace)
                 .join(Place, Place.id == M2MUserOpenedSecretPlace.place_id)
-                # .join(Category, Place.category_id == Category.id)
                 .where(
                     M2MUserOpenedSecretPlace.place_id == self.id,
                     M2MUserOpenedSecretPlace.user_id == asker_id,
-                    # Category.mark == s.SECRET_MARK,
                 )
             )
         ).fetchone()

@@ -1,8 +1,34 @@
 import graphene
 from alchql.fields import FilterConnectionField
 
-from gql.gql_types import *
-from gql.mutations import *
+from gql.gql_types import (
+    PlaceType,
+    CategoryType,
+    UserType,
+    UserImageType,
+    CategoryImageType,
+    PlaceImageType,
+    # SecretPlaceExtraType,
+    ActionType,
+)
+from gql.mutations import (
+    MutationCheckIn,
+    MutationRemoveFollower,
+    MutationRemovePlace,
+    MutationRemoveVisitedPlace,
+    MutationOpenSecretPlace,
+    MutationAddPlaceImage,
+    MutationAddUserImage,
+    MutationAddFollower,
+    MutationUpdatePlace,
+    MutationUpdateUser,
+    MutationAddFavouritePlace,
+    MutationRemoveFavouritePlace,
+    MutationAddPlace,
+    MutationCloseSecretPlace,
+    MutationAddUser,
+    MutationUpdateCategory,
+)
 
 
 class Query(graphene.ObjectType):

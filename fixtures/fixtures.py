@@ -15,14 +15,17 @@ def insert_categories(session):
         {"name": "Creative activities"},
         {"name": "Nightlife"},
         {"name": "Pets"},
-        {"name": "Secret place"},
+        {"name": "Secret place", "mark": "secret"},
         # {"name": "Auto"}, # :'(
     ]
 
     return [
         session.execute(
             sa.insert(Category)
-            .values({Category.name: val["name"]})
+            .values(
+                {Category.name: val["name"],
+                 Category.mark: val.get("mark", None)}
+            )
             .returning(Category.id)
         )
         .fetchone()

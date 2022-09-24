@@ -30,6 +30,12 @@ class Place(Model, RecordTimestampFields):
         index=True,
         nullable=False,
     )
+    # secret_extra_id = sa.Column(
+    #     sa.Integer,
+    #     sa.ForeignKey("secret_extras.id", ondelete=""),
+    #     index=True,
+    #     nullable=False,
+    # )
     # TODO SECRET PLACE EXTRA id here
 
     # todo place merge
