@@ -32,11 +32,11 @@ from utils.s3_object_tools import get_presigned_url
 
 class Cat(ObjectType):
     name = String()
-    # filename = String()
-    # description = String()
+    mark = String()
+    id = String()
     category_images = graphene.List(of_type=CatImage)
 
-
+# TODO ENUM (SECRET PLACES) = HIDE \ SHOW \ ONLY
 # TODO BURNED OUT PLACES
 class PlaceType(SQLAlchemyObjectType):
     class Meta:
@@ -90,27 +90,18 @@ class PlaceType(SQLAlchemyObjectType):
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
-        raw_cat_id = (
-            (
-                await session.execute(
-                    sa.select(Place.category_id).where(Place.id == self.id)
-                )
+
+        category = (
+            await session.execute(
+                sa.select(Place.category_id, Category.name, Category.mark)
+                .join(Category, Place.category_id == Category.id)
+                .where(Place.id == self.id)
             )
-            .fetchone()
-            .category_id
-        )
-        cat_id = encode_gql_id(
+        ).fetchone()
+
+        coded_id = encode_gql_id(
             "CategoryType",
-            raw_cat_id,
-        )
-        category_name = (
-            (
-                await session.execute(
-                    sa.select(Category.name).where(Category.id == raw_cat_id)
-                )
-            )
-            .fetchone()
-            .name
+            category.category_id,
         )
 
         images = (
@@ -119,7 +110,7 @@ class PlaceType(SQLAlchemyObjectType):
                     CategoryImage.id,
                     CategoryImage.s3_filename,
                     CategoryImage.description,
-                ).where(CategoryImage.category_id == raw_cat_id)
+                ).where(CategoryImage.category_id == category.category_id)
             )
         ).fetchall()
         category_images = []
@@ -138,29 +129,13 @@ class PlaceType(SQLAlchemyObjectType):
             ]
 
         return {
-            "name": category_name,
-            "ID": cat_id,
-            # "description": "",
+            "name": category.name,
+            "id": coded_id,
+            "mark": category.mark,
             "category_images": category_images,
         }
 
     # secret_place_extra_id = graphene.String()
-    # user_marked_id = graphene.String()
-
-    # async def resolve_user_marked_id(self, info):
-    #     session: AsyncSession = info.context.session
-    #     user_id = (
-    #         (
-    #             await session.execute(
-    #                 sa.select(M2MUserPlaceMarked.user_id).where(
-    #                     M2MUserPlaceMarked.place_id == self.id
-    #                 )
-    #             )
-    #         )
-    #         .fetchone()
-    #         .user_id
-    #     )
-    #     return encode_gql_id("UserType", user_id)
 
     # TODO Refactor this piece of shit
     async def resolve_images(self, info):
@@ -281,36 +256,43 @@ class PlaceType(SQLAlchemyObjectType):
         return owner_id
 
     async def resolve_has_favourited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
         session: AsyncSession = info.context.session
         visit = (
             await session.execute(
                 sa.select(M2MUserPlaceFavourite).where(
                     M2MUserPlaceFavourite.place_id == self.id,
-                    M2MUserPlaceFavourite.user_id == self.owner_id,
+                    M2MUserPlaceFavourite.user_id == asker_id,
                 )
             )
         ).fetchone()
         return True if visit else False
 
     async def resolve_has_visited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
         session: AsyncSession = info.context.session
         visit = (
             await session.execute(
                 sa.select(M2MUserPlaceVisited).where(
                     M2MUserPlaceVisited.place_id == self.id,
-                    M2MUserPlaceVisited.user_id == self.owner_id,
+                    M2MUserPlaceVisited.user_id == asker_id,
                 )
             )
         ).fetchone()
         return True if visit else False
 
     async def resolve_is_opened_for_user(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
         session: AsyncSession = info.context.session
         visit = (
             await session.execute(
-                sa.select(M2MUserOpenedSecretPlace).where(
+                sa.select(M2MUserOpenedSecretPlace)
+                .join(Place, Place.id == M2MUserOpenedSecretPlace.place_id)
+                # .join(Category, Place.category_id == Category.id)
+                .where(
                     M2MUserOpenedSecretPlace.place_id == self.id,
-                    M2MUserOpenedSecretPlace.user_id == self.owner_id,
+                    M2MUserOpenedSecretPlace.user_id == asker_id,
+                    # Category.mark == s.SECRET_MARK,
                 )
             )
         ).fetchone()

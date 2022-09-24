@@ -8,4 +8,5 @@ class Category(Model, RecordTimestampFields):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String, nullable=False)
+    mark = sa.Column(sa.String)
     # places = relationship("Place", back_populates='place_category')
