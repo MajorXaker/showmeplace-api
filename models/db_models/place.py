@@ -1,5 +1,6 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
+
+# from sqlalchemy.orm import relationship
 
 from models.base_engine import Model, RecordTimestampFields
 

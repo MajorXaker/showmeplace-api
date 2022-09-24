@@ -22,10 +22,7 @@ def insert_categories(session):
     return [
         session.execute(
             sa.insert(Category)
-            .values(
-                {Category.name: val["name"],
-                 Category.mark: val.get("mark", None)}
-            )
+            .values({Category.name: val["name"], Category.mark: val.get("mark", None)})
             .returning(Category.id)
         )
         .fetchone()

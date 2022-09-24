@@ -1,13 +1,10 @@
 import graphene
-from alchql import SQLAlchemyCreateMutation
-from alchql.get_input_type import get_input_fields
-from sqlalchemy.ext.asyncio import AsyncSession
 import sqlalchemy as sa
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from gql.gql_id import decode_gql_id
-from gql.gql_types import PlaceType
-from gql.gql_types.user_type import UserType
+from gql.gql_types.place_type import PlaceType
 from models.db_models import M2MUserOpenedSecretPlace, Place, ActionsEconomy
-from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 from utils.api_auth import AuthChecker
 
 

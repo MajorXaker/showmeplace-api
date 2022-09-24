@@ -20,3 +20,16 @@ class IdentificationEnum(StrEnum):
 class CoinValueChangeEnum(StrEnum):
     SPEND = "SPEND"
     EARN = "EARN"
+
+
+class SecretPlacesFilterEnum(StrEnum):
+    ALL = "ALL"
+    SECRET = "SECRET"
+    REGULAR = "REGULAR"
+
+
+class DecayingPlacesFilterEnum(StrEnum):
+    ALL = "ALL"
+    DECAYED = "DECAYED"
+    DECAYING = "DECAYING"
+    REGULAR = "REGULAR"
