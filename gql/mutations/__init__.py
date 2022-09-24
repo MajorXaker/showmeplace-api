@@ -3,7 +3,7 @@ from .service import (
     MutationCloseSecretPlace,
     MutationRemoveVisitedPlace,
 )
-from .update_category import MutationUpdateCategory
+
 from .add_user import MutationAddUser
 from .update_user import MutationUpdateUser
 from .add_place import MutationAddPlace

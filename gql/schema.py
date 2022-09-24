@@ -9,7 +9,7 @@ from gql.gql_types import (
     CategoryImageType,
     PlaceImageType,
     # SecretPlaceExtraType,
-    ActionType,
+    ActionType, OldPlaceType,
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -27,7 +27,6 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory,
 )
 
 
@@ -39,6 +38,8 @@ class Query(graphene.ObjectType):
         PlaceImageType, deprecation_reason="Won't be accessed directly"
     )
     select_actions = FilterConnectionField(ActionType)
+
+    old_select_places = FilterConnectionField(OldPlaceType, deprecation_reason="OLD")
 
 
 class Mutation(graphene.ObjectType):

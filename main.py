@@ -1,10 +1,11 @@
 import sqlalchemy as sa
 import uvicorn
 from alchql.app import SessionQLApp
-from alchql.middlewares import LogMiddleware
+from alchql.middlewares import LogMiddleware, LoaderMiddleware
 from fastapi import FastAPI
 
 from gql.schema import schema
+from models.base_engine import Model
 from utils.db import async_engine
 from utils.config import settings as s
 
@@ -12,6 +13,7 @@ app = FastAPI()
 
 middleware = [
     LogMiddleware(),
+    LoaderMiddleware(Model.registry.mappers),
 ]
 
 
