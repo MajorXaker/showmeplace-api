@@ -4,9 +4,7 @@ import math
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
-from alchql.batching import get_batch_resolver
 from alchql.consts import OP_EQ, OP_IN
-from alchql.fields import ModelField
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
 from graphene import ObjectType, String
@@ -14,21 +12,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
 from gql.gql_id import decode_gql_id, encode_gql_id
-from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from gql.gql_types.category_type import CatImage
-from gql.mutations.service.filters import secrets_filter, decaying_filter
 from models.db_models import (
     Place,
     M2MUserPlaceFavourite,
     PlaceImage,
     Category,
     CategoryImage,
-    M2MUserOpenedSecretPlace, SecretPlaceExtra, )
+    M2MUserOpenedSecretPlace,
+    SecretPlaceExtra,
+)
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
+
 # from gql.utils.gql_id import encode_gql_id
+from utils.filters import secrets_filter, decaying_filter
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
 
@@ -72,22 +72,15 @@ class PlaceType(SQLAlchemyObjectType):
                     parse_query(unidecode(x))
                 ),
             ),
-            "show_secret_places": FilterItem(
-                field_type=graphene.Boolean, filter_func=None
-            ),  # hidden usually
-            "show_decayed_places": FilterItem(
-                field_type=graphene.Boolean, filter_func=None
-            ),  # hidden usually
             "secrets_filter": FilterItem(
-                field_type=graphene.List(of_type=graphene.Enum.from_enum(SecretPlacesFilterEnum)),
+                field_type=graphene.Enum.from_enum(SecretPlacesFilterEnum),
                 filter_func=secrets_filter,
             ),
             "decay_filter": FilterItem(
-                field_type=graphene.List(of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)),
+                field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
-            )
+            ),
         }
-
 
         only_fields = [
             Place.id.key,
@@ -95,8 +88,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-
-            # Place.owner_id.key,
+            Place.active_due_date.key,
             # "owner_id",
         ]
 
@@ -120,15 +112,17 @@ class PlaceType(SQLAlchemyObjectType):
 
     async def resolve_secret_extra_field(self, info):
         session: AsyncSession = info.context.session
-        extra = (await session.execute(
-            sa.select(
-                SecretPlaceExtra.food_suggestion,
-                SecretPlaceExtra.extra_suggestion,
-                SecretPlaceExtra.music_suggestion,
-                SecretPlaceExtra.time_suggestion,
-                SecretPlaceExtra.company_suggestion,
-            ).where(SecretPlaceExtra.place_id == self.id)
-        )).fetchone()
+        extra = (
+            await session.execute(
+                sa.select(
+                    SecretPlaceExtra.food_suggestion,
+                    SecretPlaceExtra.extra_suggestion,
+                    SecretPlaceExtra.music_suggestion,
+                    SecretPlaceExtra.time_suggestion,
+                    SecretPlaceExtra.company_suggestion,
+                ).where(SecretPlaceExtra.place_id == self.id)
+            )
+        ).fetchone()
         return dict(extra) if extra else None
 
     async def resolve_category_data(self, info):
@@ -206,7 +200,11 @@ class PlaceType(SQLAlchemyObjectType):
         decay = (
             (
                 await session.execute(
-                    sa.select(Place.active_due_date).where(Place.id == self.id)
+                    sa.select(Place.active_due_date).where(
+                        sa.and_(
+                            Place.id == self.id,
+                        ),
+                    )
                 )
             )
             .fetchone()
@@ -214,7 +212,7 @@ class PlaceType(SQLAlchemyObjectType):
         )
         if not decay:
             return False
-        return True
+        return decay > datetime.datetime.now()
 
     async def resolve_has_decayed(self, info):
         session: AsyncSession = info.context.session
@@ -247,16 +245,16 @@ class PlaceType(SQLAlchemyObjectType):
         if user_to_filter_place:
             q = q.where(Place.owner_id == user_to_filter_place)
 
-        if not info.variable_values.get("showSecretPlaces"):
-            q = q.select_from(
-                sa.join(Place, Category, Place.category_id == Category.id)
-            ).where(Category.name != s.SECRET_PLACE_NAME)
-        if not info.variable_values.get("showDecayedPlaces"):
-            future = datetime.datetime.now() + datetime.timedelta(minutes=9000)
-            q = q.where(
-                sa.sql.func.coalesce(Place.active_due_date, future)
-                > datetime.datetime.now()
-            )
+        # if not info.variable_values.get("showSecretPlaces"):
+        #     q = q.select_from(
+        #         sa.join(Place, Category, Place.category_id == Category.id)
+        #     ).where(Category.name != s.SECRET_PLACE_NAME)
+        # if not info.variable_values.get("showDecayedPlaces"):
+        #     future = datetime.datetime.now() + datetime.timedelta(minutes=9000)
+        #     q = q.where(
+        #         sa.sql.func.coalesce(Place.active_due_date, future)
+        #         > datetime.datetime.now()
+        #     )
 
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
