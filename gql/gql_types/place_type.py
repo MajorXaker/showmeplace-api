@@ -274,5 +274,5 @@ class PlaceType(SQLAlchemyObjectType):
         return q
 
     async def resolve_owner_id(self, info):
-        owner_id = encode_gql_id("UserType", self.id)
+        owner_id = encode_gql_id("UserType", self.owner_id)
         return owner_id
