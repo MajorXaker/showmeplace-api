@@ -3,7 +3,7 @@ import math
 from utils.config import settings as s
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType
+from alchql import SQLAlchemyObjectType, gql_types
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
@@ -73,13 +73,17 @@ class PlaceType(SQLAlchemyObjectType):
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            Place.owner_id.key,
+            # Place.owner_id.key,
+            # "owner_id",
         ]
 
     category_data = graphene.Field(type_=Cat)
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
+    owner_id = gql_types.String(model_field=Place.owner_id)
+
+
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
@@ -268,3 +272,7 @@ class PlaceType(SQLAlchemyObjectType):
             ).where(M2MUserPlaceVisited.user_id == user_visited)
 
         return q
+
+    async def resolve_owner_id(self, info):
+        owner_id = encode_gql_id("UserType", self.id)
+        return owner_id
