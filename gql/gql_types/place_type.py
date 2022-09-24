@@ -74,7 +74,6 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.owner_id.key,
-            # Place.category_id.key,
         ]
 
     category_data = graphene.Field(type_=Cat)
@@ -234,13 +233,6 @@ class PlaceType(SQLAlchemyObjectType):
                 > datetime.datetime.now()
             )
 
-        # q = cls.user_marked_logic(
-        #     query=q,
-        #     asker_id=asker_id,
-        #     user_to_filter_place=user_to_filter_place,
-        #     include_my_places=include_my_places,
-        # )
-
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
                 raise ValueError("Invalid request. Coordinates must be present")
@@ -276,25 +268,3 @@ class PlaceType(SQLAlchemyObjectType):
             ).where(M2MUserPlaceVisited.user_id == user_visited)
 
         return q
-
-    # @staticmethod
-    # def user_marked_logic(
-    #     query,
-    #     asker_id: int,
-    #     user_to_filter_place: int | None = None,
-    #     include_my_places: bool = False,
-    # ):
-    #
-    #     query = query.outerjoin_from(
-    #         Place,
-    #         M2MUserPlaceMarked,
-    #         onclause=(Place.id == M2MUserPlaceMarked.place_id),
-    #     )
-    #     if user_to_filter_place:
-    #         query = query.where(M2MUserPlaceMarked.user_id == user_to_filter_place)
-    #     if include_my_places:
-    #         query = query.where(M2MUserPlaceMarked.user_id == asker_id)
-    #     return query
-
-    # def resolve_category_id(self, info):
-    #     return encode_gql_id(self.__class__.__name__, self.category_id)

@@ -22,3 +22,4 @@ class User(Model, RecordTimestampFields):
     external_id_type: IdentificationEnum = sa.Column(
         sa.Text, nullable=False, server_default="COGNITO"
     )
+    # TODO what do we need for profile sharing

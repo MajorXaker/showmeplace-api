@@ -24,9 +24,6 @@ class UserType(SQLAlchemyObjectType):
                 field_type=graphene.String, filter_func=None
             ),
             "user_followers": FilterItem(field_type=graphene.String, filter_func=None),
-            # Place.user_marked: [OP_EQ]
-            # M2MUserFollowingUser.lead_id.key: [OP_EQ],
-            # M2MUserFollowingUser.follower_id.key: [OP_EQ],
         }
         only_fields = [
             User.id.key,
