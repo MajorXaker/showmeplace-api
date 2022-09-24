@@ -6,7 +6,7 @@ from alchql.node import AsyncNode
 from alchql.utils import FilterItem
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from gql.gql_id import decode_gql_id
+from gql.gql_id import decode_gql_id, encode_gql_id
 from models.db_models import User, UserImage, M2MUserFollowingUser
 from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
@@ -36,6 +36,30 @@ class UserType(SQLAlchemyObjectType):
         ]
 
     images = graphene.String()
+    followers = graphene.List(of_type=graphene.String)
+    following = graphene.List(of_type=graphene.String)
+
+    async def resolve_followers(self, info):
+        session: AsyncSession = info.context.session
+        followers = (
+            await session.execute(
+                sa.select(M2MUserFollowingUser.follower_id).where(
+                    M2MUserFollowingUser.lead_id == self.id
+                )
+            )
+        ).fetchall()
+        return [encode_gql_id("UserType", usr.follower_id) for usr in followers]
+
+    async def resolve_following(self, info):
+        session: AsyncSession = info.context.session
+        followers = (
+            await session.execute(
+                sa.select(M2MUserFollowingUser.lead_id).where(
+                    M2MUserFollowingUser.follower_id == self.id
+                )
+            )
+        ).fetchall()
+        return [encode_gql_id("UserType", usr.lead_id) for usr in followers]
 
     async def resolve_images(self, info):
         session: AsyncSession = info.context.session
