@@ -1,2 +1,0 @@
-from .remove_visited_place import MutationRemoveVisitedPlace
-from .close_secret_place import MutationCloseSecretPlace

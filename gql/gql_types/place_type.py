@@ -16,6 +16,7 @@ from unidecode import unidecode
 from gql.gql_id import decode_gql_id, encode_gql_id
 from gql.gql_types.secret_place_extra_type import SecretPlaceExtraType
 from gql.gql_types.category_type import CatImage
+from gql.mutations.service.filters import secrets_filter, decaying_filter
 from models.db_models import (
     Place,
     M2MUserPlaceFavourite,
@@ -24,6 +25,7 @@ from models.db_models import (
     CategoryImage,
     M2MUserOpenedSecretPlace, SecretPlaceExtra, )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
 # from gql.utils.gql_id import encode_gql_id
@@ -76,6 +78,14 @@ class PlaceType(SQLAlchemyObjectType):
             "show_decayed_places": FilterItem(
                 field_type=graphene.Boolean, filter_func=None
             ),  # hidden usually
+            "secrets_filter": FilterItem(
+                field_type=graphene.List(of_type=graphene.Enum.from_enum(SecretPlacesFilterEnum)),
+                filter_func=secrets_filter,
+            ),
+            "decay_filter": FilterItem(
+                field_type=graphene.List(of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)),
+                filter_func=decaying_filter,
+            )
         }
 
 
