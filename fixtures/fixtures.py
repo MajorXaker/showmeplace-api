@@ -166,6 +166,22 @@ def insert_category_images(session):
             .fetchone()
             .id
         )
-        ids.append((id_pin, id_icon))
+        id_decayed = (
+            session.execute(
+                sa.insert(CategoryImage)
+                .values(
+                    {
+                        CategoryImage.s3_filename: f'{img["name"]}.png',
+                        CategoryImage.s3_path: "category_images/decay/",
+                        CategoryImage.description: "pin_decay",
+                        CategoryImage.category_id: category_id,
+                    }
+                )
+                .returning(CategoryImage.id)
+            )
+            .fetchone()
+            .id
+        )
+        ids.append((id_pin, id_icon, id_decayed))
 
     return ids
