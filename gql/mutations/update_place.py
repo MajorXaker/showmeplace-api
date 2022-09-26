@@ -10,12 +10,22 @@ class MutationUpdatePlace(SQLAlchemyUpdateMutation):
         model = Place
         output = PlaceType
         input_type_name = "InputUpdatePlace"
+        exclude_fields = [
+            Place.record_created.key,
+            Place.record_modified.key,
+            Place.coordinate_longitude.key,
+            Place.coordinate_latitude.key,
+            Place.category_id.key,
+            Place.owner_id.key,
+            Place.address.key,
+            Place.is_secret_place.key,
+        ]
 
     @classmethod
-    async def mutate(cls, root, info, value: dict):
+    async def mutate(cls, root, info, value: dict, id):
         user_id = await AuthChecker.check_auth_mutation(
             session=info.context.session, info=info
         )
-        result = await super().mutate(root, info, value)
+        result = await super().mutate(root, info, id, value)
 
         return result

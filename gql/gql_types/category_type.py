@@ -24,7 +24,7 @@ class CategoryType(SQLAlchemyObjectType):
         filter_fields = {
             Category.id: [OP_EQ, OP_IN],
         }
-        only_fields = [Category.id.key, Category.name.key]
+        only_fields = [Category.id.key, Category.name.key, Category.mark.key]
 
     images = graphene.List(of_type=CatImage)
 

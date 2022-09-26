@@ -13,7 +13,7 @@ class AuthChecker:
     @classmethod
     def check_auth_request(cls, info):
         for header in info.context.request.headers.raw:
-            if header[0] == b"user_auth":
+            if header[0] == b"authorization":
                 active_user = header[1]
                 user_id = decode_gql_id(active_user)[1]
                 return user_id

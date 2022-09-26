@@ -1,9 +1,9 @@
 import datetime
 import math
-from utils.config import settings as s
+
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType
+from alchql import SQLAlchemyObjectType, gql_types
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
@@ -15,30 +15,45 @@ from gql.gql_id import decode_gql_id, encode_gql_id
 from gql.gql_types.category_type import CatImage
 from models.db_models import (
     Place,
-    M2MUserPlaceMarked,
     M2MUserPlaceFavourite,
     PlaceImage,
     Category,
     CategoryImage,
+    M2MUserOpenedSecretPlace,
+    SecretPlaceExtra,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
+from utils.config import settings as s
 
 # from gql.utils.gql_id import encode_gql_id
+from utils.filters import secrets_filter, decaying_filter
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
 
 
 class Cat(ObjectType):
     name = String()
-    # filename = String()
-    # description = String()
+    mark = String()
+    id = String()
     category_images = graphene.List(of_type=CatImage)
 
 
+class SecretPlaceExtraObject(ObjectType):
+    food_suggestion = String()
+    time_suggestion = String()
+    company_suggestion = String()
+    music_suggestion = String()
+    extra_suggestion = String()
+
+
+# TODO ENUM (SECRET PLACES) = HIDE \ SHOW \ ONLY
 # TODO BURNED OUT PLACES
 class PlaceType(SQLAlchemyObjectType):
     class Meta:
+        model = Place
+        interfaces = (AsyncNode,)
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
@@ -57,54 +72,73 @@ class PlaceType(SQLAlchemyObjectType):
                     parse_query(unidecode(x))
                 ),
             ),
-            "show_secret_places": FilterItem(
-                field_type=graphene.Boolean, filter_func=None
-            ),  # hidden usually
-            "show_decayed_places": FilterItem(
-                field_type=graphene.Boolean, filter_func=None
-            ),  # hidden usually
+            "secrets_filter": FilterItem(
+                field_type=graphene.Enum.from_enum(SecretPlacesFilterEnum),
+                filter_func=secrets_filter,
+            ),
+            "decay_filter": FilterItem(
+                field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
+                filter_func=decaying_filter,
+            ),
         }
 
-        model = Place
-        interfaces = (AsyncNode,)
         only_fields = [
             Place.id.key,
             Place.name.key,
             Place.description.key,
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
-            Place.owner_id.key,
-            # Place.category_id.key,
+            Place.active_due_date.key,
+            # "owner_id",
         ]
 
+    # secret_extra = ModelField(
+    #     SecretPlaceExtraType,
+    #     model_field=SecretPlaceExtra,
+    #     resolver=get_batch_resolver(SecretPlaceExtra.place_id.property, single=True),
+    #     use_label=False
+    # )
+
+    secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
     category_data = graphene.Field(type_=Cat)
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
+    owner_id = gql_types.String(model_field=Place.owner_id)
+
+    has_visited = graphene.Boolean()
+    has_favourited = graphene.Boolean()
+    is_opened_for_user = graphene.Boolean()
+
+    async def resolve_secret_extra_field(self, info):
+        session: AsyncSession = info.context.session
+        extra = (
+            await session.execute(
+                sa.select(
+                    SecretPlaceExtra.food_suggestion,
+                    SecretPlaceExtra.extra_suggestion,
+                    SecretPlaceExtra.music_suggestion,
+                    SecretPlaceExtra.time_suggestion,
+                    SecretPlaceExtra.company_suggestion,
+                ).where(SecretPlaceExtra.place_id == self.id)
+            )
+        ).fetchone()
+        return dict(extra) if extra else None
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
-        raw_cat_id = (
-            (
-                await session.execute(
-                    sa.select(Place.category_id).where(Place.id == self.id)
-                )
+
+        category = (
+            await session.execute(
+                sa.select(Place.category_id, Category.name, Category.mark)
+                .join(Category, Place.category_id == Category.id)
+                .where(Place.id == self.id)
             )
-            .fetchone()
-            .category_id
-        )
-        cat_id = encode_gql_id(
+        ).fetchone()
+
+        coded_id = encode_gql_id(
             "CategoryType",
-            raw_cat_id,
-        )
-        category_name = (
-            (
-                await session.execute(
-                    sa.select(Category.name).where(Category.id == raw_cat_id)
-                )
-            )
-            .fetchone()
-            .name
+            category.category_id,
         )
 
         images = (
@@ -113,7 +147,7 @@ class PlaceType(SQLAlchemyObjectType):
                     CategoryImage.id,
                     CategoryImage.s3_filename,
                     CategoryImage.description,
-                ).where(CategoryImage.category_id == raw_cat_id)
+                ).where(CategoryImage.category_id == category.category_id)
             )
         ).fetchall()
         category_images = []
@@ -132,29 +166,13 @@ class PlaceType(SQLAlchemyObjectType):
             ]
 
         return {
-            "name": category_name,
-            "ID": cat_id,
-            # "description": "",
+            "name": category.name,
+            "id": coded_id,
+            "mark": category.mark,
             "category_images": category_images,
         }
 
     # secret_place_extra_id = graphene.String()
-    # user_marked_id = graphene.String()
-
-    # async def resolve_user_marked_id(self, info):
-    #     session: AsyncSession = info.context.session
-    #     user_id = (
-    #         (
-    #             await session.execute(
-    #                 sa.select(M2MUserPlaceMarked.user_id).where(
-    #                     M2MUserPlaceMarked.place_id == self.id
-    #                 )
-    #             )
-    #         )
-    #         .fetchone()
-    #         .user_id
-    #     )
-    #     return encode_gql_id("UserType", user_id)
 
     # TODO Refactor this piece of shit
     async def resolve_images(self, info):
@@ -182,7 +200,11 @@ class PlaceType(SQLAlchemyObjectType):
         decay = (
             (
                 await session.execute(
-                    sa.select(Place.active_due_date).where(Place.id == self.id)
+                    sa.select(Place.active_due_date).where(
+                        sa.and_(
+                            Place.id == self.id,
+                        ),
+                    )
                 )
             )
             .fetchone()
@@ -190,7 +212,7 @@ class PlaceType(SQLAlchemyObjectType):
         )
         if not decay:
             return False
-        return True
+        return decay > datetime.datetime.now()
 
     async def resolve_has_decayed(self, info):
         session: AsyncSession = info.context.session
@@ -223,23 +245,16 @@ class PlaceType(SQLAlchemyObjectType):
         if user_to_filter_place:
             q = q.where(Place.owner_id == user_to_filter_place)
 
-        if not info.variable_values.get("showSecretPlaces"):
-            q = q.select_from(
-                sa.join(Place, Category, Place.category_id == Category.id)
-            ).where(Category.name != s.SECRET_PLACE_NAME)
-        if not info.variable_values.get("showDecayedPlaces"):
-            future = datetime.datetime.now() + datetime.timedelta(minutes=9000)
-            q = q.where(
-                sa.sql.func.coalesce(Place.active_due_date, future)
-                > datetime.datetime.now()
-            )
-
-        # q = cls.user_marked_logic(
-        #     query=q,
-        #     asker_id=asker_id,
-        #     user_to_filter_place=user_to_filter_place,
-        #     include_my_places=include_my_places,
-        # )
+        # if not info.variable_values.get("showSecretPlaces"):
+        #     q = q.select_from(
+        #         sa.join(Place, Category, Place.category_id == Category.id)
+        #     ).where(Category.name != s.SECRET_PLACE_NAME)
+        # if not info.variable_values.get("showDecayedPlaces"):
+        #     future = datetime.datetime.now() + datetime.timedelta(minutes=9000)
+        #     q = q.where(
+        #         sa.sql.func.coalesce(Place.active_due_date, future)
+        #         > datetime.datetime.now()
+        #     )
 
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
@@ -277,24 +292,47 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
-    # @staticmethod
-    # def user_marked_logic(
-    #     query,
-    #     asker_id: int,
-    #     user_to_filter_place: int | None = None,
-    #     include_my_places: bool = False,
-    # ):
-    #
-    #     query = query.outerjoin_from(
-    #         Place,
-    #         M2MUserPlaceMarked,
-    #         onclause=(Place.id == M2MUserPlaceMarked.place_id),
-    #     )
-    #     if user_to_filter_place:
-    #         query = query.where(M2MUserPlaceMarked.user_id == user_to_filter_place)
-    #     if include_my_places:
-    #         query = query.where(M2MUserPlaceMarked.user_id == asker_id)
-    #     return query
+    async def resolve_owner_id(self, info):
+        owner_id = encode_gql_id("UserType", self.owner_id)
+        return owner_id
 
-    # def resolve_category_id(self, info):
-    #     return encode_gql_id(self.__class__.__name__, self.category_id)
+    async def resolve_has_favourited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceFavourite).where(
+                    M2MUserPlaceFavourite.place_id == self.id,
+                    M2MUserPlaceFavourite.user_id == asker_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
+
+    async def resolve_has_visited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceVisited).where(
+                    M2MUserPlaceVisited.place_id == self.id,
+                    M2MUserPlaceVisited.user_id == asker_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
+
+    async def resolve_is_opened_for_user(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserOpenedSecretPlace)
+                .join(Place, Place.id == M2MUserOpenedSecretPlace.place_id)
+                .where(
+                    M2MUserOpenedSecretPlace.place_id == self.id,
+                    M2MUserOpenedSecretPlace.user_id == asker_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False

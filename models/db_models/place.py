@@ -1,5 +1,6 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
+
+# from sqlalchemy.orm import relationship
 
 from models.base_engine import Model, RecordTimestampFields
 
@@ -30,6 +31,12 @@ class Place(Model, RecordTimestampFields):
         index=True,
         nullable=False,
     )
+    # secret_extra_id = sa.Column(
+    #     sa.Integer,
+    #     sa.ForeignKey("secret_extras.id", ondelete=""),
+    #     index=True,
+    #     nullable=False,
+    # )
     # TODO SECRET PLACE EXTRA id here
 
     # todo place merge
