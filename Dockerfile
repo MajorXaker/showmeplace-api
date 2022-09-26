@@ -1,14 +1,14 @@
 FROM python:3.10-buster
 
 
-ENV WORKDIR_PATH /home/ec2-user/project
+ENV WORKDIR_PATH /home/ec2-user/showmeplace-api
 
 ENV USER_CONTAINER 1919
 ENV DOCKER 1
 
 RUN mkdir -p $WORKDIR_PATH
 WORKDIR $WORKDIR_PATH
-RUN apt-get update -y && apt-get install vim -y && pip install pipenv
+RUN apt-get update -y && apt-get install vim nano -y && pip install -U pipenv
 
 COPY --chmod=0444 ./Pipfile* ./
 RUN pipenv install --deploy --system --clear
