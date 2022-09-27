@@ -7,6 +7,8 @@ from fastapi import FastAPI
 from gql.schema import schema
 from utils.db import async_engine
 from utils.config import settings as s
+from utils.sns_webhooks.email_bounce import handle_email_bounce
+from utils.sns_webhooks.email_complaint import handle_email_complaint
 
 app = FastAPI()
 
@@ -29,6 +31,15 @@ app.add_route(
         # extensions=extensions,
         engine=async_engine,
     ),
+)
+
+app.include_router(
+    handle_email_bounce,
+    prefix="/handle-email-bounce",
+)
+app.include_router(
+    handle_email_complaint,
+    prefix="/handle-email-complaint",
 )
 
 if __name__ == "__main__":
