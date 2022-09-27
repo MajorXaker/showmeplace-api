@@ -12,6 +12,7 @@ handle_email_complaint = APIRouter()
 
 @handle_email_complaint.post("")
 async def handle_complaint(req: Request):
+    logging.warning("GOT POST")
     body = await req.json()
     url = body["SubscribeURL"]
     logging.warning("URL")

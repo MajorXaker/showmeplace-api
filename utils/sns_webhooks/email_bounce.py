@@ -12,6 +12,7 @@ handle_email_bounce = APIRouter()
 
 @handle_email_bounce.post("")
 async def handle_bounce(req: Request):
+    logging.warning("GOT POST")
     body = await req.json()
     url = body["SubscribeURL"]
     logging.warning("URL")
