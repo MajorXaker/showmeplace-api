@@ -1,3 +1,5 @@
+import logging
+
 import sqlalchemy as sa
 import uvicorn
 from alchql.app import SessionQLApp
@@ -44,6 +46,7 @@ app.include_router(
 
 if __name__ == "__main__":
     print("starting")
+    logging.warning("Test")
     uvicorn.run(
         "__main__:app",
         host="0.0.0.0",
