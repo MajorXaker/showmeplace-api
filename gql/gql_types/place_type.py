@@ -80,6 +80,7 @@ class PlaceType(SQLAlchemyObjectType):
                 field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
             ),
+            "opened_secret_places": FilterItem(field_type=graphene.Boolean, filter_func=None),
         }
 
         only_fields = [
@@ -190,71 +191,20 @@ class PlaceType(SQLAlchemyObjectType):
         ]
         return result
 
-    # todo places added by user
-    # todo places visited by user
-    # todo secret place opened by user
-    # todo places favourited by user
-
-    async def resolve_is_decaying(self, info):
-        session: AsyncSession = info.context.session
-        decay = (
-            (
-                await session.execute(
-                    sa.select(Place.active_due_date).where(
-                        sa.and_(
-                            Place.id == self.id,
-                        ),
-                    )
-                )
-            )
-            .fetchone()
-            .active_due_date
-        )
-        if not decay:
-            return False
-        return decay > datetime.datetime.now()
-
-    async def resolve_has_decayed(self, info):
-        session: AsyncSession = info.context.session
-        decay = (
-            (
-                await session.execute(
-                    sa.select(Place.active_due_date).where(Place.id == self.id)
-                )
-            )
-            .fetchone()
-            .active_due_date
-        )
-        if not decay:
-            return False
-        return (
-            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
-        ) < datetime.datetime.now()
-
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
         session: AsyncSession = info.context.session
         asker_id = AuthChecker.check_auth_request(info)
-        user_to_filter_place = info.variable_values.get("userOwner")
-        if user_to_filter_place:
-            user_to_filter_place = decode_gql_id(user_to_filter_place)[1]
+        user_owner = info.variable_values.get("userOwner")
+        if user_owner:
+            user_owner = decode_gql_id(user_owner)[1]
         include_my_places = info.variable_values.get("includeMyPlaces", False)
 
+        # M2MUserOpenedSecretPlace.user_id == asker_id))
         if not include_my_places:
             q = q.where(Place.owner_id != asker_id)
-        if user_to_filter_place:
-            q = q.where(Place.owner_id == user_to_filter_place)
-
-        # if not info.variable_values.get("showSecretPlaces"):
-        #     q = q.select_from(
-        #         sa.join(Place, Category, Place.category_id == Category.id)
-        #     ).where(Category.name != s.SECRET_PLACE_NAME)
-        # if not info.variable_values.get("showDecayedPlaces"):
-        #     future = datetime.datetime.now() + datetime.timedelta(minutes=9000)
-        #     q = q.where(
-        #         sa.sql.func.coalesce(Place.active_due_date, future)
-        #         > datetime.datetime.now()
-        #     )
+        if user_owner:
+            q = q.where(Place.owner_id == user_owner)
 
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
@@ -263,14 +213,31 @@ class PlaceType(SQLAlchemyObjectType):
             long = info.variable_values["longitudeFrom"]
             dist = info.variable_values["distanceFrom"]
 
-            delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
+            delta_latitude = abs(dist / 111)  # 1 lat degree is roughly 111 km
 
-            longitude_1_degree_length = 111.3 * math.cos(lat)
+            longitude_1_degree_length = abs(111.3 * math.cos(lat))
             delta_longitude = dist / longitude_1_degree_length
             q = q.where(
                 sa.and_(
                     sa.func.ABS(Place.coordinate_longitude - long) < delta_longitude,
                     sa.func.ABS(Place.coordinate_latitude - lat) < delta_latitude,
+                )
+            )
+
+        has_opened = info.variable_values.get("openedSecretPlaces", False)
+        if has_opened:
+            q = (
+                q.outerjoin_from(
+                    Place,
+                    M2MUserOpenedSecretPlace,
+                    onclause=(Place.id == M2MUserOpenedSecretPlace.place_id),
+                )
+                .join(Category, Place.category_id == Category.id)
+                .where(
+                    sa.or_(
+                        Category.mark != "secret",
+                        M2MUserOpenedSecretPlace.user_id == asker_id,
+                    )
                 )
             )
 
@@ -342,8 +309,43 @@ class PlaceType(SQLAlchemyObjectType):
                 .where(
                     M2MUserOpenedSecretPlace.place_id == self.id,
                     M2MUserOpenedSecretPlace.user_id == asker_id,
-
                 )
             )
         ).fetchone()
         return True if visit else False
+
+    async def resolve_is_decaying(self, info):
+        session: AsyncSession = info.context.session
+        decay = (
+            (
+                await session.execute(
+                    sa.select(Place.active_due_date).where(
+                        sa.and_(
+                            Place.id == self.id,
+                        ),
+                    )
+                )
+            )
+            .fetchone()
+            .active_due_date
+        )
+        if not decay:
+            return False
+        return decay > datetime.datetime.now()
+
+    async def resolve_has_decayed(self, info):
+        session: AsyncSession = info.context.session
+        decay = (
+            (
+                await session.execute(
+                    sa.select(Place.active_due_date).where(Place.id == self.id)
+                )
+            )
+            .fetchone()
+            .active_due_date
+        )
+        if not decay:
+            return False
+        return (
+            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
+        ) < datetime.datetime.now()
