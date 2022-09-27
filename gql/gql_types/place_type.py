@@ -325,6 +325,16 @@ class PlaceType(SQLAlchemyObjectType):
     async def resolve_is_opened_for_user(self, info):
         asker_id = AuthChecker.check_auth_request(info)
         session: AsyncSession = info.context.session
+        is_secret = (
+            await session.execute(
+                sa.select(Category.id, Category.mark, Place.owner_id)
+                .join(Place, Place.category_id == Category.id)
+                .where(Place.id == self.id)
+            )
+        ).fetchone()
+        if is_secret:
+            if not is_secret.mark or is_secret.owner_id == asker_id:
+                return True
         visit = (
             await session.execute(
                 sa.select(M2MUserOpenedSecretPlace)
@@ -332,6 +342,7 @@ class PlaceType(SQLAlchemyObjectType):
                 .where(
                     M2MUserOpenedSecretPlace.place_id == self.id,
                     M2MUserOpenedSecretPlace.user_id == asker_id,
+
                 )
             )
         ).fetchone()
