@@ -1,3 +1,4 @@
+import logging
 import math
 
 import graphene
@@ -35,11 +36,11 @@ class MutationCheckIn(graphene.Mutation):
 
         lat = info.variable_values["userLatitude"]
         long = info.variable_values["userLongitude"]
-        dist = 1000 / s.CHECK_IN_DISTANCE
-
-        delta_latitude = dist / 111  # 1 lat degree is roughly 111 km
+        dist = s.CHECK_IN_DISTANCE / 1000
+        # logging.debug(f"Current check-in distance is: {dist}")
+        delta_latitude = abs(dist / 111)  # 1 lat degree is roughly 111 km
         longitude_1_degree_length = 111.3 * math.cos(lat)
-        delta_longitude = dist / longitude_1_degree_length
+        delta_longitude = abs(dist / longitude_1_degree_length)
 
         place_id = decode_gql_id(check_in__place__id)[1]
         is_been_here = (
