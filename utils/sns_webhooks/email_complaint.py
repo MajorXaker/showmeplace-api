@@ -17,3 +17,9 @@ async def handle_complaint(req: Request):
     logging.warning("URL")
     logging.warning(url)
     return "test-test"
+
+
+@handle_email_complaint.post("")
+async def handle_complaint(req: Request):
+    logging.warning("Got get request")
+    return "test-test"
