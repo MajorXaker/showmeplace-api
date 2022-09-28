@@ -1,3 +1,4 @@
+import boto3
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
@@ -7,14 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from gql.gql_id import encode_gql_id
 from models.db_models import User, EmailAddress
 from models.enums import EmailStatusEnum
-
-
-# cognito_email_check = graphene.NonNull(
-#     of_type=EmailCheckVerification,
-#     email_address=graphene.Argument(type_=graphene.String, required=True),
-#     external_id=graphene.Argument(type_=graphene.String, required=True),
-#     resolver=resolve_email_check_verification
-# )
+from utils.config import settings as s
 
 
 class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
@@ -36,6 +30,22 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
         if False:
             # TODO section logic when email is incorrect
             raise ValueError("Incorrect email! Change email")
+
+        cognito_connection = boto3.client(
+            "cognito-idp",
+            region_name="us-east-1",
+            aws_access_key_id=s.ACCESS_KEY_ID,
+            aws_secret_access_key=s.ACCESS_SECRET_KEY,
+        )
+        # status could be 'CONFIRMED' or 'UNCONFIRMED'
+        email_address = value["email_address"]
+        user_data = cognito_connection.list_users(
+            UserPoolId="us-east-1_60d3tsON2",
+            Limit=1,
+            Filter=f'email = "{email_address}"',
+        )
+        if user_data["Users"][0]["UserStatus"] == "UNCONFIRMED":
+            raise PermissionError("Email has not been verified yet!")
 
         user_in_base = (
             await session.execute(
@@ -85,3 +95,4 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
             registered_now=True,
             internal_id=internal_id,
         )
+
