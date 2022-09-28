@@ -129,7 +129,7 @@ class PlaceType(SQLAlchemyObjectType):
         if not extra:
             return None
         data = dict(extra)
-        data["id"] = encode_gql_id(data["id"])
+        data["id"] = encode_gql_id("SecretPlaceType",data["id"])
         return data
 
     async def resolve_category_data(self, info):
