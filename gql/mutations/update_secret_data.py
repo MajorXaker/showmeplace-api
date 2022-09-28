@@ -6,7 +6,7 @@ from models.db_models import Place, SecretPlaceExtra
 from utils.api_auth import AuthChecker
 
 
-class MutationUpdatePlace(SQLAlchemyUpdateMutation):
+class MutationUpdateSecretPlaceData(SQLAlchemyUpdateMutation):
     class Meta:
         model = SecretPlaceExtra
         output = SecretPlaceExtraType

@@ -27,7 +27,7 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory,
+    MutationUpdateCategory, MutationUpdateSecretPlaceData,
 )
 
 
@@ -68,6 +68,7 @@ class Mutation(graphene.ObjectType):
     close_secret_place = MutationCloseSecretPlace.Field(
         deprecation_reason="Service, will be deleted later"
     )
+    update_secret_place = MutationUpdateSecretPlaceData.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

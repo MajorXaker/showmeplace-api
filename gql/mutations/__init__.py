@@ -12,3 +12,4 @@ from gql.mutations.remove_place import MutationRemovePlace
 from .add_place_image import MutationAddPlaceImage
 from .add_user_image import MutationAddUserImage
 from .mutation_check_in import MutationCheckIn
+from .update_secret_data import MutationUpdateSecretPlaceData
