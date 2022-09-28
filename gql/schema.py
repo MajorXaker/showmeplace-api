@@ -1,5 +1,6 @@
 import graphene
 from alchql.fields import FilterConnectionField
+from graphene import ConnectionField
 
 from gql.gql_types import (
     PlaceType,
@@ -9,7 +10,7 @@ from gql.gql_types import (
     CategoryImageType,
     PlaceImageType,
     # SecretPlaceExtraType,
-    ActionType,
+    ActionType, EmailCheckAvailability, resolve_email_check_availability
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -27,7 +28,7 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory, MutationUpdateSecretPlaceData,
+    MutationUpdateCategory, MutationUpdateSecretPlaceData, MutationVerifyCognitoUser,
 )
 
 
@@ -40,8 +41,23 @@ class Query(graphene.ObjectType):
     )
     select_actions = FilterConnectionField(ActionType)
 
+    check_email_availability = graphene.NonNull(
+        of_type=EmailCheckAvailability,
+        email_address=graphene.Argument(type_=graphene.String, required=True),
+        resolver=resolve_email_check_availability
+    )
+    # cognito_email_check = graphene.NonNull(
+    #     of_type=EmailCheckVerification,
+    #     email_address=graphene.Argument(type_=graphene.String, required=True),
+    #     external_id=graphene.Argument(type_=graphene.String, required=True),
+    #     resolver=resolve_email_check_verification
+    # )
+
+
+
 
 class Mutation(graphene.ObjectType):
+    verify_cognito_user= MutationVerifyCognitoUser.Field()
     add_user = MutationAddUser.Field()
     update_user = MutationUpdateUser.Field()
 

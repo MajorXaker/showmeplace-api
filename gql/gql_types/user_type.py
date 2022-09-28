@@ -7,7 +7,8 @@ from alchql.utils import FilterItem
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from gql.gql_id import decode_gql_id, encode_gql_id
-from models.db_models import User, UserImage, M2MUserFollowingUser
+from models.db_models import User, UserImage, M2MUserFollowingUser, EmailAddress
+from models.enums import EmailStatusEnum
 from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
 
@@ -38,6 +39,21 @@ class UserType(SQLAlchemyObjectType):
     images = graphene.String()
     followers = graphene.List(of_type=graphene.String)
     following = graphene.List(of_type=graphene.String)
+    active_email = graphene.String()
+
+    async def resolve_active_email(self, info):
+        session: AsyncSession = info.context.session
+        email = (
+            await session.execute(
+                sa.select(EmailAddress.address).where(
+                    sa.and_(
+                        EmailAddress.user_id == self.id,
+                        EmailAddress.status == EmailStatusEnum.VERIFIED,
+                    )
+                )
+            )
+        ).fetchone()
+        return email.address if email else None
 
     async def resolve_followers(self, info):
         session: AsyncSession = info.context.session
