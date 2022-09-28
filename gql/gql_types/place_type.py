@@ -41,6 +41,7 @@ class Cat(ObjectType):
 
 
 class SecretPlaceExtraObject(ObjectType):
+    id = String()
     food_suggestion = String()
     time_suggestion = String()
     company_suggestion = String()
