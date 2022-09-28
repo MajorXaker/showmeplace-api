@@ -126,7 +126,11 @@ class PlaceType(SQLAlchemyObjectType):
                 ).where(SecretPlaceExtra.place_id == self.id)
             )
         ).fetchone()
-        return dict(extra) if extra else None
+        if not extra:
+            return None
+        data = dict(extra)
+        data["id"] = encode_gql_id(data["id"])
+        return data
 
     async def resolve_category_data(self, info):
         session: AsyncSession = info.context.session
