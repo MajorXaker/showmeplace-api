@@ -116,6 +116,7 @@ class PlaceType(SQLAlchemyObjectType):
         extra = (
             await session.execute(
                 sa.select(
+                    SecretPlaceExtra.id,
                     SecretPlaceExtra.food_suggestion,
                     SecretPlaceExtra.extra_suggestion,
                     SecretPlaceExtra.music_suggestion,
