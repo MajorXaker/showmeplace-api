@@ -17,7 +17,6 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
         input_fields = {
             "user_name": graphene.String(),
             "email_address": graphene.String(required=True),
-            "external_id": graphene.String(required=True),
         }
 
     registered_now = graphene.Boolean()
@@ -29,7 +28,7 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
         session: AsyncSession = info.context.session
         if False:
             # TODO section logic when email is incorrect
-            raise ValueError("Incorrect email! Change email")
+            raise ValueError("Incorrect email! Change email address")
 
         cognito_connection = boto3.client(
             "cognito-idp",
@@ -44,13 +43,19 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
             Limit=1,
             Filter=f'email = "{email_address}"',
         )
-        if user_data["Users"][0]["UserStatus"] == "UNCONFIRMED":
+        the_user = user_data["Users"][0]
+        if the_user["UserStatus"] == "UNCONFIRMED":
             raise PermissionError("Email has not been verified yet!")
-
+        user_attribute = dict(
+            zip(
+                (x["Name"] for x in the_user["Attributes"]),
+                (x["Value"] for x in the_user["Attributes"]),
+            )
+        )
         user_in_base = (
             await session.execute(
                 sa.select(User.external_id, User.id).where(
-                    User.external_id == value["external_id"]
+                    User.external_id == user_attribute["sub"]
                 )
             )
         ).fetchone()
@@ -69,7 +74,7 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
                 .values(
                     {
                         User.name: value["user_name"],
-                        User.external_id: value["external_id"],
+                        User.external_id: user_attribute["sub"],
                         User.external_id_type: "COGNITO",
                         User.coins: 0,
                         User.level: 0,
@@ -95,4 +100,3 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
             registered_now=True,
             internal_id=internal_id,
         )
-
