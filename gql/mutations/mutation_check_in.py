@@ -1,3 +1,4 @@
+import datetime
 import logging
 import math
 
@@ -33,16 +34,21 @@ class MutationCheckIn(graphene.Mutation):
     ):
         session: AsyncSession = info.context.session
         user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
-
         lat = info.variable_values["userLatitude"]
         long = info.variable_values["userLongitude"]
         dist = s.CHECK_IN_DISTANCE / 1000
+        place_id = decode_gql_id(check_in__place__id)[1]
+
+        logging.debug(
+            f"EVENT: {datetime.datetime.now()}."
+            f"User ID#{user_id}, checks in place ID#{place_id}. "
+            f"Dist={dist} km. User coords: Lat={lat}, Long={long}."
+        )
         # logging.debug(f"Current check-in distance is: {dist}")
         delta_latitude = abs(dist / 111)  # 1 lat degree is roughly 111 km
         longitude_1_degree_length = 111.3 * math.cos(lat)
         delta_longitude = abs(dist / longitude_1_degree_length)
 
-        place_id = decode_gql_id(check_in__place__id)[1]
         is_been_here = (
             await session.execute(
                 sa.select(M2MUserPlaceVisited.user_id).where(
