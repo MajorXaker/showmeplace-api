@@ -4,7 +4,7 @@
     DATABASE_PASSWORD = "local_showmeplace_local"
     DATABASE_DB = "showmeplace"
     DATABASE_HOST = "localhost"
-    DATABASE_ECHO_MODE = true
+    DATABASE_ECHO_MODE = false
 
     S3_IMAGES_BUCKET = "showmeplace-s3-bucket"
     S3_PRESIGNED_URL_EXPIRATION = 43200 #12 hours

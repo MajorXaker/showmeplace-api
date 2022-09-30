@@ -39,7 +39,7 @@ class MutationCheckIn(graphene.Mutation):
         dist = s.CHECK_IN_DISTANCE / 1000
         place_id = decode_gql_id(check_in__place__id)[1]
 
-        logging.debug(
+        print(
             f"EVENT: {datetime.datetime.now()}."
             f"User ID#{user_id}, checks in place ID#{place_id}. "
             f"Dist={dist} km. User coords: Lat={lat}, Long={long}."

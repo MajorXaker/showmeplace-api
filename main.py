@@ -45,20 +45,11 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-    print("starting")
-    logging.warning("Test")
+    logging.info("Engage!")
     uvicorn.run(
         "__main__:app",
         host="0.0.0.0",
         port=8000,
-        log_level="info",
-        reload=s.SERVER_RELOAD_MODE,
-        log_config=None,
-    )
-    uvicorn.run(
-        "__main__:app",
-        host="0.0.0.0",
-        port=433,
         log_level="info",
         reload=s.SERVER_RELOAD_MODE,
         log_config=None,
