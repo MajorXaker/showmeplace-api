@@ -1,4 +1,3 @@
-# import api_models.models as m
 import logging
 
 from fastapi import APIRouter
@@ -9,7 +8,7 @@ from starlette.requests import Request
 
 handle_email_bounce = APIRouter()
 
-
+# /handle-email-complaint
 @handle_email_bounce.post("")
 async def handle_bounce(req: Request):
     logging.warning("GOT POST")

@@ -14,7 +14,7 @@ class EmailAddress(Model, RecordTimestampFields):
         index=True,
         nullable=True,
     )
-    address = sa.Column(sa.String)
+    address = sa.Column(sa.String, nullable=False, unique=True, index=True)
     status = sa.Column(
-        sa.String, server_default=EmailStatusEnum.PENDING, nullable=False, index=True
+        sa.String, server_default=EmailStatusEnum.PENDING, nullable=False
     )

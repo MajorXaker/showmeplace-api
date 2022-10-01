@@ -6,6 +6,7 @@ from gql.gql_id import decode_gql_id
 from gql.gql_types.user_type import UserType
 from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 from utils.api_auth import AuthChecker
+import sqlalchemy as sa
 
 
 class MutationAddFollower(SQLAlchemyCreateMutation):
@@ -31,6 +32,17 @@ class MutationAddFollower(SQLAlchemyCreateMutation):
             raise ValueError("You can't follow yourself")
         value["follower_id"] = user_id
         value["lead_id"] = lead_id
-        result = await super().mutate(root, info, value)
+        # result = await super().mutate(root, info, value)
+        insert = (
+            sa.dialects.postgresql.insert(M2MUserFollowingUser).values(
+                {
+                    M2MUserFollowingUser.lead_id: lead_id,
+                    M2MUserFollowingUser.follower_id: user_id,
+                }
+            )
+        ).on_conflict_do_nothing(index_elements=["lead_id", "follower_id"])
 
-        return result
+
+        await session.execute(insert)
+
+        return "aaa"
