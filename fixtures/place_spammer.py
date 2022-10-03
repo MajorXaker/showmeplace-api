@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+
 from models.db_models import User, Place
 from utils.db import db_url
 
