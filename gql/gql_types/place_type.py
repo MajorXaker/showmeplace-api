@@ -31,6 +31,7 @@ from utils.config import settings as s
 from utils.filters import secrets_filter, decaying_filter
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
+from utils.utils import CountableConnectionCreator
 
 
 class Cat(ObjectType):
@@ -55,6 +56,7 @@ class PlaceType(SQLAlchemyObjectType):
     class Meta:
         model = Place
         interfaces = (AsyncNode,)
+        connection_class = CountableConnectionCreator
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],

@@ -11,12 +11,14 @@ from models.db_models import User, UserImage, M2MUserFollowingUser, EmailAddress
 from models.enums import EmailStatusEnum
 from utils.api_auth import AuthChecker
 from utils.s3_object_tools import get_presigned_url
+from utils.utils import CountableConnectionCreator
 
 
 class UserType(SQLAlchemyObjectType):
     class Meta:
         model = User
         interfaces = (AsyncNode,)
+        connection_class = CountableConnectionCreator
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
             User.external_id: [OP_EQ],
