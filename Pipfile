@@ -23,6 +23,8 @@ unidecode = "*"
 pillow = "*"
 graphene-federation3 = "*"
 facepy = "*"
+pytest = "*"
+httpx = "*"
 
 [dev-packages]
 
