@@ -29,6 +29,8 @@
     COGNITO_USER_POOL = "us-east-1_60d3tsON2" #prod
     COGNITO_CLIENT_ID = "76tv59cs60tbmklb67halcvcmm"
 
+    MACHINE_NAME = "smp-production"
+
 
 
 

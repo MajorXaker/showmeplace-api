@@ -31,6 +31,7 @@ class UserType(SQLAlchemyObjectType):
         only_fields = [
             User.id.key,
             User.name.key,
+            User.description.key,
             User.has_onboarded.key,
             User.level.key,
             User.coins.key,

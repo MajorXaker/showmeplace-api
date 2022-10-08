@@ -95,14 +95,35 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
         password: str,
         email: str,
     ):
+        email_in_use = (
+            await session.execute(
+                sa.select(EmailAddress.id).where(
+                    EmailAddress.address == email,
+                    sa.or_(
+                        EmailAddress.user_id.isnot(None),
+                        EmailAddress.status.in_(
+                            [
+                                "BOUNCED",
+                                "COMPLAINED",
+                                "BLACKLISTED",
+                            ]
+                        ),
+                    ),
+                )
+            )
+        ).fetchone()
+        if email_in_use:
+            raise ValueError("Email address already in use")
         if "@" not in email:
             raise ValueError("Email address incorrect")
+
         sign_up_response = cognito_connection.sign_up(
             ClientId=s.COGNITO_CLIENT_ID,
             Username=username,
             Password=password,
             UserAttributes=[
                 {"Name": "email", "Value": email},
+                # {"Name": "custom:creator", "Value": s.MACHINE_NAME},
             ],
         )
         # TODO Routine for confirming email!!!!
@@ -127,8 +148,6 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                 .returning(User.id)
             )
         ).fetchone()
-
-        # internal_id = encode_gql_id("UserType", new_user_id.id)
 
         await session.execute(
             sa.insert(EmailAddress).values(
