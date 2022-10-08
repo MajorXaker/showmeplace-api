@@ -7,7 +7,7 @@ from alchql import SQLAlchemyObjectType, gql_types
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
-from graphene import ObjectType, String
+from graphene import ObjectType, String, Float
 from sqlalchemy.ext.asyncio import AsyncSession
 from unidecode import unidecode
 
@@ -28,9 +28,10 @@ from utils.api_auth import AuthChecker
 from utils.config import settings as s
 
 # from gql.utils.gql_id import encode_gql_id
-from utils.filters import secrets_filter, decaying_filter
+from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
+from utils.utils import CountableConnectionCreator
 
 
 class Cat(ObjectType):
@@ -49,15 +50,23 @@ class SecretPlaceExtraObject(ObjectType):
     extra_suggestion = String()
 
 
-# TODO ENUM (SECRET PLACES) = HIDE \ SHOW \ ONLY
-# TODO BURNED OUT PLACES
+class CoordinateBox(graphene.InputObjectType):
+    ne_longitude = Float()
+    ne_latitude = Float()
+    sw_longitude = Float()
+    sw_latitude = Float()
+
+
 class PlaceType(SQLAlchemyObjectType):
     class Meta:
         model = Place
         interfaces = (AsyncNode,)
+        connection_class = CountableConnectionCreator
         filter_fields = {
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
+            # "coordinate_box": CoordinateBox(),
+            "coordinate_box": FilterItem(field_type=CoordinateBox, filter_func=box_coordinates_filter),
             "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
