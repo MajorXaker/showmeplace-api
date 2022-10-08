@@ -16,7 +16,7 @@
     ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
     AWS_UPLOADING = true
 
-    CHECK_IN_DISTANCE = 50 # in meters
+    CHECK_IN_DISTANCE_METERS = 100 # in meters
 
     SERVER_RELOAD_MODE = true
 

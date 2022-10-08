@@ -130,7 +130,7 @@ class MutationUpdateUser(graphene.Mutation):
                 if too_short:
                     errors["Too Short"] = too_short
                 message = ". ".join(errors.values())
-
+                # TODO make a function raiser
                 raise GraphQLError(
                     message,
                     extensions={
