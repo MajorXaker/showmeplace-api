@@ -10,8 +10,9 @@ from gql.gql_types import (
     CategoryImageType,
     PlaceImageType,
     # SecretPlaceExtraType,
-    ActionType, OldPlaceType,
-    ActionType, EmailCheckAvailability, resolve_email_check_availability
+    ActionType,
+    OldPlaceType,
+    ActionType,
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -29,7 +30,9 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory, MutationUpdateSecretPlaceData, MutationVerifyCognitoUser, MutationRegistrationLoginCognito,
+    MutationUpdateSecretPlaceData,
+    MutationVerifyCognitoUser,
+    MutationRegistrationLoginCognito,
 )
 
 
@@ -44,11 +47,11 @@ class Query(graphene.ObjectType):
 
     old_select_places = FilterConnectionField(OldPlaceType, deprecation_reason="OLD")
 
-    check_email_availability = graphene.NonNull(
-        of_type=EmailCheckAvailability,
-        email_address=graphene.Argument(type_=graphene.String, required=True),
-        resolver=resolve_email_check_availability
-    )
+    # check_email_availability = graphene.NonNull(
+    #     of_type=EmailCheckAvailability,
+    #     email_address=graphene.Argument(type_=graphene.String, required=True),
+    #     resolver=resolve_email_check_availability,
+    # )
     # cognito_email_check = graphene.NonNull(
     #     of_type=EmailCheckVerification,
     #     email_address=graphene.Argument(type_=graphene.String, required=True),
@@ -57,10 +60,8 @@ class Query(graphene.ObjectType):
     # )
 
 
-
-
 class Mutation(graphene.ObjectType):
-    verify_cognito_user= MutationVerifyCognitoUser.Field()
+    verify_cognito_user = MutationVerifyCognitoUser.Field()
     add_user = MutationAddUser.Field()
     update_user = MutationUpdateUser.Field()
 

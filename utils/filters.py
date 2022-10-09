@@ -2,6 +2,7 @@ import datetime
 
 from sqlalchemy import func as f
 
+from gql.gql_id import gql_decoder
 # from gql.gql_types.place_type import CoordinateBox # TODO buggy!
 from models.db_models import Place
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
@@ -42,3 +43,11 @@ def box_coordinates_filter(v):
         Place.coordinate_longitude.between(v.sw_longitude, v.ne_longitude),
     )
     return result
+
+# @gql_decoder
+# def filter_owner(v):
+#     return Place.owner_id == v
+
+# @gql_decoder
+# def filter_visitor(v):
+#     return Place.owner_id == v
