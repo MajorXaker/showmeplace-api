@@ -3,11 +3,10 @@ import logging
 import sqlalchemy as sa
 import uvicorn
 from alchql.app import SessionQLApp
-from alchql.middlewares import LogMiddleware, LoaderMiddleware
+from alchql.middlewares import LogMiddleware
 from fastapi import FastAPI
 
 from gql.schema import schema
-from models.base_engine import Model
 from utils.db import async_engine
 from utils.config import settings as s
 from utils.sns_webhooks.email_bounce import handle_email_bounce
@@ -17,7 +16,6 @@ app = FastAPI()
 
 middleware = [
     LogMiddleware(),
-    LoaderMiddleware(Model.registry.mappers),
 ]
 
 
@@ -47,11 +45,12 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-    logging.info("Engage!")
+    print("starting")
+    logging.warning("Test")
     uvicorn.run(
         "__main__:app",
         host="0.0.0.0",
-        port=8000,
+        port=443,
         log_level="info",
         reload=s.SERVER_RELOAD_MODE,
         log_config=None,

@@ -16,7 +16,7 @@
     ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
     AWS_UPLOADING = true
 
-    CHECK_IN_DISTANCE = 50 # in meters
+    CHECK_IN_DISTANCE_METERS = 100 # in meters
 
     SERVER_RELOAD_MODE = true
 
@@ -25,6 +25,11 @@
     SECRET_PLACE_NAME = "Secret place"
     SECRET_MARK = "secret"
     PLACE_BURNOUT_DURATION_HOURS = 24
+
+    COGNITO_USER_POOL = "us-east-1_60d3tsON2" #prod
+    COGNITO_CLIENT_ID = "76tv59cs60tbmklb67halcvcmm"
+
+    MACHINE_NAME = "smp-production"
 
 
 

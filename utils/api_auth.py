@@ -8,7 +8,7 @@ from models.db_models import User
 class AuthChecker:
     class NotAuthorisedException(ConnectionRefusedError):
         pass
-        # raise ConnectionRefusedError("Unathorised connection")
+        # raise ConnectionRefusedError("Unauthorized connection")
 
     @classmethod
     def check_auth_request(cls, info):
@@ -17,7 +17,7 @@ class AuthChecker:
                 active_user = header[1]
                 user_id = decode_gql_id(active_user)[1]
                 return user_id
-        raise cls.NotAuthorisedException("Unathorised connection")
+        raise cls.NotAuthorisedException("Unauthorized connection")
 
     @classmethod
     async def check_auth_mutation(cls, session: AsyncSession, info):
@@ -26,5 +26,5 @@ class AuthChecker:
             await session.execute(sa.select(User.id).where(User.id == user_id))
         ).fetchone()
         if not is_user_in_db:
-            cls.NotAuthorisedException("Unathorised connection")
+            cls.NotAuthorisedException("Unauthorized connection")
         return user_id

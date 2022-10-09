@@ -23,7 +23,7 @@ db_url = f"postgresql://{pure_db_url}"
 async_engine = create_async_engine(
     async_db_url,
     encoding="utf-8",
-    # echo=settings.get("DATABASE_ECHO_MODE", False),
+    echo=settings.get("DATABASE_ECHO_MODE", False),
     max_overflow=settings.get("DB_CONN_MAX_OVERFLOW", 25),
 )
 

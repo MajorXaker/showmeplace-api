@@ -33,3 +33,15 @@ class DecayingPlacesFilterEnum(StrEnum):
     DECAYED = "DECAYED"
     DECAYING = "DECAYING"
     REGULAR = "REGULAR"
+
+
+class EmailStatusEnum(StrEnum):
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    BOUNCED = "BOUNCED"
+    COMPLAINED = "COMPLAINED"
+    BLACKLISTED = "BLACKLISTED"
+    # these 3 are debatable and may be redundant
+    BOUNCE_2ND_CHANCE = "BOUNCE_2ND_CHANCE"
+    BOUNCE_3RD_CHANCE = "BOUNCE_3RD_CHANCE"
+    COMPLAIN_2ND_CHANCE = "COMPLAIN_2ND_CHANCE"

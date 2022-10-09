@@ -1,5 +1,6 @@
 import graphene
 from alchql.fields import FilterConnectionField
+from graphene import ConnectionField
 
 from gql.gql_types import (
     PlaceType,
@@ -10,6 +11,7 @@ from gql.gql_types import (
     PlaceImageType,
     # SecretPlaceExtraType,
     ActionType, OldPlaceType,
+    ActionType, EmailCheckAvailability, resolve_email_check_availability
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -27,6 +29,7 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
+    MutationUpdateCategory, MutationUpdateSecretPlaceData, MutationVerifyCognitoUser, MutationRegistrationLoginCognito,
 )
 
 
@@ -41,8 +44,23 @@ class Query(graphene.ObjectType):
 
     old_select_places = FilterConnectionField(OldPlaceType, deprecation_reason="OLD")
 
+    check_email_availability = graphene.NonNull(
+        of_type=EmailCheckAvailability,
+        email_address=graphene.Argument(type_=graphene.String, required=True),
+        resolver=resolve_email_check_availability
+    )
+    # cognito_email_check = graphene.NonNull(
+    #     of_type=EmailCheckVerification,
+    #     email_address=graphene.Argument(type_=graphene.String, required=True),
+    #     external_id=graphene.Argument(type_=graphene.String, required=True),
+    #     resolver=resolve_email_check_verification
+    # )
+
+
+
 
 class Mutation(graphene.ObjectType):
+    verify_cognito_user= MutationVerifyCognitoUser.Field()
     add_user = MutationAddUser.Field()
     update_user = MutationUpdateUser.Field()
 
@@ -69,6 +87,8 @@ class Mutation(graphene.ObjectType):
     close_secret_place = MutationCloseSecretPlace.Field(
         deprecation_reason="Service, will be deleted later"
     )
+    update_secret_place = MutationUpdateSecretPlaceData.Field()
+    registration_login = MutationRegistrationLoginCognito.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
