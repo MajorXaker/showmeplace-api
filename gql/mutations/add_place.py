@@ -13,6 +13,7 @@ from models.db_models import (
 )
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
+from utils.smp_exceptions import Exc
 from ..gql_id import decode_gql_id
 from ..gql_types.place_type import PlaceType
 from ..service_types.coin_change_object import CoinChange
@@ -91,6 +92,10 @@ class MutationAddPlace(graphene.Mutation):
             )
 
         if not possible_actions[action_name]:
+            Exc.value(
+                message="Insufficient coins",
+
+            )
             raise ValueError(f"Insufficient coins")
 
         # adding a place to db
