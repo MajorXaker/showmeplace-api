@@ -11,6 +11,7 @@ from utils.api_auth import AuthChecker
 from utils.config import settings as s
 from models.db_models import Place, ActionsEconomy, Category
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 from ..gql_id import decode_gql_id
 from ..service_types.coin_change_object import CoinChange
 
@@ -62,7 +63,11 @@ class MutationCheckIn(graphene.Mutation):
             )
         ).fetchone()
         if is_been_here:
-            raise ValueError("User has already been here")
+            Exc.value(
+                message="User has already been here",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE
+            )
         # TODO go to try-except logic
 
         place = (

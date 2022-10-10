@@ -13,7 +13,7 @@ from models.db_models import (
 )
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from utils.smp_exceptions import Exc
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 from ..gql_id import decode_gql_id
 from ..gql_types.place_type import PlaceType
 from ..service_types.coin_change_object import CoinChange
@@ -90,13 +90,14 @@ class MutationAddPlace(graphene.Mutation):
             action_name = (
                 "Create first secret place" if is_secret_place else "Create a place"
             )
-
+        # TODO return how much more coins is needed
         if not possible_actions[action_name]:
-            Exc.value(
+            Exc.low_wallet(
                 message="Insufficient coins",
+                of_group=ExceptionGroupEnum.BAD_BALANCE,
+                reasons=ExceptionReasonEnum.LOW_BALANCE
 
             )
-            raise ValueError(f"Insufficient coins")
 
         # adding a place to db
         uploaded_place_id = (

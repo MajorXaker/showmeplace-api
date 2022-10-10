@@ -11,7 +11,7 @@ from models.db_models import User, EmailAddress
 from models.enums import EmailStatusEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from utils.smp_exceptions import ExceptionEnum, Exc
+from utils.smp_exceptions import ExceptionGroupEnum, Exc
 
 
 class PasswordChange(graphene.InputObjectType):
@@ -61,7 +61,7 @@ class MutationUpdateUser(graphene.Mutation):
             ).fetchone()
             if is_not_available:
                 Exc.value(message="Email address is already in use",
-                          of_group=ExceptionEnum.EMAIL,
+                          of_group=ExceptionGroupEnum.EMAIL,
                           reasons="Email Already In Use")
 
             response = cognito_connection.admin_update_user_attributes(

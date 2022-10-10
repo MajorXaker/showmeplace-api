@@ -15,6 +15,7 @@ from utils.s3_object_tools import (
     get_presigned_url,
     add_imagetype_routine,
 )
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 from ..gql_id import decode_gql_id
 
 
@@ -34,7 +35,11 @@ class MutationAddUserImage(SQLAlchemyCreateMutation):
         session: AsyncSession = info.context.session
         user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
         if len(image__b64s) > 1:
-            raise ValueError("User images cannot be more than 1")
+            Exc.value(
+                message="User images cannot be more than 1",
+                of_group=ExceptionGroupEnum.IMAGE_ERROR,
+                reasons=ExceptionReasonEnum.ONLY_ONE_ITEM
+            )
         file_extension = (
             ".jpg"  # TODO implement a feature to load images of diffrent types
         )

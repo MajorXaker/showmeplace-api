@@ -8,6 +8,7 @@ from gql.gql_id import encode_gql_id
 from models.db_models import User, EmailAddress
 from models.enums import EmailStatusEnum
 from utils.config import settings as s
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
@@ -50,7 +51,11 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
             )
         else:
             if not value.get("email_address"):
-                raise ValueError("Email is required for registration")
+                Exc.value(
+                    message="Email is required for registration",
+                    of_group=ExceptionGroupEnum.EMAIL,
+                    reasons=ExceptionReasonEnum.MISSING_VALUE,
+                )
             response = await cls.cognito_register(
                 cognito_connection=cognito_connection,
                 session=session,
@@ -72,8 +77,12 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                 ClientId=s.COGNITO_CLIENT_ID,
             )
         except cognito_connection.exceptions.NotAuthorizedException:
-            raise ValueError("Incorrect username or password")
-
+            Exc.value(
+                message="Incorrect username or password",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+            return
         if response["AuthenticationResult"].get("AccessToken"):
             user = (
                 await session.execute(sa.select(User.id).where(User.name == username))
@@ -113,9 +122,21 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
             )
         ).fetchone()
         if email_in_use:
-            raise ValueError("Email address already in use")
+            Exc.value(
+                message="Email address already in use",
+                of_group=ExceptionGroupEnum.EMAIL,
+                reasons=(
+                    ExceptionReasonEnum.DUPLICATE_VALUE,
+                    ExceptionReasonEnum.VALUE_IN_USE,
+                ),
+            )
+
         if "@" not in email:
-            raise ValueError("Email address incorrect")
+            Exc.value(
+                message="Email address incorrect",
+                of_group=ExceptionGroupEnum.EMAIL,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
 
         sign_up_response = cognito_connection.sign_up(
             ClientId=s.COGNITO_CLIENT_ID,

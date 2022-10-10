@@ -31,7 +31,7 @@ from utils.config import settings as s
 from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
-from utils.smp_exceptions import ExceptionEnum, Exc
+from utils.smp_exceptions import ExceptionGroupEnum, Exc, ExceptionReasonEnum
 from utils.utils import CountableConnectionCreator
 
 
@@ -225,8 +225,8 @@ class PlaceType(SQLAlchemyObjectType):
         if "distanceFrom" in info.variable_values:
             if "longitudeFrom" not in info.variable_values or "latitudeFrom" not in info.variable_values:
                 Exc.missing_data(message="No user coordinates provided",
-                          of_group=ExceptionEnum.COORDINATES,
-                          reasons="Missing Coordinate Value")
+                                 of_group=ExceptionGroupEnum.COORDINATES,
+                                 reasons=ExceptionReasonEnum.MISSING_VALUE)
             lat = info.variable_values["latitudeFrom"]
             long = info.variable_values["longitudeFrom"]
             dist = info.variable_values["distanceFrom"]
