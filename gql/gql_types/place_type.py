@@ -101,7 +101,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            # "owner_id",
+            Place.owner_id.key
         ]
 
     # secret_extra = ModelField(
@@ -116,7 +116,7 @@ class PlaceType(SQLAlchemyObjectType):
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-    owner_id = gql_types.String(model_field=Place.owner_id)
+    # owner_id = gql_types.String(model_field=Place.owner_id)
 
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
@@ -277,9 +277,9 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
-    async def resolve_owner_id(self, info):
-        owner_id = encode_gql_id("UserType", self.owner_id)
-        return owner_id
+    # async def resolve_owner_id(self, info):
+    #     owner_id = encode_gql_id("UserType", self.owner_id)
+    #     return owner_id
 
     async def resolve_has_favourited(self, info):
         asker_id = AuthChecker.check_auth_request(info)

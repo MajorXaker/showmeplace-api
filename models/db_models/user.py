@@ -22,4 +22,9 @@ class User(Model, RecordTimestampFields):
     external_id_type: IdentificationEnum = sa.Column(
         sa.Text, nullable=False, server_default="COGNITO"
     )
+    active_email_address_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("email_address.id", ondelete="RESTRICT"),
+        nullable=True,
+    )
     # TODO what do we need for profile sharing

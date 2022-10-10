@@ -2,6 +2,7 @@ import boto3
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
+from graphql import GraphQLResolveInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from gql.gql_id import encode_gql_id
@@ -11,23 +12,29 @@ from utils.config import settings as s
 from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
-class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
+class PasswordReset(graphene.InputObjectType):
+    confirmation_code = graphene.String(required=True)
+    new_password = graphene.String(required=True)
+
+
+class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
     class Meta:
         model = User
-        input_fields = {
+        arguments = {
             "user_name": graphene.String(required=True),
             "email_address": graphene.String(),
             "password": graphene.String(required=True),
+            "password_reset_box": PasswordReset(),
         }
+        name = "MutationSignInSignUp"
 
     registered_now = graphene.Boolean()
     registered_earlier = graphene.Boolean()
     token = graphene.String()
 
     @classmethod
-    async def mutate(cls, root, info, value: dict):
+    async def mutate(cls, root, info, **value: dict):
         session: AsyncSession = info.context.session
-        pool = s.COGNITO_USER_POOL
         cognito_connection = boto3.client(
             "cognito-idp",
             region_name="us-east-1",
@@ -36,12 +43,27 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
         )
         username = value["user_name"]
         raw_user_data = cognito_connection.list_users(
-            UserPoolId=pool,
+            UserPoolId=s.COGNITO_USER_POOL,
             Limit=1,
             Filter=f'username = "{username}"',
+            # )[0]
         )["Users"]
 
         if raw_user_data:
+            if raw_user_data[0]["UserStatus"] == "RESET_REQUIRED":
+                if not "password_reset_box" in value:
+                    Exc.value(
+                        message="No password reset data",
+                        of_group=ExceptionGroupEnum.PASSWORD_RESET,
+                        reasons=ExceptionReasonEnum.MISSING_VALUE,
+                    )
+                await cls.reset_password(
+                    cognito_connection=cognito_connection,
+                    info=info,
+                    username=username,
+                    password_reset_box=value["password_reset_box"],
+                )
+
             # TODO Do we need userdata?
             response = await cls.cognito_login(
                 cognito_connection=cognito_connection,
@@ -64,7 +86,7 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                 email=value["email_address"],
             )
 
-        return MutationRegistrationLoginCognito(**response)
+        return MutationSigninSignupCognito(**response)
 
     @classmethod
     async def cognito_login(
@@ -83,10 +105,48 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                 reasons=ExceptionReasonEnum.INCORRECT_VALUE,
             )
             return
+        except cognito_connection.exceptions.UserNotConfirmedException:
+            Exc.value(
+                message="Email address is not confirmed",
+                of_group=ExceptionGroupEnum.EMAIL,
+                reasons=ExceptionReasonEnum.NOT_CONFIRMED,
+            )
+            return
+        except cognito_connection.exceptions.PasswordResetRequiredException:
+            Exc.value(
+                message="User has requested a password change",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.CHANGE_REQUESTED,
+            )
+            return
         if response["AuthenticationResult"].get("AccessToken"):
             user = (
-                await session.execute(sa.select(User.id).where(User.name == username))
+                await session.execute(
+                    sa.select(
+                        User.id,
+                        User.name,
+                        User.active_email_address_id,
+                        EmailAddress.status.label("email_status"),
+                    )
+                    .join(EmailAddress, EmailAddress.id == User.active_email_address_id)
+                    .where(User.name == username)
+                )
             ).fetchone()
+            if user.email_status != EmailStatusEnum.VERIFIED:
+                if user.email_status == EmailStatusEnum.PENDING:
+                    await session.execute(
+                        sa.update(EmailAddress)
+                        .where(EmailAddress.id == user.active_email_address_id)
+                        .values({EmailAddress.status: EmailStatusEnum.VERIFIED})
+                    )
+                else:
+                    # todo wunno what could happen to trigger this. Need to think of it
+                    Exc.value(
+                        message="Incorrect email address. Contact ShowMePlace team",
+                        of_group=ExceptionGroupEnum.EMAIL,
+                        reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+                    )
+
             token = encode_gql_id("UserType", user.id)
 
             return {
@@ -104,6 +164,7 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
         password: str,
         email: str,
     ):
+        # TODO remove user if hasn't verified email in 24 hours and tried to use same credentials again
         email_in_use = (
             await session.execute(
                 sa.select(EmailAddress.id).where(
@@ -138,21 +199,24 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                 reasons=ExceptionReasonEnum.INCORRECT_VALUE,
             )
 
-        sign_up_response = cognito_connection.sign_up(
-            ClientId=s.COGNITO_CLIENT_ID,
-            Username=username,
-            Password=password,
-            UserAttributes=[
-                {"Name": "email", "Value": email},
-                # {"Name": "custom:creator", "Value": s.MACHINE_NAME},
-            ],
-        )
-        # TODO Routine for confirming email!!!!
-        confirm_sign_up_response = cognito_connection.admin_confirm_sign_up(
-            UserPoolId=s.COGNITO_USER_POOL, Username=username
-        )
-        email_status = EmailStatusEnum.VERIFIED
-        # TODO Routine for confirming email!!!!
+        # # TODO Routine for confirming email!!!!
+        # confirm_sign_up_response = cognito_connection.admin_confirm_sign_up(
+        #     UserPoolId=s.COGNITO_USER_POOL, Username=username
+        # )
+        email_status = EmailStatusEnum.PENDING
+
+        email_row = (
+            await session.execute(
+                sa.insert(EmailAddress)
+                .values(
+                    {
+                        EmailAddress.address: email,
+                        EmailAddress.status: email_status,
+                    }
+                )
+                .returning(EmailAddress.id)
+            )
+        ).fetchone()
 
         new_user_id = (
             await session.execute(
@@ -164,20 +228,21 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
                         User.external_id_type: "COGNITO",
                         User.coins: 0,
                         User.level: 0,
+                        User.active_email_address_id: email_row.id,
                     }
                 )
                 .returning(User.id)
             )
         ).fetchone()
 
-        await session.execute(
-            sa.insert(EmailAddress).values(
-                {
-                    EmailAddress.address: email,
-                    EmailAddress.user_id: new_user_id.id,
-                    EmailAddress.status: email_status,
-                }
-            )
+        sign_up_response = cognito_connection.sign_up(
+            ClientId=s.COGNITO_CLIENT_ID,
+            Username=username,
+            Password=password,
+            UserAttributes=[
+                {"Name": "email", "Value": email},
+                # {"Name": "custom:creator", "Value": s.MACHINE_NAME},
+            ],
         )
 
         internal_id = (
@@ -194,3 +259,59 @@ class MutationRegistrationLoginCognito(SQLAlchemyCreateMutation):
             "registered_earlier": False,
             "registered_now": True,
         }
+
+    @classmethod
+    async def reset_password(
+        cls,
+        cognito_connection,
+        info: GraphQLResolveInfo,
+        username: str,
+        password_reset_box: dict,
+    ):
+        if not all(
+            [
+                "new_password" in password_reset_box,
+                "confirmation_code" in password_reset_box,
+            ]
+        ):
+            Exc.value(
+                message="No password reset data incomplete",
+                of_group=ExceptionGroupEnum.PASSWORD_RESET,
+                reasons=ExceptionReasonEnum.MISSING_VALUE,
+            )
+        # TODO EXTREME VULNURABILITY! NO CODE IS NECESSARY ATM!!!
+        response = cognito_connection.admin_set_user_password(
+            UserPoolId=s.COGNITO_USER_POOL,
+            Username=username,
+            Password=password_reset_box["new_password"],
+            Permanent=True,
+        )
+
+        # response = cognito_connection.admin_respond_to_auth_challenge(
+        #     UserPoolId=s.COGNITO_USER_POOL,
+        #     ClientId=s.COGNITO_CLIENT_ID,
+        #     ChallengeName='NEW_PASSWORD_REQUIRED',
+        #     ChallengeResponses={
+        #         'PASSWORD': password_reset_box["new_password"]
+        #         'PASSWORD': password_reset_box["new_password"]
+        #     },
+        #     Session='string',
+        #     AnalyticsMetadata={
+        #         'AnalyticsEndpointId': 'string'
+        #     },
+        #     ContextData={
+        #         'IpAddress': 'string',
+        #         'ServerName': 'string',
+        #         'ServerPath': 'string',
+        #         'HttpHeaders': [
+        #             {
+        #                 'headerName': 'string',
+        #                 'headerValue': 'string'
+        #             },
+        #         ],
+        #         'EncodedData': 'string'
+        #     },
+        #     ClientMetadata={
+        #         'string': 'string'
+        #     }
+        # )

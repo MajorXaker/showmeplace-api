@@ -15,6 +15,7 @@ class ExceptionGroupEnum(StrEnum):
     IMAGE_ERROR = "Image Error"
     BAD_INPUT = "Bad Input"
     BAD_CREDENTIALS = "Bad Credentials"
+    PASSWORD_RESET = "Bad Password Reset Box"
 
 
 
@@ -29,6 +30,8 @@ class ExceptionReasonEnum(StrEnum):
     LOW_BALANCE = "Low Coin Balance"
     INCORRECT_TOKEN = "Incorrect Token"
     ONLY_ONE_ITEM = "Only 1 Item Allowed"
+    NOT_CONFIRMED = "Email Not Confirmed"
+    CHANGE_REQUESTED = "Change Requested"
 
 
 
