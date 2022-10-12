@@ -1,4 +1,6 @@
 import datetime
+import json
+import logging
 import math
 
 import graphene
@@ -6,6 +8,7 @@ import sqlalchemy as sa
 from alchql import SQLAlchemyObjectType, gql_types
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
+from alchql.query_helper import QueryHelper
 from alchql.utils import FilterItem
 from graphene import ObjectType, String, Float
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,10 +28,11 @@ from models.db_models import (
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
-from utils.config import settings as s
+from utils.config import settings as s, log
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
+from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
 from utils.smp_exceptions import ExceptionGroupEnum, Exc, ExceptionReasonEnum
@@ -67,7 +71,9 @@ class PlaceType(SQLAlchemyObjectType):
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
             # "coordinate_box": CoordinateBox(),
-            "coordinate_box": FilterItem(field_type=CoordinateBox, filter_func=box_coordinates_filter),
+            "coordinate_box": FilterItem(
+                field_type=CoordinateBox, filter_func=box_coordinates_filter
+            ),
             "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
@@ -91,7 +97,9 @@ class PlaceType(SQLAlchemyObjectType):
                 field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
             ),
-            "opened_secret_places": FilterItem(field_type=graphene.Boolean, filter_func=None),
+            "opened_secret_places": FilterItem(
+                field_type=graphene.Boolean, filter_func=None
+            ),
         }
 
         only_fields = [
@@ -101,7 +109,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            Place.owner_id.key
+            Place.owner_id.key,
         ]
 
     # secret_extra = ModelField(
@@ -139,7 +147,7 @@ class PlaceType(SQLAlchemyObjectType):
         if not extra:
             return None
         data = dict(extra)
-        data["id"] = encode_gql_id("SecretPlaceType",data["id"])
+        data["id"] = encode_gql_id("SecretPlaceType", data["id"])
         return data
 
     async def resolve_category_data(self, info):
@@ -209,6 +217,9 @@ class PlaceType(SQLAlchemyObjectType):
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
+
+        await debug_log(cls, info)
+
         session: AsyncSession = info.context.session
         asker_id = AuthChecker.check_auth_request(info)
         user_owner = info.variable_values.get("userOwner")
@@ -223,10 +234,15 @@ class PlaceType(SQLAlchemyObjectType):
             q = q.where(Place.owner_id == user_owner)
 
         if "distanceFrom" in info.variable_values:
-            if "longitudeFrom" not in info.variable_values or "latitudeFrom" not in info.variable_values:
-                Exc.missing_data(message="No user coordinates provided",
-                                 of_group=ExceptionGroupEnum.COORDINATES,
-                                 reasons=ExceptionReasonEnum.MISSING_VALUE)
+            if (
+                "longitudeFrom" not in info.variable_values
+                or "latitudeFrom" not in info.variable_values
+            ):
+                Exc.missing_data(
+                    message="No user coordinates provided",
+                    of_group=ExceptionGroupEnum.COORDINATES,
+                    reasons=ExceptionReasonEnum.MISSING_VALUE,
+                )
             lat = info.variable_values["latitudeFrom"]
             long = info.variable_values["longitudeFrom"]
             dist = info.variable_values["distanceFrom"]
