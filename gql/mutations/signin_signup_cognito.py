@@ -218,7 +218,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             Exc.value(
                 message=". ".join(password_errors.keys()),
                 of_group=ExceptionGroupEnum.PASSWORD,
-                reasons=password_errors.values(),
+                reasons=list(password_errors.values()),
             )
 
         # # TODO Routine for confirming email!!!!
