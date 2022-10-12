@@ -209,7 +209,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             password_errors[
                 "Password should be at least 6 symbols"
             ] = ExceptionReasonEnum.SIX_CHARS_AT_LEAST
-        if re.findall(r"\d", password):
+        if not re.findall(r"\d", password):
             password_errors[
                 "Password should contain at least 1 number"
             ] = ExceptionReasonEnum.NUMBER_MUST_PRESENT
