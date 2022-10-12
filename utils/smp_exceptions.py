@@ -32,6 +32,8 @@ class ExceptionReasonEnum(StrEnum):
     ONLY_ONE_ITEM = "Only 1 Item Allowed"
     NOT_CONFIRMED = "Email Not Confirmed"
     CHANGE_REQUESTED = "Change Requested"
+    NUMBER_MUST_PRESENT = "Should Contain Numbers"
+    SIX_CHARS_AT_LEAST = "Should Be 6 Symbols At Least"
 
 
 

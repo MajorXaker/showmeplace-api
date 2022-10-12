@@ -1,3 +1,5 @@
+import re
+
 import boto3
 import graphene
 import sqlalchemy as sa
@@ -199,11 +201,53 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                 reasons=ExceptionReasonEnum.INCORRECT_VALUE,
             )
 
+        if len(password) < 6:
+            pass
+
+        password_errors = {}
+        if len(password) < 6:
+            password_errors[
+                "Password should be at least 6 symbols"
+            ] = ExceptionReasonEnum.SIX_CHARS_AT_LEAST
+        if re.findall(r"\d", password):
+            password_errors[
+                "Password should contain at least 1 number"
+            ] = ExceptionReasonEnum.NUMBER_MUST_PRESENT
+
+        if password_errors:
+            Exc.value(
+                message=". ".join(password_errors.keys()),
+                of_group=ExceptionGroupEnum.PASSWORD,
+                reasons=password_errors.values(),
+            )
+
         # # TODO Routine for confirming email!!!!
         # confirm_sign_up_response = cognito_connection.admin_confirm_sign_up(
         #     UserPoolId=s.COGNITO_USER_POOL, Username=username
         # )
         email_status = EmailStatusEnum.PENDING
+        try:
+            sign_up_response = cognito_connection.sign_up(
+                ClientId=s.COGNITO_CLIENT_ID,
+                Username=username,
+                Password=password,
+                UserAttributes=[
+                    {"Name": "email", "Value": email},
+                    # {"Name": "custom:creator", "Value": s.MACHINE_NAME},
+                ],
+            )
+        except cognito_connection.exceptions.InvalidPasswordException:
+            Exc.value(
+                message="Password invalid",
+                of_group=ExceptionGroupEnum.PASSWORD,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+        except cognito_connection.exceptions.UsernameExistsException:
+            Exc.value(
+                message="Username already taken",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
 
         email_row = (
             await session.execute(
@@ -234,16 +278,6 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                 .returning(User.id)
             )
         ).fetchone()
-
-        sign_up_response = cognito_connection.sign_up(
-            ClientId=s.COGNITO_CLIENT_ID,
-            Username=username,
-            Password=password,
-            UserAttributes=[
-                {"Name": "email", "Value": email},
-                # {"Name": "custom:creator", "Value": s.MACHINE_NAME},
-            ],
-        )
 
         internal_id = (
             await cls.cognito_login(
