@@ -129,6 +129,7 @@ class MutationAddPlace(graphene.Mutation):
             sa.update(Place)
             .where(
                 sa.and_(
+                    Place.owner_id == user_id,
                     Place.id != uploaded_place_id,
                     Place.category_id == place_category.id,
                     Place.active_due_date.is_(None),

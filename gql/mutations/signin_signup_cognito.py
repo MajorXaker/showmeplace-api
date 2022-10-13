@@ -44,7 +44,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             aws_access_key_id=s.ACCESS_KEY_ID,
             aws_secret_access_key=s.ACCESS_SECRET_KEY,
         )
-        username = value["user_name"]
+        username: str = value["user_name"].strip()
         if len(username) < 2:
             Exc.value(
                 message="Username is too short",
