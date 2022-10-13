@@ -45,12 +45,9 @@ convention = {
     "pk": "pk_%(table_name)s",
 }
 
-#
+
 @as_declarative(metadata=MetaData(naming_convention=convention))
 class Model:
     metadata: MetaData
 
 
-# Model = declarative_base(metadata=MetaData(naming_convention=convention))
-
-# db = create_engine("postgresql+psycopg2://mastermind:master_hrinder@localhost/hrinder")

@@ -12,15 +12,13 @@
     S3_CATEGORY_IMAGE_FOLDER = "category_images/"
     S3_USER_IMAGE_FOLDER = "user_images/"
 
-    ACCESS_SECRET_KEY = "AvgbvCY+eqQy4byqWsoje0A2KB/XYaQYUvFnKaVc"
-    ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
+    ACCESS_SECRET_KEY = ""
+    ACCESS_KEY_ID = ""
     AWS_UPLOADING = true
 
     CHECK_IN_DISTANCE_METERS = 100 # in meters
 
     SERVER_RELOAD_MODE = true
-
-    AUTH_HEADER_NAME = "user_auth" # not used atm -> bytes(private_key, "UTF-8")
 
     SECRET_PLACE_NAME = "Secret place"
     SECRET_MARK = "secret"
@@ -33,7 +31,7 @@
 
     LOGGING_LEVEL = "DEBUG"
     LOG_TO_CONSOLE = true
-    LOG_TO_FILE = false
+    LOG_TO_FILE = true
     LOG_TO_SENTRY = false
     JSON_LOGS = false
 

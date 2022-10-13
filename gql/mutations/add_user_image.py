@@ -19,7 +19,7 @@ from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 from ..gql_id import decode_gql_id
 
 
-# TODO receive b64s as dict, it would allow utilisation of extensions and image ordering
+
 class MutationAddUserImage(SQLAlchemyCreateMutation):
     class Meta:
         model = PlaceImage

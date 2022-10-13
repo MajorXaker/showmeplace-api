@@ -189,7 +189,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
         password: str,
         email: str,
     ):
-        # TODO remove user if hasn't verified email in 24 hours and tried to use same credentials again
+        # TODO remove user if hasn't verified email in 24 hours and tried to use same credentials again - Ougen*
         q = sa.select(EmailAddress.id).where(
             EmailAddress.address == email,
 
@@ -232,10 +232,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                 reasons=list(password_errors.values()),
             )
 
-        # # TODO Routine for confirming email!!!!
-        # confirm_sign_up_response = cognito_connection.admin_confirm_sign_up(
-        #     UserPoolId=s.COGNITO_USER_POOL, Username=username
-        # )
+
         email_status = EmailStatusEnum.PENDING
         try:
             sign_up_response = cognito_connection.sign_up(

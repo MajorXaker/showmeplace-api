@@ -90,7 +90,7 @@ class MutationAddPlace(graphene.Mutation):
             action_name = (
                 "Create first secret place" if is_secret_place else "Create a place"
             )
-        # TODO return how much more coins is needed
+        # TODO return how much more coins is needed - Ougen
         if not possible_actions[action_name]:
             Exc.low_wallet(
                 message="Insufficient coins",
@@ -114,7 +114,6 @@ class MutationAddPlace(graphene.Mutation):
             new_secret_place_data = await basic_mapper(
                 SecretPlaceExtra, secret_place_extra
             )
-            # TODO SECRET PLACE EXTRA id to place
             new_secret_place_data[SecretPlaceExtra.place_id] = uploaded_place_id
             await session.execute(
                 sa.insert(SecretPlaceExtra).values(new_secret_place_data)

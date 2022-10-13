@@ -27,4 +27,6 @@ class User(Model, RecordTimestampFields):
         sa.ForeignKey("email_address.id", ondelete="RESTRICT"),
         nullable=True,
     )
-    # TODO what do we need for profile sharing
+    # TODO what do we need for profile sharing - Ougen**
+    # Mutation for generation UID which will live for X (in settings) hours.
+    # TODO URL Endpoint for such page

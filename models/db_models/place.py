@@ -11,7 +11,6 @@ class Place(Model, RecordTimestampFields):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String)
-    # todo photo field or relation
     description = sa.Column(sa.Text)
     coordinate_longitude = sa.Column(sa.Float, nullable=False)
     coordinate_latitude = sa.Column(sa.Float, nullable=False)
@@ -37,7 +36,7 @@ class Place(Model, RecordTimestampFields):
     #     index=True,
     #     nullable=False,
     # )
-    # TODO SECRET PLACE EXTRA id here
+    # TODO SECRET PLACE EXTRA id here - Ougen*
 
     # todo place merge
     # merge would be as a new entity - grouped place

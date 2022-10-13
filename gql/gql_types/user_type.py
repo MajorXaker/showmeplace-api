@@ -97,10 +97,6 @@ class UserType(SQLAlchemyObjectType):
             return result
         return ""
 
-        # TODO namee ilike
-        # todo user - marked place
-        # todo users - place visited
-        # todo user - secret place openeer
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
