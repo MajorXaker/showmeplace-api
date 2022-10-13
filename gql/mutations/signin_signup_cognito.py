@@ -27,6 +27,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             "email_address": graphene.String(),
             "password": graphene.String(required=True),
             "password_reset_box": PasswordReset(),
+            "is_registration": graphene.Boolean(),
         }
         name = "MutationSignInSignUp"
 
@@ -56,10 +57,26 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             Filter=f'username = "{username}"',
             # )[0]
         )["Users"]
+        is_registration = value.get("is_registration")
 
-        if raw_user_data:
+        if is_registration and not raw_user_data:
+            if not value.get("email_address"):
+                Exc.value(
+                    message="Email is required for registration.",
+                    of_group=ExceptionGroupEnum.EMAIL,
+                    reasons=ExceptionReasonEnum.MISSING_VALUE,
+                )
+            response = await cls.cognito_register(
+                cognito_connection=cognito_connection,
+                session=session,
+                username=username,
+                password=value["password"],
+                email=value["email_address"],
+            )
+
+        if not is_registration and raw_user_data:
             if raw_user_data[0]["UserStatus"] == "RESET_REQUIRED":
-                if not "password_reset_box" in value:
+                if "password_reset_box" not in value:
                     Exc.value(
                         message="No password reset data",
                         of_group=ExceptionGroupEnum.PASSWORD_RESET,
@@ -71,7 +88,6 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                     username=username,
                     password_reset_box=value["password_reset_box"],
                 )
-
             # TODO Do we need userdata?
             response = await cls.cognito_login(
                 cognito_connection=cognito_connection,
@@ -79,22 +95,20 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                 username=username,
                 password=value["password"],
             )
-        else:
-            if not value.get("email_address"):
-                Exc.value(
-                    message="User not registered. Email is not provided.",
-                    of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
-                    reasons=(
-                        ExceptionReasonEnum.MISSING_VALUE,
-                        ExceptionReasonEnum.NOT_REGISTERED,
-                    ),
-                )
-            response = await cls.cognito_register(
-                cognito_connection=cognito_connection,
-                session=session,
-                username=username,
-                password=value["password"],
-                email=value["email_address"],
+        if not is_registration and not raw_user_data:
+            Exc.value(
+                message="User is not registered",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+        if is_registration and raw_user_data:
+            Exc.value(
+                message="Username already in use",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=(
+                    ExceptionReasonEnum.INCORRECT_VALUE,
+                    ExceptionReasonEnum.VALUE_IN_USE,
+                ),
             )
 
         return MutationSigninSignupCognito(**response)
