@@ -41,7 +41,11 @@ class MutationUpdateUser(graphene.Mutation):
             aws_secret_access_key=s.ACCESS_SECRET_KEY,
         )
         user = (
-            await session.execute(sa.select(User.name).where(User.id == user_id))
+            await session.execute(
+                sa.select(
+                    User.name, User.active_email_address_id.label("old_email_id")
+                ).where(User.id == user_id)
+            )
         ).fetchone()
 
         if values.get("description"):
@@ -60,9 +64,11 @@ class MutationUpdateUser(graphene.Mutation):
                 )
             ).fetchone()
             if is_not_available:
-                Exc.value(message="Email address is already in use",
-                          of_group=ExceptionGroupEnum.EMAIL,
-                          reasons="Email Already In Use")
+                Exc.value(
+                    message="Email address is already in use",
+                    of_group=ExceptionGroupEnum.EMAIL,
+                    reasons="Email Already In Use",
+                )
 
             response = cognito_connection.admin_update_user_attributes(
                 UserPoolId=s.COGNITO_USER_POOL,
@@ -76,7 +82,7 @@ class MutationUpdateUser(graphene.Mutation):
                 await session.execute(
                     sa.select(
                         EmailAddress.id, EmailAddress.status, EmailAddress.address
-                    ).where(EmailAddress.user_id == user_id)
+                    ).where(EmailAddress.id == user.old_email_id)
                 )
             ).fetchone()
 
@@ -106,6 +112,14 @@ class MutationUpdateUser(graphene.Mutation):
                     .returning(EmailAddress.id)
                 )
             ).fetchone()
+
+            await session.execute(
+                sa.update(User).where(User.id == user_id).values(
+                    {
+                        User.active_email_address_id: new_email.id
+                    }
+                )
+            )
 
         if values.get("passwords"):
             new_password = values["passwords"].get("new_password")

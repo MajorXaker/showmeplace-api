@@ -190,23 +190,11 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
         email: str,
     ):
         # TODO remove user if hasn't verified email in 24 hours and tried to use same credentials again
-        email_in_use = (
-            await session.execute(
-                sa.select(EmailAddress.id).where(
-                    EmailAddress.address == email,
-                    sa.or_(
-                        EmailAddress.user_id.isnot(None),
-                        EmailAddress.status.in_(
-                            [
-                                "BOUNCED",
-                                "COMPLAINED",
-                                "BLACKLISTED",
-                            ]
-                        ),
-                    ),
-                )
-            )
-        ).fetchone()
+        q = sa.select(EmailAddress.id).where(
+            EmailAddress.address == email,
+
+        )
+        email_in_use = (await session.execute(q)).fetchone()
         if email_in_use:
             Exc.value(
                 message="Email address already in use",
