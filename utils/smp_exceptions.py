@@ -33,7 +33,10 @@ class ExceptionReasonEnum(StrEnum):
     NOT_CONFIRMED = "Email Not Confirmed"
     CHANGE_REQUESTED = "Change Requested"
     NUMBER_MUST_PRESENT = "Should Contain Numbers"
-    SIX_CHARS_AT_LEAST = "Should Be 6 Symbols At Least"
+    LONGER_6 = "Should Be 6 Symbols At Least"
+    LONGER_2 = "Should Be 2 Symbols At Least"
+    NOT_REGISTERED = "User Not Registered"
+
 
 
 
@@ -53,6 +56,11 @@ class Exc:
         of_group: str = "Unknown Error",
         reasons="",
     ):
+        """
+        @param message: Text to send. This may be shown to users
+        @param of_group: ExceptionGroupEnum value. This is hardcoded on frontend to catch errors
+        @param reasons: ExceptionReasonEnum value. This is hardcoded on frontend to catch errors
+        """
         message, reasons = cls.prepare(message, reasons)
         raise GraphQLError(
             message,

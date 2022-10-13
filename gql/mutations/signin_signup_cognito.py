@@ -44,6 +44,12 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             aws_secret_access_key=s.ACCESS_SECRET_KEY,
         )
         username = value["user_name"]
+        if len(username) < 2:
+            Exc.value(
+                message="Username is too short",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.LONGER_2,
+            )
         raw_user_data = cognito_connection.list_users(
             UserPoolId=s.COGNITO_USER_POOL,
             Limit=1,
@@ -76,9 +82,12 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
         else:
             if not value.get("email_address"):
                 Exc.value(
-                    message="Email is required for registration",
-                    of_group=ExceptionGroupEnum.EMAIL,
-                    reasons=ExceptionReasonEnum.MISSING_VALUE,
+                    message="User not registered. Email is not provided.",
+                    of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                    reasons=(
+                        ExceptionReasonEnum.MISSING_VALUE,
+                        ExceptionReasonEnum.NOT_REGISTERED,
+                    ),
                 )
             response = await cls.cognito_register(
                 cognito_connection=cognito_connection,
@@ -208,7 +217,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
         if len(password) < 6:
             password_errors[
                 "Password should be at least 6 symbols"
-            ] = ExceptionReasonEnum.SIX_CHARS_AT_LEAST
+            ] = ExceptionReasonEnum.LONGER_6
         if not re.findall(r"\d", password):
             password_errors[
                 "Password should contain at least 1 number"
