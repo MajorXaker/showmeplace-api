@@ -321,39 +321,41 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                 of_group=ExceptionGroupEnum.PASSWORD_RESET,
                 reasons=ExceptionReasonEnum.MISSING_VALUE,
             )
-        # TODO EXTREME VULNURABILITY! NO CODE IS NECESSARY ATM!!!
-        response = cognito_connection.admin_set_user_password(
-            UserPoolId=s.COGNITO_USER_POOL,
-            Username=username,
-            Password=password_reset_box["new_password"],
-            Permanent=True,
-        )
+        try:
+            response = cognito_connection.confirm_forgot_password(
+                ClientId=s.COGNITO_CLIENT_ID,
+                Username=username,
+                ConfirmationCode=password_reset_box["new_password"],
+                Password=password_reset_box["confirmation_code"],
+            )
+        except cognito_connection.exceptions.CodeMismatchException:
+            Exc.value(
+                message="Code incorrect",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+        except cognito_connection.exceptions.ExpiredCodeException:
+            Exc.value(
+                message="Code is expired. Order a new one",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+        except cognito_connection.exceptions.UserNotFoundException:
+            Exc.value(
+                message="User is not registered",
+                of_group=ExceptionGroupEnum.BAD_CREDENTIALS,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
+        except cognito_connection.exceptions.UserNotConfirmedException:
+            Exc.value(
+                message="Email address is not confirmed",
+                of_group=ExceptionGroupEnum.EMAIL,
+                reasons=ExceptionReasonEnum.NOT_CONFIRMED,
+            )
+        except cognito_connection.exceptions.InvalidPasswordException:
+            Exc.value(
+                message="Password invalid",
+                of_group=ExceptionGroupEnum.PASSWORD,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
 
-        # response = cognito_connection.admin_respond_to_auth_challenge(
-        #     UserPoolId=s.COGNITO_USER_POOL,
-        #     ClientId=s.COGNITO_CLIENT_ID,
-        #     ChallengeName='NEW_PASSWORD_REQUIRED',
-        #     ChallengeResponses={
-        #         'PASSWORD': password_reset_box["new_password"]
-        #         'PASSWORD': password_reset_box["new_password"]
-        #     },
-        #     Session='string',
-        #     AnalyticsMetadata={
-        #         'AnalyticsEndpointId': 'string'
-        #     },
-        #     ContextData={
-        #         'IpAddress': 'string',
-        #         'ServerName': 'string',
-        #         'ServerPath': 'string',
-        #         'HttpHeaders': [
-        #             {
-        #                 'headerName': 'string',
-        #                 'headerValue': 'string'
-        #             },
-        #         ],
-        #         'EncodedData': 'string'
-        #     },
-        #     ClientMetadata={
-        #         'string': 'string'
-        #     }
-        # )
