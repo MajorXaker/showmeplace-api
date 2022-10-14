@@ -325,8 +325,8 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
             response = cognito_connection.confirm_forgot_password(
                 ClientId=s.COGNITO_CLIENT_ID,
                 Username=username,
-                ConfirmationCode=password_reset_box["new_password"],
-                Password=password_reset_box["confirmation_code"],
+                ConfirmationCode=password_reset_box["confirmation_code"],
+                Password=password_reset_box["new_password"],
             )
         except cognito_connection.exceptions.CodeMismatchException:
             Exc.value(
