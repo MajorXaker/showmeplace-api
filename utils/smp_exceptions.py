@@ -16,6 +16,7 @@ class ExceptionGroupEnum(StrEnum):
     BAD_INPUT = "Bad Input"
     BAD_CREDENTIALS = "Bad Credentials"
     PASSWORD_RESET = "Bad Password Reset Box"
+    BAD_CODE = "Bad Password Restore Code"
 
 
 
@@ -36,6 +37,7 @@ class ExceptionReasonEnum(StrEnum):
     LONGER_6 = "Should Be 6 Symbols At Least"
     LONGER_2 = "Should Be 2 Symbols At Least"
     NOT_REGISTERED = "User Not Registered"
+    EXPIRED = "Value Expired"
 
 
 

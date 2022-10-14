@@ -331,14 +331,14 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
         except cognito_connection.exceptions.CodeMismatchException:
             Exc.value(
                 message="Code incorrect",
-                of_group=ExceptionGroupEnum.BAD_INPUT,
+                of_group=ExceptionGroupEnum.BAD_CODE,
                 reasons=ExceptionReasonEnum.INCORRECT_VALUE,
             )
         except cognito_connection.exceptions.ExpiredCodeException:
             Exc.value(
                 message="Code is expired. Order a new one",
-                of_group=ExceptionGroupEnum.BAD_INPUT,
-                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+                of_group=ExceptionGroupEnum.BAD_CODE,
+                reasons=ExceptionReasonEnum.EXPIRED,
             )
         except cognito_connection.exceptions.UserNotFoundException:
             Exc.value(
