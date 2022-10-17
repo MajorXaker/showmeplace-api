@@ -26,7 +26,12 @@
     SECRET_MARK = "secret"
     PLACE_BURNOUT_DURATION_HOURS = 24
 
-
-
+[test]
+    DATABASE_PORT = "5432"
+    DATABASE_USER = "localmind"
+    DATABASE_PASSWORD = "local_showmeplace_local"
+    DATABASE_DB = "showmeplace-test"
+    DATABASE_HOST = "localhost"
+    DATABASE_ECHO_MODE = false
 
 

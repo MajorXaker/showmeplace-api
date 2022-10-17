@@ -9,33 +9,32 @@ from alchql.app import SessionQLApp
 from alchql.gql_id import ResolvedGlobalId
 from alchql.middlewares import LoaderMiddleware
 from fastapi import FastAPI
-
 # from fastjwk import JWKBearer, JWTAuthorizationCredentials
 # from api_models.models import Model
-from models.base_engine import Model
 from graphene import Context
 from graphql import ASTValidationRule, GraphQLError
 from httpx import AsyncClient
-
 # from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette.background import BackgroundTasks
 from starlette.requests import HTTPConnection
 
-from utils.config import settings as s
-
-from utils.db import get_session
+from models.base_engine import Model
+from utils.config import settings as st
+# from config import settings as st
+# from core.db import get_session
 # from gql.middlewares import AuthMiddleware, StytchAuthMiddleware
 from gql.schema import schema
 from tests.creator import Creator
+from utils.db import get_session
 
 db_url = (
     "postgresql+asyncpg://"
-    f"{s.DATABASE_USER}:"
-    f"{s.DATABASE_PASSWORD}@"
-    f"{s.DATABASE_HOST}:"
-    f"{s.DATABASE_PORT}/"
-    f"{s.DATABASE_DB}"
+    f"{st.DATABASE_USER}:"
+    f"{st.DATABASE_PASSWORD}@"
+    f"{st.DATABASE_HOST}:"
+    f"{st.DATABASE_PORT}/"
+    f"{st.DATABASE_DB}"
 )
 
 
@@ -47,7 +46,10 @@ def event_loop():
 
 
 def check_test_db():
-    if s.DATABASE_HOST not in ("localhost", "127.0.0.1"):
+    if (
+        st.DATABASE_HOST not in ("localhost", "127.0.0.1", "postgres")
+        or "amazonaws" in st.DATABASE_HOST
+    ):
         print(db_url)
         raise Exception("Use local database only!")
 
@@ -104,6 +106,8 @@ def get_test_app(session: AsyncSession):
             schema=schema,
             middleware=[
                 LoaderMiddleware(Model.registry.mappers),
+                # AuthMiddleware(),
+                # StytchAuthMiddleware(),
             ],
             context_value=Context,
         ),

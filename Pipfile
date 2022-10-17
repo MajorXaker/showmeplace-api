@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 alembic = "*"
 alchql = "*" # alchemy - graphql integration
-black = "*"
 pydantic = "*"
 dynaconf = "*"
 graphql-core = "==3.2.1"
@@ -23,10 +22,16 @@ unidecode = "*"
 pillow = "*"
 graphene-federation3 = "*"
 facepy = "*"
-pytest = "*"
 httpx = "*"
 
 [dev-packages]
+black = "==22.3"
+pytest = "==6.2.5"
+coverage = { extras = ["toml"], version = "*" }
+pytest-asyncio = "==0.15.1"
+pytest-mock = "==3.6.1"
+snapshottest = "==0.6.0"
+
 
 [requires]
 python_version = "3.10"

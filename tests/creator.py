@@ -1,3 +1,4 @@
+import random
 import re
 from datetime import date, datetime, timedelta
 
@@ -5,16 +6,66 @@ import sqlalchemy as sa
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from models.db_models import User, Category, Place
+
 
 class Creator:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_user(self):
-        pass
+    async def create_user(self, name="TestUser"):
+        ext_id = str(int(datetime.utcnow().timestamp() * 1000))
+        user = (
+            await self.session.execute(
+                sa.insert(User)
+                .values(
+                    {
+                        User.name: name,
+                        User.external_id_type: "META",
+                        User.external_id: ext_id,
+                        User.coins: 0,
+                    }
+                )
+                .returning(User.id)
+            )
+        ).fetchone()
+        return user.id
 
-    async def create_place(self):
-        pass
+    async def create_category(self, category_name, secret_mark: bool = False):
+        category = (
+            await self.session.execute(
+                (
+                    sa.insert(Category)
+                    .values(
+                        {
+                            Category.name: category_name,
+                            Category.mark: "secret" if secret_mark else None,
+                        }
+                    )
+                    .returning(Category.id)
+                )
+            )
+        ).fetchone()
+        return category.id
+
+    async def create_place(self, name="TestPlace", category_id=1, owner_id=1):
+        place_id = (
+            await self.session.execute(
+                sa.insert(Place)
+                .values(
+                    {
+                        Place.name: name,
+                        Place.category_id: category_id,
+                        Place.coordinate_longitude: random.randint(-90, 90),
+                        Place.coordinate_latitude: random.randint(-90, 90),
+                        Place.owner_id: owner_id,
+                    }
+                )
+                .returning(Place.id)
+            )
+        ).scalar()
+        return place_id
+
 
     async def create_follow(self):
         pass
@@ -27,8 +78,6 @@ class Creator:
 
     async def open_secret_place(self):
         pass
-
-
 
     # async def create_lot(
     #     self,
