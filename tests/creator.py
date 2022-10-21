@@ -10,6 +10,8 @@ from models.db_models import User, Category, Place
 
 
 class Creator:
+    places_ids = dict()
+
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -48,7 +50,14 @@ class Creator:
         ).fetchone()
         return category.id
 
-    async def create_place(self, name="TestPlace", category_id=1, owner_id=1):
+    async def create_place(
+        self,
+        name="TestPlace",
+        category_id=1,
+        owner_id=1,
+        latitude=random.randint(-90, 90),
+        longitude=random.randint(-90, 90),
+    ):
         place_id = (
             await self.session.execute(
                 sa.insert(Place)
@@ -56,8 +65,8 @@ class Creator:
                     {
                         Place.name: name,
                         Place.category_id: category_id,
-                        Place.coordinate_longitude: random.randint(-90, 90),
-                        Place.coordinate_latitude: random.randint(-90, 90),
+                        Place.coordinate_longitude: latitude,
+                        Place.coordinate_latitude: longitude,
                         Place.owner_id: owner_id,
                     }
                 )
@@ -65,6 +74,12 @@ class Creator:
             )
         ).scalar()
         return place_id
+
+    async def prepare_places_for_tests(self):
+        if self.places_ids:
+            return self.places_ids
+
+        secret_place_id = "todo"
 
 
     async def create_follow(self):
