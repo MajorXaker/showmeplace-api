@@ -19,6 +19,3 @@ async def resolve_email_check_availability(query, info, email_address):
     ).fetchone()
     # return "True" if is_in_list else "False"
     return EmailCheckAvailability(is_available=False if is_in_list else True)
-
-
-

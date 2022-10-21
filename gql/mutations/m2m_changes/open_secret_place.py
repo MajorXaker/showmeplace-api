@@ -32,7 +32,7 @@ class MutationOpenSecretPlace(graphene.Mutation):
             Exc.value(
                 message="Place already opened",
                 of_group=ExceptionGroupEnum.BAD_INPUT,
-                reasons=ExceptionReasonEnum.DUPLICATE_VALUE
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE,
             )
         opening_possible = (
             await ActionsEconomy.verify_possibility(
@@ -69,7 +69,7 @@ class MutationOpenSecretPlace(graphene.Mutation):
             Exc.low_wallet(
                 message="Not enough coins to open",
                 of_group=ExceptionGroupEnum.BAD_BALANCE,
-                reasons=ExceptionReasonEnum.LOW_BALANCE
+                reasons=ExceptionReasonEnum.LOW_BALANCE,
             )
 
         return await PlaceType.get_node(info, place_id)

@@ -25,13 +25,12 @@ def overdrive():
 
             """
 
-
     variables_raw = {
-      "includeMyPlaces": True,
-      "secretsFilter": "ALL",
-      "decayFilter": "ALL",
-      "after": None,
-      "first": 1000
+        "includeMyPlaces": True,
+        "secretsFilter": "ALL",
+        "decayFilter": "ALL",
+        "after": None,
+        "first": 1000,
     }
 
     # variables = json.dumps(variables_raw)

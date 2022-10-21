@@ -114,11 +114,9 @@ class MutationUpdateUser(graphene.Mutation):
             ).fetchone()
 
             await session.execute(
-                sa.update(User).where(User.id == user_id).values(
-                    {
-                        User.active_email_address_id: new_email.id
-                    }
-                )
+                sa.update(User)
+                .where(User.id == user_id)
+                .values({User.active_email_address_id: new_email.id})
             )
 
         if values.get("passwords"):

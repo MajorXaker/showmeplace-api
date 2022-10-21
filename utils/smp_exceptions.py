@@ -19,8 +19,6 @@ class ExceptionGroupEnum(StrEnum):
     BAD_CODE = "Bad Password Restore Code"
 
 
-
-
 class ExceptionReasonEnum(StrEnum):
     MISSING_VALUE = "Missing Value"
     INCORRECT_VALUE = "Incorrect Value"
@@ -38,8 +36,6 @@ class ExceptionReasonEnum(StrEnum):
     LONGER_2 = "Should Be 2 Symbols At Least"
     NOT_REGISTERED = "User Not Registered"
     EXPIRED = "Value Expired"
-
-
 
 
 class Exc:
@@ -95,7 +91,7 @@ class Exc:
         cls,
         message: str | None = None,
         of_group: str = "Unknown Error",
-        reasons = "",
+        reasons="",
     ):
         message, reasons = cls.prepare(message, reasons)
         raise GraphQLError(

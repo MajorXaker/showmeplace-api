@@ -1,23 +1,15 @@
 import boto3
 import graphene
-from alchql import SQLAlchemyCreateMutation
-from alchql.get_input_type import get_input_fields
+import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from gql.gql_id import decode_gql_id
-from gql.gql_types.place_type import PlaceType
 from models.db_models import User, EmailAddress
-from models.db_models.m2m.m2m_user_place_favourite import M2MUserPlaceFavourite
-from utils.api_auth import AuthChecker
-import sqlalchemy as sa
 from utils.config import settings as s
 from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 class MutationForgotPassword(graphene.Mutation):
     class Meta:
-        # model = M2MUserOpenedSecretPlace
-        # output = PlaceType
         arguments = {"user_name": graphene.String(required=True)}
 
     is_success = graphene.Boolean()
@@ -43,8 +35,7 @@ class MutationForgotPassword(graphene.Mutation):
 
         try:
             response = cognito_connection.admin_reset_user_password(
-                UserPoolId=s.COGNITO_USER_POOL,
-                Username=user_name
+                UserPoolId=s.COGNITO_USER_POOL, Username=user_name
             )
         except cognito_connection.exceptions.UserNotFoundException:
             Exc.value(

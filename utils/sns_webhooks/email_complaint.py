@@ -2,15 +2,13 @@ import json
 import logging
 
 from fastapi import APIRouter
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-# import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from models.db_models import EmailAddress
 from models.enums import EmailStatusEnum
 from utils.db import async_engine
-
 
 handle_email_complaint = APIRouter()
 
@@ -45,6 +43,7 @@ async def handle_bounce(req: Request):
         await session.commit()
     logging.info("Add new adress to db with Complaioned status")
     return "Success"
+
 
 @handle_email_complaint.post("")
 async def handle_complaint(req: Request):

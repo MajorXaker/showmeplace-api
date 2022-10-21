@@ -33,7 +33,6 @@ class UserType(SQLAlchemyObjectType):
             User.id.key,
             User.name.key,
             User.description.key,
-            User.has_onboarded.key,
             User.level.key,
             User.coins.key,
             User.external_id.key,
@@ -96,7 +95,6 @@ class UserType(SQLAlchemyObjectType):
             )
             return result
         return ""
-
 
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
