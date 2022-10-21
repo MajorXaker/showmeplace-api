@@ -13,4 +13,3 @@ class SecretPlaceExtra(Model, RecordTimestampFields):
     company_suggestion = sa.Column(sa.Text)
     music_suggestion = sa.Column(sa.Text)
     extra_suggestion = sa.Column(sa.Text)
-

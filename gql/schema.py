@@ -1,16 +1,14 @@
 import graphene
 from alchql.fields import FilterConnectionField
-from graphene import ConnectionField
 
 from gql.gql_types import (
     PlaceType,
     CategoryType,
     UserType,
-    UserImageType,
-    CategoryImageType,
     PlaceImageType,
-    # SecretPlaceExtraType,
-    ActionType, EmailCheckAvailability, resolve_email_check_availability
+    ActionType,
+    EmailCheckAvailability,
+    resolve_email_check_availability,
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -28,7 +26,9 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory, MutationUpdateSecretPlaceData, MutationVerifyCognitoUser, MutationSigninSignupCognito,
+    MutationUpdateSecretPlaceData,
+    MutationVerifyCognitoUser,
+    MutationSigninSignupCognito,
     MutationForgotPassword,
 )
 
@@ -46,17 +46,15 @@ class Query(graphene.ObjectType):
         of_type=EmailCheckAvailability,
         email_address=graphene.Argument(type_=graphene.String, required=True),
         resolver=resolve_email_check_availability,
-        deprecation_reason="Use mutation registration login"
+        deprecation_reason="Use mutation registration login",
     )
 
 
 class Mutation(graphene.ObjectType):
-    verify_cognito_user= MutationVerifyCognitoUser.Field(
+    verify_cognito_user = MutationVerifyCognitoUser.Field(
         deprecation_reason="use registration login"
     )
-    add_user = MutationAddUser.Field(
-        deprecation_reason="use registrationLogin"
-    )
+    add_user = MutationAddUser.Field(deprecation_reason="use registrationLogin")
     update_user = MutationUpdateUser.Field()
 
     add_place = MutationAddPlace.Field()

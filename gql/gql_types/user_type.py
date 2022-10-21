@@ -96,7 +96,6 @@ class UserType(SQLAlchemyObjectType):
             return result
         return ""
 
-
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
 

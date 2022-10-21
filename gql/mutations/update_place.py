@@ -12,7 +12,7 @@ class MutationUpdatePlace(SQLAlchemyUpdateMutation):
         input_type_name = "InputUpdatePlace"
         only_fields = [
             Place.name.key,
-            Place.description.key
+            Place.description.key,
         ]
 
     @classmethod

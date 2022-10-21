@@ -68,7 +68,7 @@ class MutationAddPlace(graphene.Mutation):
                 )
             )
         ).fetchone()
-        #TODO Throw an exception if secret place data provided but category is not secret place - Ougen
+        # TODO Throw an exception if secret place data provided but category is not secret place - Ougen
         is_secret_place = place_category.name == s.SECRET_PLACE_NAME
 
         existing_places = (
@@ -96,8 +96,7 @@ class MutationAddPlace(graphene.Mutation):
             Exc.low_wallet(
                 message="Insufficient coins",
                 of_group=ExceptionGroupEnum.BAD_BALANCE,
-                reasons=ExceptionReasonEnum.LOW_BALANCE
-
+                reasons=ExceptionReasonEnum.LOW_BALANCE,
             )
 
         # adding a place to db
@@ -105,9 +104,13 @@ class MutationAddPlace(graphene.Mutation):
             new_secret_place_data = await basic_mapper(
                 SecretPlaceExtra, secret_place_extra
             )
-            secret_place_id = (await session.execute(
-                sa.insert(SecretPlaceExtra).values(new_secret_place_data).returning(SecretPlaceExtra.id)
-            )).scalar()
+            secret_place_id = (
+                await session.execute(
+                    sa.insert(SecretPlaceExtra)
+                    .values(new_secret_place_data)
+                    .returning(SecretPlaceExtra.id)
+                )
+            ).scalar()
         else:
             secret_place_id = None
         new_place[Place.secret_extra_id] = secret_place_id

@@ -25,6 +25,7 @@ log = logging.getLogger("smp-api")
 log_level = logging.DEBUG if settings.LOGGING_LEVEL == "DEBUG" else logging.INFO
 log.setLevel(log_level)
 
+
 class ElkJsonFormatter(jsonlogger.JsonFormatter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
