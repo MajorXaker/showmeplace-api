@@ -1,14 +1,11 @@
 import datetime
-import json
-import logging
 import math
 
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType, gql_types
+from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
-from alchql.query_helper import QueryHelper
 from alchql.utils import FilterItem
 from graphene import ObjectType, String, Float
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,9 +25,7 @@ from models.db_models import (
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
-from utils.config import settings as s, log
-
-# from gql.utils.gql_id import encode_gql_id
+from utils.config import settings as s
 from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
 from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
@@ -112,19 +107,11 @@ class PlaceType(SQLAlchemyObjectType):
             Place.owner_id.key,
         ]
 
-    # secret_extra = ModelField(
-    #     SecretPlaceExtraType,
-    #     model_field=SecretPlaceExtra,
-    #     resolver=get_batch_resolver(SecretPlaceExtra.place_id.property, single=True),
-    #     use_label=False
-    # )
-
     secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
     category_data = graphene.Field(type_=Cat)
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-    # owner_id = gql_types.String(model_field=Place.owner_id)
 
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
@@ -141,7 +128,15 @@ class PlaceType(SQLAlchemyObjectType):
                     SecretPlaceExtra.music_suggestion,
                     SecretPlaceExtra.time_suggestion,
                     SecretPlaceExtra.company_suggestion,
-                ).where(SecretPlaceExtra.place_id == self.id)
+                )
+                .select_from(
+                    sa.join(
+                        Place,
+                        SecretPlaceExtra,
+                        SecretPlaceExtra.id == Place.secret_extra_id,
+                    )
+                )
+                .where(Place.secret_extra_id == self.id)
             )
         ).fetchone()
         if not extra:
@@ -293,10 +288,6 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
-    # async def resolve_owner_id(self, info):
-    #     owner_id = encode_gql_id("UserType", self.owner_id)
-    #     return owner_id
-
     async def resolve_has_favourited(self, info):
         asker_id = AuthChecker.check_auth_request(info)
         session: AsyncSession = info.context.session
@@ -381,5 +372,5 @@ class PlaceType(SQLAlchemyObjectType):
         if not decay:
             return False
         return (
-            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
+            decay + datetime.timedelta(hours=s.PLACE_DECAY_DURATION_HOURS)
         ) < datetime.datetime.now()

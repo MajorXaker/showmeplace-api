@@ -33,7 +33,6 @@ class UserType(SQLAlchemyObjectType):
             User.id.key,
             User.name.key,
             User.description.key,
-            User.has_onboarded.key,
             User.level.key,
             User.coins.key,
             User.external_id.key,
