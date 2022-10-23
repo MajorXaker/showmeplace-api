@@ -108,6 +108,3 @@ class ActionsEconomy(Model, RecordTimestampFields):
             )
         }
         return {**always_true, **possibilities}
-
-    class InsufficientCoins(Exception):
-        pass

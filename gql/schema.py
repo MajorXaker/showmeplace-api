@@ -1,16 +1,14 @@
 import graphene
 from alchql.fields import FilterConnectionField
-from graphene import ConnectionField
 
 from gql.gql_types import (
     PlaceType,
     CategoryType,
     UserType,
-    UserImageType,
-    CategoryImageType,
     PlaceImageType,
-    # SecretPlaceExtraType,
-    ActionType, EmailCheckAvailability, resolve_email_check_availability
+    ActionType,
+    EmailCheckAvailability,
+    resolve_email_check_availability,
 )
 from gql.mutations import (
     MutationCheckIn,
@@ -28,7 +26,10 @@ from gql.mutations import (
     MutationAddPlace,
     MutationCloseSecretPlace,
     MutationAddUser,
-    MutationUpdateCategory, MutationUpdateSecretPlaceData, MutationVerifyCognitoUser,
+    MutationUpdateSecretPlaceData,
+    MutationVerifyCognitoUser,
+    MutationSigninSignupCognito,
+    MutationForgotPassword,
 )
 
 
@@ -44,21 +45,16 @@ class Query(graphene.ObjectType):
     check_email_availability = graphene.NonNull(
         of_type=EmailCheckAvailability,
         email_address=graphene.Argument(type_=graphene.String, required=True),
-        resolver=resolve_email_check_availability
+        resolver=resolve_email_check_availability,
+        deprecation_reason="Use mutation registration login",
     )
-    # cognito_email_check = graphene.NonNull(
-    #     of_type=EmailCheckVerification,
-    #     email_address=graphene.Argument(type_=graphene.String, required=True),
-    #     external_id=graphene.Argument(type_=graphene.String, required=True),
-    #     resolver=resolve_email_check_verification
-    # )
-
-
 
 
 class Mutation(graphene.ObjectType):
-    verify_cognito_user= MutationVerifyCognitoUser.Field()
-    add_user = MutationAddUser.Field()
+    verify_cognito_user = MutationVerifyCognitoUser.Field(
+        deprecation_reason="use registration login"
+    )
+    add_user = MutationAddUser.Field(deprecation_reason="use registrationLogin")
     update_user = MutationUpdateUser.Field()
 
     add_place = MutationAddPlace.Field()
@@ -85,6 +81,9 @@ class Mutation(graphene.ObjectType):
         deprecation_reason="Service, will be deleted later"
     )
     update_secret_place = MutationUpdateSecretPlaceData.Field()
+    registration_login = MutationSigninSignupCognito.Field()
+
+    forgot_password = MutationForgotPassword.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

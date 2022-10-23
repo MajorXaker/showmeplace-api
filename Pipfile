@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 alembic = "*"
 alchql = "*" # alchemy - graphql integration
+black = "*"
 pydantic = "*"
 dynaconf = "*"
 graphql-core = "==3.2.1"
@@ -22,7 +23,9 @@ unidecode = "*"
 pillow = "*"
 graphene-federation3 = "*"
 facepy = "*"
+geopy = "*"
 httpx = "*"
+python-json-logger = "*"
 
 [dev-packages]
 black = "==22.3"

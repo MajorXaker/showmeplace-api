@@ -13,7 +13,6 @@ class SecretPlaceExtraType(SQLAlchemyObjectType):
         interfaces = (AsyncNode,)
         filter_fields = {
             SecretPlaceExtra.id: [OP_EQ],
-            SecretPlaceExtra.place_id: [OP_EQ],
         }
         only_fields = [
             SecretPlaceExtra.id.key,

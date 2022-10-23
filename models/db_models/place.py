@@ -11,7 +11,6 @@ class Place(Model, RecordTimestampFields):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     name = sa.Column(sa.String)
-    # todo photo field or relation
     description = sa.Column(sa.Text)
     coordinate_longitude = sa.Column(sa.Float, nullable=False)
     coordinate_latitude = sa.Column(sa.Float, nullable=False)
@@ -22,8 +21,6 @@ class Place(Model, RecordTimestampFields):
         index=True,
         nullable=False,
     )
-
-    is_secret_place = sa.Column(sa.Boolean, server_default="FALSE")
     active_due_date = sa.Column(sa.DateTime)
     owner_id = sa.Column(
         sa.Integer,
@@ -31,13 +28,11 @@ class Place(Model, RecordTimestampFields):
         index=True,
         nullable=False,
     )
-    # secret_extra_id = sa.Column(
-    #     sa.Integer,
-    #     sa.ForeignKey("secret_extras.id", ondelete=""),
-    #     index=True,
-    #     nullable=False,
-    # )
-    # TODO SECRET PLACE EXTRA id here
+    secret_extra_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("secret_extras.id", ondelete="CASCADE"),
+        nullable=True,
+    )
 
     # todo place merge
     # merge would be as a new entity - grouped place

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from gql.gql_id import decode_gql_id
 from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 from utils.api_auth import AuthChecker
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 class MutationRemoveFollower(graphene.Mutation):
@@ -22,7 +23,14 @@ class MutationRemoveFollower(graphene.Mutation):
         user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
         lead_id = decode_gql_id(lead_id)[1]
         if user_id == lead_id:
-            raise ValueError("You can't unfollow yourself")
+            Exc.value(
+                message="You can't unfollow yourself",
+                of_group=ExceptionGroupEnum.BAD_FOLLOWER,
+                reasons=(
+                    ExceptionReasonEnum.DUPLICATE_VALUE,
+                    ExceptionReasonEnum.SELF_ACTION,
+                ),
+            )
 
         await session.execute(
             sa.delete(M2MUserFollowingUser).where(

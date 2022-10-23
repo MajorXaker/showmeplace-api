@@ -10,13 +10,16 @@ from gql.gql_id import decode_gql_id, encode_gql_id
 from models.db_models import User, UserImage, M2MUserFollowingUser, EmailAddress
 from models.enums import EmailStatusEnum
 from utils.api_auth import AuthChecker
+from utils.logging_tools import debug_log
 from utils.s3_object_tools import get_presigned_url
+from utils.utils import CountableConnectionCreator
 
 
 class UserType(SQLAlchemyObjectType):
     class Meta:
         model = User
         interfaces = (AsyncNode,)
+        connection_class = CountableConnectionCreator
         filter_fields = {
             User.id: [OP_EQ, OP_IN],
             User.external_id: [OP_EQ],
@@ -29,7 +32,7 @@ class UserType(SQLAlchemyObjectType):
         only_fields = [
             User.id.key,
             User.name.key,
-            User.has_onboarded.key,
+            User.description.key,
             User.level.key,
             User.coins.key,
             User.external_id.key,
@@ -93,18 +96,13 @@ class UserType(SQLAlchemyObjectType):
             return result
         return ""
 
-        # TODO namee ilike
-        # todo user - marked place
-        # todo users - place visited
-        # todo user - secret place openeer
-
     # def resolve_id(self, info):
     #     return encode_gql_id(self.__class__.__name__, self.id)
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
         asker_id = AuthChecker.check_auth_request(info)
-
+        await debug_log(cls, info)
         if "userFollowerOf" in info.variable_values:
             user = decode_gql_id(info.variable_values["userVisited"])[1]
             q = q.outerjoin_from(

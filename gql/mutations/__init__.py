@@ -14,3 +14,5 @@ from .add_user_image import MutationAddUserImage
 from .mutation_check_in import MutationCheckIn
 from .update_secret_data import MutationUpdateSecretPlaceData
 from .verify_user_cognito import MutationVerifyCognitoUser
+from .signin_signup_cognito import MutationSigninSignupCognito
+from .forgot_password import MutationForgotPassword
