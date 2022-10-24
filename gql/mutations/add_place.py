@@ -68,8 +68,15 @@ class MutationAddPlace(graphene.Mutation):
                 )
             )
         ).fetchone()
-        # TODO Throw an exception if secret place data provided but category is not secret place - Ougen
+
         is_secret_place = place_category.name == s.SECRET_PLACE_NAME
+
+        if not is_secret_place and secret_place_extra is not None:
+            Exc.value(
+                message="It is not possible to enter the data of a secret place in a normal place",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.INCORRECT_VALUE,
+            )
 
         existing_places = (
             await session.execute(

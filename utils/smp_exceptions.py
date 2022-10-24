@@ -44,7 +44,7 @@ class Exc:
         if isinstance(reasons, str):
             reasons = (reasons,)
         if not message:
-            message = " .".join(reasons)
+            message = ". ".join(reasons)
         return message, reasons
 
     @classmethod
