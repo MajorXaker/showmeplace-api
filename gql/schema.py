@@ -1,14 +1,12 @@
 import graphene
 from alchql.fields import FilterConnectionField
-from graphene import ConnectionField
 
 from gql.gql_types import (
     PlaceType,
     CategoryType,
     UserType,
-    UserImageType,
-    CategoryImageType,
     PlaceImageType,
+    ActionType,
     # SecretPlaceExtraType,
     ActionType,
     OldPlaceType,
@@ -32,7 +30,8 @@ from gql.mutations import (
     MutationAddUser,
     MutationUpdateSecretPlaceData,
     MutationVerifyCognitoUser,
-    MutationRegistrationLoginCognito,
+    MutationSigninSignupCognito,
+    MutationForgotPassword,
 )
 
 
@@ -61,7 +60,7 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    verify_cognito_user = MutationVerifyCognitoUser.Field()
+    verify_cognito_user= MutationVerifyCognitoUser.Field()
     add_user = MutationAddUser.Field()
     update_user = MutationUpdateUser.Field()
 

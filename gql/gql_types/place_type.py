@@ -69,10 +69,16 @@ class PlaceType(SQLAlchemyObjectType):
             # "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "coordinate_box": FilterItem(
+                field_type=CoordinateBox, filter_func=box_coordinates_filter
+            ),
+            "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
+            "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "include_my_places": FilterItem(
                 field_type=graphene.Boolean, filter_func=None
             ),
-            # "user_owner": FilterItem(field_type=graphene.String, filter_func=None),
+            "user_owner": FilterItem(field_type=graphene.String, filter_func=None),
             "user_favourite": FilterItem(field_type=graphene.String, filter_func=None),
             "user_visited": FilterItem(field_type=graphene.String, filter_func=None),
             "name_ilike": FilterItem(
@@ -94,20 +100,14 @@ class PlaceType(SQLAlchemyObjectType):
             ),
         }
 
-        # only_fields = [
-        #     Place.id.key,
-        #     Place.name.key,
-        #     Place.description.key,
-        #     Place.coordinate_longitude.key,
-        #     Place.coordinate_latitude.key,
-        #     Place.active_due_date.key,
-        #     Place.owner_id.key,
-        #     Place.active_due_date.key
-        #     # "owner_id",
-        # ]
-        exclude_fields = [
-            Place.record_created.key,
-            Place.record_modified.key,
+        only_fields = [
+            Place.id.key,
+            Place.name.key,
+            Place.description.key,
+            Place.coordinate_longitude.key,
+            Place.coordinate_latitude.key,
+            Place.active_due_date.key,
+            Place.owner_id.key,
         ]
 
     # secret_extra = ModelField(
@@ -179,41 +179,27 @@ class PlaceType(SQLAlchemyObjectType):
 
     # secret_place_extra_id = graphene.String()
 
-    # # TODO Refactor this piece of shit
-    # async def resolve_images(self, info):
-    #     session: AsyncSession = info.context.session
-    #     images = (
-    #         await session.execute(
-    #             sa.select(PlaceImage.id).where(PlaceImage.place_id == self.id)
-    #         )
-    #     ).fetchall()
-    #     result = [
-    #         await get_presigned_url(
-    #             session=info.context.session, image_id=image.id, image_class=PlaceImage
-    #         )
-    #         for image in images
-    #     ]
-    #     return result
-
-    # @classmethod
-    # async def set_select_from(cls, info, q, query_fields):
-    #     session: AsyncSession = info.context.session
-    #     asker_id = AuthChecker.check_auth_request(info)
-    #     user_owner = info.variable_values.get("userOwner")
-    #     # if user_owner:
-    #     #     user_owner = decode_gql_id(user_owner)[1]
-    #     include_my_places = info.variable_values.get("includeMyPlaces", False)
-    #
-    #     # M2MUserOpenedSecretPlace.user_id == asker_id))
-    #     if not include_my_places:
-    #         q = q.where(Place.owner_id != asker_id)
-    #     # if user_owner:
-    #     #     q = q.where(Place.owner_id == user_owner)
-    #
-    #     return q
+    # TODO Refactor this piece of shit
+    async def resolve_images(self, info):
+        session: AsyncSession = info.context.session
+        images = (
+            await session.execute(
+                sa.select(PlaceImage.id).where(PlaceImage.place_id == self.id)
+            )
+        ).fetchall()
+        result = [
+            await get_presigned_url(
+                session=info.context.session, image_id=image.id, image_class=PlaceImage
+            )
+            for image in images
+        ]
+        return result
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
+
+        await debug_log(cls, info)
+
         session: AsyncSession = info.context.session
         asker_id = AuthChecker.check_auth_request(info)
         user_owner = info.variable_values.get("userOwner")
@@ -282,6 +268,31 @@ class PlaceType(SQLAlchemyObjectType):
 
         return q
 
+    async def resolve_has_favourited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceFavourite).where(
+                    M2MUserPlaceFavourite.place_id == self.id,
+                    M2MUserPlaceFavourite.user_id == asker_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
+
+    async def resolve_has_visited(self, info):
+        asker_id = AuthChecker.check_auth_request(info)
+        session: AsyncSession = info.context.session
+        visit = (
+            await session.execute(
+                sa.select(M2MUserPlaceVisited).where(
+                    M2MUserPlaceVisited.place_id == self.id,
+                    M2MUserPlaceVisited.user_id == asker_id,
+                )
+            )
+        ).fetchone()
+        return True if visit else False
     # image = ModelField(
     #     V2CategoryType,
     #     model_field=Category,
@@ -353,5 +364,5 @@ class PlaceType(SQLAlchemyObjectType):
         if not decay:
             return False
         return (
-            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
+            decay + datetime.timedelta(hours=s.PLACE_DECAY_DURATION_HOURS)
         ) < datetime.datetime.now()

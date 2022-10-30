@@ -1,14 +1,10 @@
-from asyncio import current_task
-
 # from config import settings
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
 )
-from sqlalchemy.orm import scoped_session, sessionmaker
 
 from utils.config import settings
-
 
 pure_db_url = (
     f"{settings.DATABASE_USER}:"

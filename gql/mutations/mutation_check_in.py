@@ -1,16 +1,13 @@
-import datetime
-import logging
-import math
-
 import graphene
 import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncSession
 from geopy.distance import geodesic
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.api_auth import AuthChecker
-from utils.config import settings as s
 from models.db_models import Place, ActionsEconomy, Category
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
+from utils.api_auth import AuthChecker
+from utils.config import settings as s
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 from ..gql_id import decode_gql_id
 from ..service_types.coin_change_object import CoinChange
 
@@ -62,15 +59,21 @@ class MutationCheckIn(graphene.Mutation):
             )
         ).fetchone()
         if is_been_here:
-            raise ValueError("User has already been here")
+            Exc.value(
+                message="User has already been here",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE,
+            )
         # TODO go to try-except logic
 
         place = (
             await session.execute(
                 sa.select(
-                    Place.id, Place.owner_id, Category.name.label("category_name"),
-                    Place.coordinate_longitude, Place.coordinate_latitude
-
+                    Place.id,
+                    Place.owner_id,
+                    Category.name.label("category_name"),
+                    Place.coordinate_longitude,
+                    Place.coordinate_latitude,
                 )
                 .join(Category, Place.category_id == Category.id)
                 .where(
@@ -78,8 +81,9 @@ class MutationCheckIn(graphene.Mutation):
                 )
             )
         ).fetchone()
-        distance = geodesic((place.coordinate_latitude,place.coordinate_longitude),
-                            (lat,long)).m
+        distance = geodesic(
+            (place.coordinate_latitude, place.coordinate_longitude), (lat, long)
+        ).m
         if distance > s.CHECK_IN_DISTANCE_METERS:
             place = None
         if place:
@@ -109,6 +113,12 @@ class MutationCheckIn(graphene.Mutation):
                 action_name="Visit a place",
                 coin_receiver_user_id=user_id,
             )
-            return MutationCheckIn(is_success=True, coin_change=coin_change_actor, distance_to_place=int(distance))
+            return MutationCheckIn(
+                is_success=True,
+                coin_change=coin_change_actor,
+                distance_to_place=int(distance),
+            )
         else:
-            return MutationCheckIn(is_success=False, coin_change=None, distance_to_place=int(distance))
+            return MutationCheckIn(
+                is_success=False, coin_change=None, distance_to_place=int(distance)
+            )

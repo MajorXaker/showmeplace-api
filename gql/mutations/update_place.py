@@ -10,15 +10,9 @@ class MutationUpdatePlace(SQLAlchemyUpdateMutation):
         model = Place
         output = PlaceType
         input_type_name = "InputUpdatePlace"
-        exclude_fields = [
-            Place.record_created.key,
-            Place.record_modified.key,
-            Place.coordinate_longitude.key,
-            Place.coordinate_latitude.key,
-            Place.category_id.key,
-            Place.owner_id.key,
-            Place.address.key,
-            Place.is_secret_place.key,
+        only_fields = [
+            Place.name.key,
+            Place.description.key,
         ]
 
     @classmethod

@@ -24,6 +24,8 @@ pillow = "*"
 graphene-federation3 = "*"
 facepy = "*"
 geopy = "*"
+httpx = "*"
+python-json-logger = "*"
 
 [dev-packages]
 
