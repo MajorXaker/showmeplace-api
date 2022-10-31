@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from sqlalchemy import func as f
 
@@ -29,6 +30,10 @@ def decaying_filter(v: DecayingPlacesFilterEnum):
         DecayingPlacesFilterEnum.REGULAR: Place.active_due_date.is_(None),
     }[v]
     return result
+
+
+def decaying_filter_list(items: List[DecayingPlacesFilterEnum]):
+    return sa.or_(*map(decaying_filter, items))
 
 
 def box_coordinates_filter(v):

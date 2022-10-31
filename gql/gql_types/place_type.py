@@ -26,7 +26,7 @@ from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
+from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter, decaying_filter_list
 from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
@@ -91,6 +91,10 @@ class PlaceType(SQLAlchemyObjectType):
             "decay_filter": FilterItem(
                 field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
+            ),
+            "decay_filter_list": FilterItem(
+                field_type=graphene.List(of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)),
+                filter_func=decaying_filter_list,
             ),
             "opened_secret_places": FilterItem(
                 field_type=graphene.Boolean, filter_func=None
