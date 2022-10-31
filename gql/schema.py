@@ -88,7 +88,7 @@ class Mutation(graphene.ObjectType):
         deprecation_reason="Service, will be deleted later"
     )
     update_secret_place = MutationUpdateSecretPlaceData.Field()
-    registration_login = MutationRegistrationLoginCognito.Field()
+    # registration_login = MutationRegistrationLoginCognito.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

@@ -1,8 +1,10 @@
 import datetime
+from typing import List
 
 from sqlalchemy import func as f
 
 from gql.gql_id import gql_decoder
+
 # from gql.gql_types.place_type import CoordinateBox # TODO buggy!
 from models.db_models import Place
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
@@ -32,6 +34,10 @@ def decaying_filter(v: DecayingPlacesFilterEnum):
     return result
 
 
+def size_filter_list(items: List[DecayingPlacesFilterEnum]):
+    return sa.or_(*map(decaying_filter, items))
+
+
 def box_coordinates_filter(v):
     # if any(
     #     [
@@ -52,6 +58,7 @@ def box_coordinates_filter(v):
         Place.coordinate_longitude.between(v.sw_longitude, v.ne_longitude),
     )
     return result
+
 
 # @gql_decoder
 # def filter_owner(v):

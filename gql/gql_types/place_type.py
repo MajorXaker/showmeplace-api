@@ -17,7 +17,7 @@ from models.db_models import (
     Place,
     Category,
     M2MUserOpenedSecretPlace,
-    M2MUserPlaceFavourite,
+    M2MUserPlaceFavourite, PlaceImage,
 )
 from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
@@ -26,6 +26,7 @@ from utils.config import settings as s
 
 # from gql.utils.gql_id import encode_gql_id
 from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
+from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
 from utils.utils import CountableConnectionCreator
@@ -62,16 +63,12 @@ class PlaceType(SQLAlchemyObjectType):
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
             Place.owner_id: [OP_EQ],
-            # "coordinate_box": CoordinateBox(),
             "coordinate_box": FilterItem(
                 field_type=CoordinateBox, filter_func=box_coordinates_filter
             ),
             # "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             # "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
-            "coordinate_box": FilterItem(
-                field_type=CoordinateBox, filter_func=box_coordinates_filter
-            ),
             "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
@@ -110,90 +107,12 @@ class PlaceType(SQLAlchemyObjectType):
             Place.owner_id.key,
         ]
 
-    # secret_extra = ModelField(
-    #     SecretPlaceExtraType,
-    #     model_field=SecretPlaceExtra,
-    #     resolver=get_batch_resolver(SecretPlaceExtra.place_id.property, single=True),
-    #     use_label=False
-    # )
-
-    # secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
-    # category_data = graphene.Field(type_=Cat)
-    # images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-    # owner_id = gql_types.String(model_field=Place.owner_id)
 
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
     is_opened_for_user = graphene.Boolean()
-
-    # async def resolve_secret_extra_field(self, info):
-    #     session: AsyncSession = info.context.session
-    #     extra = (
-    #         await session.execute(
-    #             sa.select(
-    #                 SecretPlaceExtra.id,
-    #                 SecretPlaceExtra.food_suggestion,
-    #                 SecretPlaceExtra.extra_suggestion,
-    #                 SecretPlaceExtra.music_suggestion,
-    #                 SecretPlaceExtra.time_suggestion,
-    #                 SecretPlaceExtra.company_suggestion,
-    #             ).where(SecretPlaceExtra.place_id == self.id)
-    #         )
-    #     ).fetchone()
-    #     if not extra:
-    #         return None
-    #     data = dict(extra)
-    #     data["id"] = encode_gql_id("SecretPlaceType",data["id"])
-    #     return data
-
-    # async def resolve_category_data(self, info):
-    #     session: AsyncSession = info.context.session
-    #
-    #     category = (
-    #         await session.execute(
-    #             sa.select(Place.category_id, Category.name, Category.mark)
-    #             .join(Category, Place.category_id == Category.id)
-    #             .where(Place.id == self.id)
-    #         )
-    #     ).fetchone()
-    #
-    #     coded_id = encode_gql_id(
-    #         "CategoryType",
-    #         category.category_id,
-    #     )
-    #
-    #     images = (
-    #         await session.execute(
-    #             sa.select(
-    #                 CategoryImage.id,
-    #                 CategoryImage.s3_filename,
-    #                 CategoryImage.description,
-    #             ).where(CategoryImage.category_id == category.category_id)
-    #         "distance_filter": FilterItem(
-    #             field_type=graphene.ObjectType(of_type),
-    #             filter_func=None
-    #         )
-    #     }
-
-    # secret_place_extra_id = graphene.String()
-
-    # TODO Refactor this piece of shit
-    async def resolve_images(self, info):
-        session: AsyncSession = info.context.session
-        images = (
-            await session.execute(
-                sa.select(PlaceImage.id).where(PlaceImage.place_id == self.id)
-            )
-        ).fetchall()
-        result = [
-            await get_presigned_url(
-                session=info.context.session, image_id=image.id, image_class=PlaceImage
-            )
-            for image in images
-        ]
-        return result
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
@@ -293,13 +212,6 @@ class PlaceType(SQLAlchemyObjectType):
             )
         ).fetchone()
         return True if visit else False
-    # image = ModelField(
-    #     V2CategoryType,
-    #     model_field=Category,
-    #     resolver=get_batch_resolver(m.Description.image.property, single=True),
-    #     use_label=False,
-    #     deprecation_reason="Use lot.description",
-    # )
 
     async def resolve_is_opened_for_user(self, info):
         asker_id = AuthChecker.check_auth_request(info)
@@ -325,11 +237,6 @@ class PlaceType(SQLAlchemyObjectType):
             )
         ).fetchone()
         return True if visit else False
-
-    # id = external(graphene.ID(required=True))
-    #
-    # def resolve_id(self, info):
-    #     return encode_gql_id(self.__class__.__name__, self.id)
 
     async def resolve_is_decaying(self, info):
         session: AsyncSession = info.context.session

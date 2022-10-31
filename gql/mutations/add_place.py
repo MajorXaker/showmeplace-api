@@ -98,7 +98,6 @@ class MutationAddPlace(graphene.Mutation):
             action_name = (
                 "Create first secret place" if is_secret_place else "Create a place"
             )
-        # TODO return how much more coins is needed - Ougen
         if not possible_actions[action_name]:
             Exc.low_wallet(
                 message="Insufficient coins",
