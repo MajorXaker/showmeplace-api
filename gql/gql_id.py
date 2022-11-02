@@ -5,6 +5,7 @@ from typing import Tuple, Union
 
 def decode_gql_id(encoded_id: str) -> Tuple[str, Union[str, int]]:
     type_name, id_text = base64.b64decode(encoded_id).decode().split(":")
+    # TODO - failsafe when token is incorrect - OUGEN
     return type_name, json.loads(id_text)
 
 

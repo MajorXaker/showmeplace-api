@@ -108,7 +108,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            Place.owner_id.key,
+            # Place.owner_id.key,
         ]
 
     secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
@@ -116,7 +116,7 @@ class PlaceType(SQLAlchemyObjectType):
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-
+    owner_id = graphene.String()
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
     is_opened_for_user = graphene.Boolean()
@@ -378,3 +378,7 @@ class PlaceType(SQLAlchemyObjectType):
         return (
             decay + datetime.timedelta(hours=s.PLACE_DECAY_DURATION_HOURS)
         ) < datetime.datetime.now()
+
+    async def resolve_owner_id(self, info):
+        owner_id = encode_gql_id("UserType", self.owner_id)
+        return owner_id
