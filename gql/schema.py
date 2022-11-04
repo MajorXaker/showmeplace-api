@@ -35,7 +35,7 @@ from gql.mutations import (
 
 class Query(graphene.ObjectType):
     select_places = FilterConnectionField(PlaceType)
-    select_other_places = FilterConnectionField(PlaceType)
+    select_other_places = FilterConnectionField(PlaceType) # TODO switch to fine queries
     select_users = FilterConnectionField(UserType)
     select_category = FilterConnectionField(CategoryType)
     select_place_images = FilterConnectionField(
