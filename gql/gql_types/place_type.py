@@ -26,7 +26,12 @@ from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
+from utils.filters import (
+    secrets_filter,
+    decaying_filter,
+    box_coordinates_filter,
+    decaying_filter_list,
+)
 from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
@@ -92,6 +97,12 @@ class PlaceType(SQLAlchemyObjectType):
                 field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
             ),
+            "decay_filter_list": FilterItem(
+                field_type=graphene.List(
+                    of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)
+                ),
+                filter_func=decaying_filter_list,
+            ),
             "opened_secret_places": FilterItem(
                 field_type=graphene.Boolean, filter_func=None
             ),
@@ -104,7 +115,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            Place.owner_id.key,
+            # Place.owner_id.key,
         ]
 
     secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
@@ -112,7 +123,7 @@ class PlaceType(SQLAlchemyObjectType):
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-
+    owner_id = graphene.String()
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
     is_opened_for_user = graphene.Boolean()
@@ -374,3 +385,11 @@ class PlaceType(SQLAlchemyObjectType):
         return (
             decay + datetime.timedelta(hours=s.PLACE_DECAY_DURATION_HOURS)
         ) < datetime.datetime.now()
+
+    async def resolve_owner_id(self, info):
+        session: AsyncSession = info.context.session
+        place = (
+            await session.execute(sa.select(Place.owner_id).where(Place.id == self.id))
+        ).fetchone()
+        owner_id_encoded = encode_gql_id("UserType", place.owner_id)
+        return owner_id_encoded
