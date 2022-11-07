@@ -18,3 +18,12 @@ def encode_gql_id(type_: str, id_: Union[str, int]) -> str:
     """
     text = f"{type_}:{json.dumps(id_)}"
     return base64.b64encode(text.encode()).decode()
+
+
+def assert_gql_id(coded_id: str, data_type: str = None, id_: str | int = None):
+    assert data_type or id_
+    data = decode_gql_id(coded_id)
+    if data_type:
+        assert data[0] == data_type
+    if id_:
+        assert data[1] == id_

@@ -6,26 +6,29 @@ from unittest.mock import patch
 
 import pytest
 from alchql.app import SessionQLApp
-from alchql.gql_id import ResolvedGlobalId
 from alchql.middlewares import LoaderMiddleware
 from fastapi import FastAPI
+
 # from fastjwk import JWKBearer, JWTAuthorizationCredentials
 # from api_models.models import Model
 from graphene import Context
 from graphql import ASTValidationRule, GraphQLError
 from httpx import AsyncClient
+
 # from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette.background import BackgroundTasks
 from starlette.requests import HTTPConnection
 
-from models.base_engine import Model
-from utils.config import settings as st
+from fixtures.fixtures import insert_economy, insert_categories
+
 # from config import settings as st
 # from core.db import get_session
 # from gql.middlewares import AuthMiddleware, StytchAuthMiddleware
 from gql.schema import schema
+from models.base_engine import Model
 from tests.creator import Creator
+from utils.config import settings as st
 from utils.db import get_session
 
 db_url = (
@@ -34,7 +37,16 @@ db_url = (
     f"{st.DATABASE_PASSWORD}@"
     f"{st.DATABASE_HOST}:"
     f"{st.DATABASE_PORT}/"
-    f"{st.DATABASE_DB}"
+    # f"{st.DATABASE_DB}"
+    f"postgres"
+)
+
+BASELESS_DB = (
+    "postgresql://"
+    f"{st.DATABASE_USER}:"
+    f"{st.DATABASE_PASSWORD}@"
+    f"{st.DATABASE_HOST}:"
+    f"{st.DATABASE_PORT}"
 )
 
 
@@ -57,12 +69,22 @@ def check_test_db():
 @pytest.fixture(scope="session")
 async def engine():
     check_test_db()
+    # setup_db_for_tests()
 
     e = create_async_engine(db_url, echo=False, max_overflow=25)
 
     try:
         async with e.begin() as con:
             await con.run_sync(Model.metadata.create_all)
+            economy = [
+                (await con.execute(q)).fetchone().id for q in insert_categories()
+            ]
+            categories = [
+                (await con.execute(q)).fetchone().id for q in insert_economy()
+            ]
+            # images = [(await con.execute(q)).fetchone().id async for q in await insert_category_images_async(con)]
+
+        aaa = 5
 
         yield e
     finally:
