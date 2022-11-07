@@ -26,7 +26,12 @@ from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter, decaying_filter_list
+from utils.filters import (
+    secrets_filter,
+    decaying_filter,
+    box_coordinates_filter,
+    decaying_filter_list,
+)
 from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
@@ -93,7 +98,9 @@ class PlaceType(SQLAlchemyObjectType):
                 filter_func=decaying_filter,
             ),
             "decay_filter_list": FilterItem(
-                field_type=graphene.List(of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)),
+                field_type=graphene.List(
+                    of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)
+                ),
                 filter_func=decaying_filter_list,
             ),
             "opened_secret_places": FilterItem(
@@ -380,5 +387,9 @@ class PlaceType(SQLAlchemyObjectType):
         ) < datetime.datetime.now()
 
     async def resolve_owner_id(self, info):
-        owner_id = encode_gql_id("UserType", self.owner_id)
-        return owner_id
+        session: AsyncSession = info.context.session
+        place = (
+            await session.execute(sa.select(Place.owner_id).where(Place.id == self.id))
+        ).fetchone()
+        owner_id_encoded = encode_gql_id("UserType", place.owner_id)
+        return owner_id_encoded
