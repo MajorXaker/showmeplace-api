@@ -52,12 +52,16 @@ class Creator:
 
     async def create_place(
         self,
-        name="TestPlace",
-        category_id=1,
-        owner_id=1,
-        latitude=random.randint(-90, 90),
-        longitude=random.randint(-90, 90),
+        name: str = "TestPlace",
+        category_id: int = 1,
+        owner_id: int = 1,
+        latitude: float = None,
+        longitude: float = None,
     ):
+        if not latitude:
+            latitude = random.randint(-90, 90)
+        if not longitude:
+            longitude = random.randint(-90, 90)
         place_id = (
             await self.session.execute(
                 sa.insert(Place)
@@ -80,7 +84,6 @@ class Creator:
             return self.places_ids
 
         secret_place_id = "todo"
-
 
     async def create_follow(self):
         pass
