@@ -184,12 +184,7 @@ async def test_select_coordinate_box_category(dbsession, creator, test_client_gr
     json_response = [
         x["node"] for x in response.json()["data"]["selectPlaces"]["edges"]
     ]
-    expected_data = set(
-        [
-            *good_category_good_coordinates_places_ids,
-            *good_category_bad_coordinates_places_ids,
-        ]
-    )
+    expected_data = {*good_category_good_coordinates_places_ids, *good_category_bad_coordinates_places_ids}
     assert expected_data == set((decode_gql_id(x["id"])[1] for x in json_response))
 
 

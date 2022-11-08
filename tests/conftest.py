@@ -21,12 +21,14 @@ from starlette.background import BackgroundTasks
 from starlette.requests import HTTPConnection
 
 from fixtures.fixtures import insert_economy, insert_categories
+import sqlalchemy as sa
 
 # from config import settings as st
 # from core.db import get_session
 # from gql.middlewares import AuthMiddleware, StytchAuthMiddleware
 from gql.schema import schema
 from models.base_engine import Model
+from models.db_models import ActionsEconomy
 from tests.creator import Creator
 from utils.config import settings as st
 from utils.db import get_session
@@ -155,6 +157,20 @@ async def test_client_graph(dbsession) -> AsyncClient:
     test_app = get_test_app(dbsession)
     async with AsyncClient(app=test_app, base_url="http://test") as client:
         yield client
+
+
+@pytest.fixture
+async def economy_values(dbsession):
+    economy_vals = (await dbsession.execute(sa.select(ActionsEconomy))).fetchall()
+    result = {
+        row[0].action_name: (
+            row[0].change_amount
+            if row[0].change_type == "EARN"
+            else -row[0].change_amount
+        )
+        for row in economy_vals
+    }
+    yield result
 
 
 # @pytest.fixture

@@ -15,7 +15,7 @@ class Creator:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_user(self, name="TestUser"):
+    async def create_user(self, name="TestUser", coins:int = 0):
         ext_id = str(int(datetime.utcnow().timestamp() * 1000))
         user = (
             await self.session.execute(
@@ -25,7 +25,7 @@ class Creator:
                         User.name: name,
                         User.external_id_type: "META",
                         User.external_id: ext_id,
-                        User.coins: 0,
+                        User.coins: coins,
                     }
                 )
                 .returning(User.id)
@@ -53,10 +53,12 @@ class Creator:
     async def create_place(
         self,
         name: str = "TestPlace",
+        description: str = None,
         category_id: int = 1,
         owner_id: int = 1,
         latitude: float = None,
         longitude: float = None,
+        address: str = None
     ):
         if not latitude:
             latitude = random.randint(-90, 90)
@@ -68,10 +70,12 @@ class Creator:
                 .values(
                     {
                         Place.name: name,
+                        Place.description: description,
                         Place.category_id: category_id,
                         Place.coordinate_longitude: latitude,
                         Place.coordinate_latitude: longitude,
                         Place.owner_id: owner_id,
+                        Place.address: address,
                     }
                 )
                 .returning(Place.id)
