@@ -1,10 +1,9 @@
 import pytest
 
 from gql.gql_id import encode_gql_id, assert_gql_id
+from models.db_models import Category
+from utils.config import settings as s
 import sqlalchemy as sa
-
-from models.db_models import M2MUserPlaceFavourite
-
 
 @pytest.mark.asyncio
 async def test_add_place(dbsession, creator, test_client_graph, economy_values):
@@ -59,7 +58,7 @@ async def test_add_place(dbsession, creator, test_client_graph, economy_values):
     json_response = response.json()
     assert not json_response.get("errors")
     data = json_response["data"]["addPlace"]
-    assert int(data["coinChange"]["coins"]) == economy_values["Create a place"] + 50
+    assert data["coinChange"]["coins"] == economy_values["Create a place"] + 50
 
     data_from_query = data["newPlace"]
     # category assertion block
@@ -173,16 +172,46 @@ async def test_favour(dbsession, creator, test_client_graph, economy_values):
     assert data["data"]["removeFavouritePlace"]["isSuccess"]
 
 
-# @pytest.mark.asyncio
-# async def test_favour(dbsession, creator, test_client_graph, economy_values):
-#     place_creator_id = await creator.create_user("Creator")
-#     place_tester_id = await creator.create_user("Tester")
-#     category_id = await creator.create_category("Auto")
-#     place_id = await creator.create_place(
-#         name="Sample Place",
-#         category_id=category_id,
-#         owner_id=place_creator_id,
-#         description="Sample Description",
-#         longitude=50,
-#         latitude=51,
-#     )
+@pytest.mark.asyncio
+async def test_visit(dbsession, creator, test_client_graph, economy_values):
+    place_creator_id = await creator.create_user("Creator")
+    place_tester_id = await creator.create_user("Tester")
+    category_id = await creator.create_category("Auto")
+    place_id = await creator.create_place(
+        name="Sample Place",
+        category_id=category_id,
+        owner_id=place_creator_id,
+        description="Sample Description",
+        longitude=50,
+        latitude=51,
+    )
+    s.CHECK_IN_DISTANCE_METERS = 100000
+
+    response = await test_client_graph.post(
+        "http://test/graphql",
+        json={
+            "query": """mutation CheckInPlace($checkInPlaceId: String!, $userLatitude: Float!, $userLongitude: Float!) {
+              checkInPlace(checkIn_Place_Id: $checkInPlaceId, user_Latitude: $userLatitude, user_Longitude: $userLongitude) {
+                isSuccess
+                coinChange {
+                  changeAmount
+                  coins
+                }
+                distanceToPlace
+              }
+            }""",
+            "variables": {
+                "checkInPlaceId": encode_gql_id("PlaceType", place_id),
+                "userLatitude": 50.5,
+                "userLongitude": 50.5,
+            },
+        },
+        headers={"Authorization": encode_gql_id("UserType", place_tester_id)},
+    )
+    assert "errors" not in response.json()
+    data = response.json()["data"]["checkInPlace"]
+    assert data["isSuccess"]
+    assert data["coinChange"]["changeAmount"] == economy_values["Visit a place"]
+    assert 66100 > data["distanceToPlace"] > 66000
+    # For now we cannot unvisit a place
+    # Methods for it are temporary and unaccessable to end users

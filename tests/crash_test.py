@@ -41,7 +41,7 @@ async def overdrive():
                 "query": query,
                 "variables": variables_raw,
             },
-            headers={"Authorization": "VXNlclR5cGU6MQ=="} # UserType:1
+            headers={"Authorization": "VXNlclR5cGU6MQ=="}  # UserType:1
             # auth=(
             #     settings.INTERNAL_GQL_USERNAME,
             #     settings.INTERNAL_GQL_PASSWORD,
