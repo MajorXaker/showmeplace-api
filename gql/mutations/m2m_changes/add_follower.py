@@ -42,18 +42,15 @@ class MutationAddFollower(SQLAlchemyCreateMutation):
                     ExceptionReasonEnum.SELF_ACTION,
                 ),
             )
-        # value["follower_id"] = user_id
-        # value["lead_id"] = lead_id
-        # result = await super().mutate(root, info, value)
-        insert = (
-            sa.dialects.postgresql.insert(M2MUserFollowingUser).values(
-                {
-                    M2MUserFollowingUser.lead_id: lead_id,
-                    M2MUserFollowingUser.follower_id: user_id,
-                }
+        value["follower_id"] = user_id
+        value["lead_id"] = lead_id
+        try:
+            result = await super().mutate(root, info, value)
+        except sa.exc.IntegrityError:
+            Exc.missing_data(
+                message="This user is already followed",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE,
             )
-        ).on_conflict_do_nothing(index_elements=["lead_id", "follower_id"])
-
-        await session.execute(insert)
-
-        return MutationAddFollower(is_success=True)
+        else:
+            return result
