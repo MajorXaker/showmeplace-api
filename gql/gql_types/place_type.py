@@ -115,7 +115,7 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            # Place.owner_id.key,
+            Place.address.key,
         ]
 
     secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)

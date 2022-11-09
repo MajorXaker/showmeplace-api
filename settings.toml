@@ -35,7 +35,12 @@
     LOG_TO_SENTRY = false
     JSON_LOGS = false
 
-
-
+[test]
+    DATABASE_PORT = "5432"
+    DATABASE_USER = "localmind"
+    DATABASE_PASSWORD = "local_showmeplace_local"
+    DATABASE_DB = "showmeplace-test"
+    DATABASE_HOST = "localhost"
+    DATABASE_ECHO_MODE = false
 
 

@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from gql.schema import schema
 from utils.db import async_engine
 from utils.config import settings as s
+from utils.healthcheck import healthcheck_router
 from utils.sns_webhooks.email_bounce import handle_email_bounce
 from utils.sns_webhooks.email_complaint import handle_email_complaint
 
@@ -34,7 +35,9 @@ app.add_route(
         engine=async_engine,
     ),
 )
-
+app.include_router(
+    healthcheck_router,
+)
 app.include_router(
     handle_email_bounce,
     prefix="/handle-email-bounce",
