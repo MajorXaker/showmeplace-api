@@ -1,3 +1,4 @@
+import graphene
 from alchql import SQLAlchemyCreateMutation
 from alchql.get_input_type import get_input_fields
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,9 @@ from gql.gql_id import decode_gql_id
 from gql.gql_types.user_type import UserType
 from models.db_models.m2m.m2m_user_user_following import M2MUserFollowingUser
 from utils.api_auth import AuthChecker
+import sqlalchemy as sa
+
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 class MutationAddFollower(SQLAlchemyCreateMutation):
@@ -22,15 +26,31 @@ class MutationAddFollower(SQLAlchemyCreateMutation):
             ],
         )
 
+    is_success = graphene.Boolean()
+
     @classmethod
     async def mutate(cls, root, info, value: dict):
         session: AsyncSession = info.context.session
         user_id = await AuthChecker.check_auth_mutation(session=session, info=info)
         lead_id = decode_gql_id(value["lead_id"])[1]
         if user_id == lead_id:
-            raise ValueError("You can't follow yourself")
+            Exc.value(
+                message="Insufficient coins",
+                of_group=ExceptionGroupEnum.BAD_FOLLOWER,
+                reasons=(
+                    ExceptionReasonEnum.DUPLICATE_VALUE,
+                    ExceptionReasonEnum.SELF_ACTION,
+                ),
+            )
         value["follower_id"] = user_id
         value["lead_id"] = lead_id
-        result = await super().mutate(root, info, value)
-
-        return result
+        try:
+            result = await super().mutate(root, info, value)
+        except sa.exc.IntegrityError:
+            Exc.missing_data(
+                message="This user is already followed",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE,
+            )
+        else:
+            return result

@@ -16,15 +16,13 @@ class MutationUpdateSecretPlaceData(SQLAlchemyUpdateMutation):
             model=SecretPlaceExtra,
             exclude_fields=[
                 SecretPlaceExtra.id.key,
-                SecretPlaceExtra.place_id.key,
                 SecretPlaceExtra.record_created.key,
-                SecretPlaceExtra.record_modified.key
+                SecretPlaceExtra.record_modified.key,
             ],
         )
         exclude_fields = [
-            SecretPlaceExtra.place_id.key,
             SecretPlaceExtra.record_created.key,
-            SecretPlaceExtra.record_modified.key
+            SecretPlaceExtra.record_modified.key,
         ]
 
     @classmethod

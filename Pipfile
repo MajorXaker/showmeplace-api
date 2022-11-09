@@ -23,8 +23,18 @@ unidecode = "*"
 pillow = "*"
 graphene-federation3 = "*"
 facepy = "*"
+geopy = "*"
+httpx = "*"
+python-json-logger = "*"
 
 [dev-packages]
+black = "==22.3"
+pytest = "==6.2.5"
+coverage = { extras = ["toml"], version = "*" }
+pytest-asyncio = "==0.15.1"
+pytest-mock = "==3.6.1"
+snapshottest = "==0.6.0"
+
 
 [requires]
 python_version = "3.10"

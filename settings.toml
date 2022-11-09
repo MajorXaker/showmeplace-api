@@ -12,21 +12,37 @@
     S3_CATEGORY_IMAGE_FOLDER = "category_images/"
     S3_USER_IMAGE_FOLDER = "user_images/"
 
-    ACCESS_SECRET_KEY = "AvgbvCY+eqQy4byqWsoje0A2KB/XYaQYUvFnKaVc"
-    ACCESS_KEY_ID = "AKIA6LA5G2ZZDD76EZGA"
+    ACCESS_SECRET_KEY = ""
+    ACCESS_KEY_ID = ""
     AWS_UPLOADING = true
 
-    CHECK_IN_DISTANCE = 50 # in meters
+    CHECK_IN_DISTANCE_METERS = 100 # in meters
 
     SERVER_RELOAD_MODE = true
 
-    AUTH_HEADER_NAME = "user_auth" # not used atm -> bytes(private_key, "UTF-8")
-
     SECRET_PLACE_NAME = "Secret place"
     SECRET_MARK = "secret"
-    PLACE_BURNOUT_DURATION_HOURS = 24
+    PLACE_DECAY_DURATION_HOURS = 24
 
+    COGNITO_USER_POOL = "us-east-1_60d3tsON2" #prod
+    COGNITO_CLIENT_ID = "76tv59cs60tbmklb67halcvcmm"
 
+    MACHINE_NAME = "smp-production"
 
+    LOGGING_LEVEL = "DEBUG"
+    LOG_TO_CONSOLE = true
+    LOG_TO_FILE = true
+    LOG_TO_SENTRY = false
+    JSON_LOGS = false
+
+    STARTING_COINS = 250 # this is how many coins we give to users
+
+[test]
+    DATABASE_PORT = "5432"
+    DATABASE_USER = "localmind"
+    DATABASE_PASSWORD = "local_showmeplace_local"
+    DATABASE_DB = "showmeplace-test"
+    DATABASE_HOST = "localhost"
+    DATABASE_ECHO_MODE = false
 
 

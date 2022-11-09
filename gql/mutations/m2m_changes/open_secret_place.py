@@ -6,6 +6,7 @@ from gql.gql_id import decode_gql_id
 from gql.gql_types.place_type import PlaceType
 from models.db_models import M2MUserOpenedSecretPlace, Place, ActionsEconomy
 from utils.api_auth import AuthChecker
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 class MutationOpenSecretPlace(graphene.Mutation):
@@ -28,7 +29,11 @@ class MutationOpenSecretPlace(graphene.Mutation):
             )
         ).fetchone()
         if already_opened:
-            raise ValueError("Place already opened")
+            Exc.value(
+                message="Place already opened",
+                of_group=ExceptionGroupEnum.BAD_INPUT,
+                reasons=ExceptionReasonEnum.DUPLICATE_VALUE,
+            )
         opening_possible = (
             await ActionsEconomy.verify_possibility(
                 session=session, user_id=user_id, action_names=["Open a secret place"]
@@ -61,6 +66,10 @@ class MutationOpenSecretPlace(graphene.Mutation):
                 coin_receiver_user_id=owner.id,
             )
         else:
-            raise ActionsEconomy.InsufficientCoins("Not enough coins to open")
+            Exc.low_wallet(
+                message="Not enough coins to open",
+                of_group=ExceptionGroupEnum.BAD_BALANCE,
+                reasons=ExceptionReasonEnum.LOW_BALANCE,
+            )
 
         return await PlaceType.get_node(info, place_id)

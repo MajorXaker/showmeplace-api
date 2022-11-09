@@ -3,7 +3,7 @@ import math
 
 import graphene
 import sqlalchemy as sa
-from alchql import SQLAlchemyObjectType, gql_types
+from alchql import SQLAlchemyObjectType
 from alchql.consts import OP_EQ, OP_IN
 from alchql.node import AsyncNode
 from alchql.utils import FilterItem
@@ -26,11 +26,16 @@ from models.db_models.m2m.m2m_user_place_visited import M2MUserPlaceVisited
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 from utils.api_auth import AuthChecker
 from utils.config import settings as s
-
-# from gql.utils.gql_id import encode_gql_id
-from utils.filters import secrets_filter, decaying_filter, box_coordinates_filter
+from utils.filters import (
+    secrets_filter,
+    decaying_filter,
+    box_coordinates_filter,
+    decaying_filter_list,
+)
+from utils.logging_tools import debug_log
 from utils.pars_query import parse_query
 from utils.s3_object_tools import get_presigned_url
+from utils.smp_exceptions import ExceptionGroupEnum, Exc, ExceptionReasonEnum
 from utils.utils import CountableConnectionCreator
 
 
@@ -66,7 +71,9 @@ class PlaceType(SQLAlchemyObjectType):
             Place.id: [OP_EQ, OP_IN],
             Place.category_id: [OP_EQ, OP_IN],
             # "coordinate_box": CoordinateBox(),
-            "coordinate_box": FilterItem(field_type=CoordinateBox, filter_func=box_coordinates_filter),
+            "coordinate_box": FilterItem(
+                field_type=CoordinateBox, filter_func=box_coordinates_filter
+            ),
             "latitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "longitude_from": FilterItem(field_type=graphene.Float, filter_func=None),
             "distance_from": FilterItem(field_type=graphene.Float, filter_func=None),
@@ -90,7 +97,15 @@ class PlaceType(SQLAlchemyObjectType):
                 field_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum),
                 filter_func=decaying_filter,
             ),
-            "opened_secret_places": FilterItem(field_type=graphene.Boolean, filter_func=None),
+            "decay_filter_list": FilterItem(
+                field_type=graphene.List(
+                    of_type=graphene.Enum.from_enum(DecayingPlacesFilterEnum)
+                ),
+                filter_func=decaying_filter_list,
+            ),
+            "opened_secret_places": FilterItem(
+                field_type=graphene.Boolean, filter_func=None
+            ),
         }
 
         only_fields = [
@@ -100,23 +115,15 @@ class PlaceType(SQLAlchemyObjectType):
             Place.coordinate_longitude.key,
             Place.coordinate_latitude.key,
             Place.active_due_date.key,
-            # "owner_id",
+            Place.address.key,
         ]
-
-    # secret_extra = ModelField(
-    #     SecretPlaceExtraType,
-    #     model_field=SecretPlaceExtra,
-    #     resolver=get_batch_resolver(SecretPlaceExtra.place_id.property, single=True),
-    #     use_label=False
-    # )
 
     secret_extra_field = graphene.Field(type_=SecretPlaceExtraObject)
     category_data = graphene.Field(type_=Cat)
     images = graphene.List(of_type=graphene.String)
     is_decaying = graphene.Boolean()
     has_decayed = graphene.Boolean()
-    owner_id = gql_types.String(model_field=Place.owner_id)
-
+    owner_id = graphene.String()
     has_visited = graphene.Boolean()
     has_favourited = graphene.Boolean()
     is_opened_for_user = graphene.Boolean()
@@ -132,13 +139,21 @@ class PlaceType(SQLAlchemyObjectType):
                     SecretPlaceExtra.music_suggestion,
                     SecretPlaceExtra.time_suggestion,
                     SecretPlaceExtra.company_suggestion,
-                ).where(SecretPlaceExtra.place_id == self.id)
+                )
+                .select_from(
+                    sa.join(
+                        Place,
+                        SecretPlaceExtra,
+                        SecretPlaceExtra.id == Place.secret_extra_id,
+                    )
+                )
+                .where(Place.secret_extra_id == self.id)
             )
         ).fetchone()
         if not extra:
             return None
         data = dict(extra)
-        data["id"] = encode_gql_id("SecretPlaceType",data["id"])
+        data["id"] = encode_gql_id("SecretPlaceType", data["id"])
         return data
 
     async def resolve_category_data(self, info):
@@ -208,6 +223,9 @@ class PlaceType(SQLAlchemyObjectType):
 
     @classmethod
     async def set_select_from(cls, info, q, query_fields):
+
+        await debug_log(cls, info)
+
         session: AsyncSession = info.context.session
         asker_id = AuthChecker.check_auth_request(info)
         user_owner = info.variable_values.get("userOwner")
@@ -222,8 +240,15 @@ class PlaceType(SQLAlchemyObjectType):
             q = q.where(Place.owner_id == user_owner)
 
         if "distanceFrom" in info.variable_values:
-            if "longitudeFrom" and "latitudeFrom" not in info.variable_values:
-                raise ValueError("Invalid request. Coordinates must be present")
+            if (
+                "longitudeFrom" not in info.variable_values
+                or "latitudeFrom" not in info.variable_values
+            ):
+                Exc.missing_data(
+                    message="No user coordinates provided",
+                    of_group=ExceptionGroupEnum.COORDINATES,
+                    reasons=ExceptionReasonEnum.MISSING_VALUE,
+                )
             lat = info.variable_values["latitudeFrom"]
             long = info.variable_values["longitudeFrom"]
             dist = info.variable_values["distanceFrom"]
@@ -273,10 +298,6 @@ class PlaceType(SQLAlchemyObjectType):
             ).where(M2MUserPlaceVisited.user_id == user_visited)
 
         return q
-
-    async def resolve_owner_id(self, info):
-        owner_id = encode_gql_id("UserType", self.owner_id)
-        return owner_id
 
     async def resolve_has_favourited(self, info):
         asker_id = AuthChecker.check_auth_request(info)
@@ -362,5 +383,13 @@ class PlaceType(SQLAlchemyObjectType):
         if not decay:
             return False
         return (
-            decay + datetime.timedelta(hours=s.PLACE_BURNOUT_DURATION_HOURS)
+            decay + datetime.timedelta(hours=s.PLACE_DECAY_DURATION_HOURS)
         ) < datetime.datetime.now()
+
+    async def resolve_owner_id(self, info):
+        session: AsyncSession = info.context.session
+        place = (
+            await session.execute(sa.select(Place.owner_id).where(Place.id == self.id))
+        ).fetchone()
+        owner_id_encoded = encode_gql_id("UserType", place.owner_id)
+        return owner_id_encoded

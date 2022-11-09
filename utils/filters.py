@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from sqlalchemy import func as f
 
@@ -6,6 +7,8 @@ from sqlalchemy import func as f
 from models.db_models import Place
 from models.enums import SecretPlacesFilterEnum, DecayingPlacesFilterEnum
 import sqlalchemy as sa
+
+from utils.smp_exceptions import Exc, ExceptionGroupEnum, ExceptionReasonEnum
 
 
 def secrets_filter(v: SecretPlacesFilterEnum):
@@ -29,14 +32,25 @@ def decaying_filter(v: DecayingPlacesFilterEnum):
     return result
 
 
+def decaying_filter_list(items: List[DecayingPlacesFilterEnum]):
+    return sa.or_(*map(decaying_filter, items))
+
+
 def box_coordinates_filter(v):
-    # if any([
-    #     not hasattr(v,"sw_latitude"),
-    #     not hasattr(v,"sw_longitude"),
-    #     not hasattr(v,"ne_latitude"),
-    #     not hasattr(v,"ne_longitude"),
-    # ]):
-    #     raise ValueError("Coordinate box incomplete")
+    # if any(
+    #     [
+    #         not hasattr(v, "sw_latitude"),
+    #         not hasattr(v, "sw_longitude"),
+    #         not hasattr(v, "ne_latitude"),
+    #         not hasattr(v, "ne_longitude"),
+    #     ]
+    # ):
+    #     Exc.value(
+    #         message="Coordinate box incomplete",
+    #         of_group=ExceptionGroupEnum.BAD_INPUT,
+    #         reasons=ExceptionReasonEnum.MISSING_VALUE,
+    #     )
+
     result = sa.and_(
         Place.coordinate_latitude.between(v.sw_latitude, v.ne_latitude),
         Place.coordinate_longitude.between(v.sw_longitude, v.ne_longitude),
