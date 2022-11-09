@@ -7,7 +7,7 @@ import sqlalchemy as sa
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.db_models import User, Category, Place
+from models.db_models import User, Category, Place, SecretPlaceExtra
 
 
 class SecretExtraData(TypedDict):
@@ -74,10 +74,19 @@ class Creator:
             latitude = random.randint(-90, 90)
         if not longitude:
             longitude = random.randint(-90, 90)
-
+        secret_data_id = None
         if secret_extra_data:
+            mapping = {
+                getattr(SecretPlaceExtra, attr_name): value
+                for attr_name, value in secret_extra_data.items()
+                if value
+            }
             secret_data_id = (
-                await self.session.execute(sa.insert(SecretExtraData))
+                await self.session.execute(
+                    sa.insert(SecretPlaceExtra)
+                    .values(mapping)
+                    .returning(SecretPlaceExtra.id)
+                )
             ).scalar()
         place_id = (
             await self.session.execute(
@@ -91,6 +100,7 @@ class Creator:
                         Place.coordinate_latitude: longitude,
                         Place.owner_id: owner_id,
                         Place.address: address,
+                        Place.secret_extra_id: secret_data_id,
                     }
                 )
                 .returning(Place.id)
