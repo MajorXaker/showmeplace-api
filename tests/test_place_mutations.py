@@ -1,9 +1,8 @@
 import pytest
 
 from gql.gql_id import encode_gql_id, assert_gql_id
-from models.db_models import Category
 from utils.config import settings as s
-import sqlalchemy as sa
+
 
 @pytest.mark.asyncio
 async def test_add_place(dbsession, creator, test_client_graph, economy_values):
