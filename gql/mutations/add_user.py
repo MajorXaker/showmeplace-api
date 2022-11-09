@@ -8,6 +8,7 @@ from gql.gql_id import encode_gql_id
 from models.db_models import User
 from utils.config import settings as s
 
+
 class MutationAddUser(SQLAlchemyCreateMutation):
     class Meta:
         model = User
