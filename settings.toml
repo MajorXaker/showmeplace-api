@@ -35,6 +35,8 @@
     LOG_TO_SENTRY = false
     JSON_LOGS = false
 
+    STARTING_COINS = 250 # this is how many coins we give to users
+
 [test]
     DATABASE_PORT = "5432"
     DATABASE_USER = "localmind"
