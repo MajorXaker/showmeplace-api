@@ -8,6 +8,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.db_models import User, Category, Place, SecretPlaceExtra
+from models.enums import DecayStatus
 
 
 class SecretExtraData(TypedDict):
@@ -115,7 +116,7 @@ class Creator:
 
         secret_place_id = "todo"
 
-    async def create_follow(self):
+    async def set_decay_status(self, place_id: int, decay_status: DecayStatus):
         pass
 
     async def create_visit(self):

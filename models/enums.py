@@ -35,6 +35,12 @@ class DecayingPlacesFilterEnum(StrEnum):
     REGULAR = "REGULAR"
 
 
+class DecayStatus(StrEnum):
+    DECAYED = "DECAYED"
+    DECAYING = "DECAYING"
+    REGULAR = "REGULAR"
+
+
 class EmailStatusEnum(StrEnum):
     PENDING = "PENDING"
     VERIFIED = "VERIFIED"
