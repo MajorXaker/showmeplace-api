@@ -1,11 +1,11 @@
 import graphene
 import sqlalchemy as sa
 from alchql import SQLAlchemyCreateMutation
-from alchql.get_input_type import get_input_fields
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from gql.gql_id import encode_gql_id
 from models.db_models import User
+from utils.config import settings as s
 
 
 class MutationAddUser(SQLAlchemyCreateMutation):
@@ -47,7 +47,7 @@ class MutationAddUser(SQLAlchemyCreateMutation):
                         User.name: value["name"],
                         User.external_id: value["external_id"],
                         User.external_id_type: value["external_id_type"],
-                        User.coins: 0,
+                        User.coins: s.STARTING_COINS,
                         User.level: 0,
                     }
                 )

@@ -276,7 +276,7 @@ class MutationSigninSignupCognito(SQLAlchemyCreateMutation):
                         User.name: username,
                         User.external_id: username,
                         User.external_id_type: "COGNITO",
-                        User.coins: 0,
+                        User.coins: s.STARTING_COINS,
                         User.level: 0,
                         User.active_email_address_id: email_row.id,
                     }

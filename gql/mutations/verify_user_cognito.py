@@ -76,7 +76,7 @@ class MutationVerifyCognitoUser(SQLAlchemyCreateMutation):
                         User.name: value["user_name"],
                         User.external_id: user_attribute["sub"],
                         User.external_id_type: "COGNITO",
-                        User.coins: 0,
+                        User.coins: s.STARTING_COINS,
                         User.level: 0,
                     }
                 )
